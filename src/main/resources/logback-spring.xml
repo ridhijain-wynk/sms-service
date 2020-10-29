@@ -1,0 +1,91 @@
+<configuration debug="false" scan="true" scanPeriod="30 seconds">
+    <timestamp key="_timestamp" datePattern="yyyy-MM-dd"/>
+    <appender name="ERRORLOG"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder class="in.wynk.logging.WynkErrorEncoder"/>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH:-/tmp}/logs/sms/error/%d{yyyy-MM-dd,
+                aux}/sms-error.${HOSTNAME}.%d{yyyy-MM-dd-HH}.log.gz
+            </fileNamePattern>
+            <maxHistory>72</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <appender name="ASYNC_ERRORLOG" queueSize="10000" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="ERRORLOG"/>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%level %date [%thread] [%file:%line] %msg%n</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH:-/tmp}/logs/sms/app/%d{yyyy-MM-dd,
+                aux}/sms.${HOSTNAME}.%d{yyyy-MM-dd-HH}.log.gz
+            </fileNamePattern>
+            <maxHistory>72</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>1GB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    <appender name="ASYNC_FILE" queueSize="10000" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+
+    <!-- logstash logs-->
+    <appender name="ANALYTIC_LOG_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%msg%n</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH:-/tmp}/logs/sms/logstash/day=%d{yyyy-MM-dd,
+                aux}/sms-logstashLogs.${HOSTNAME}.%d{yyyy-MM-dd-HH}.log.gz
+            </fileNamePattern>
+            <maxHistory>72</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="ASYNC_ANALYTIC_LOG_FILE" queueSize="10000" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="ANALYTIC_LOG_FILE"/>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+    <logger name="sendSms" additivity="false">
+        <level value="info"/>
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
+    <logger name="consumePromotionalMessage" additivity="false">
+        <level value="info"/>
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
+    <logger name="consumeNotificationMessage" additivity="false">
+        <level value="info"/>
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
+
+    <logger name="setSmsControl" additivity="false" level="info">
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
+
+    <logger name="sendSmsAirtel" additivity="false" level="info">
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
+
+    <logger name="logstashLogger" additivity="false" level="info">
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC_FILE"/>
+        <appender-ref ref="ASYNC_ERRORLOG"/>
+    </root>
+
+</configuration>
