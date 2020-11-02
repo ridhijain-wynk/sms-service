@@ -4,12 +4,12 @@ import com.amazonaws.services.sqs.model.Message;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import com.google.gson.Gson;
+import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.config.SQSConfig;
 import in.wynk.sms.consumer.SQSMessageConsumer;
 import in.wynk.sms.model.SMSDto;
 import in.wynk.sms.model.SQSQueue;
 import in.wynk.sms.model.SendSmsRequest;
-import in.wynk.sms.producer.SQSMessageProducer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +31,11 @@ public class NotificationMessageProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationMessageProcessor.class);
 
-    private ThreadPoolExecutor threadPoolExecutor;
-
     @Autowired
     private SQSMessageConsumer sqsMessageConsumer;
 
     @Autowired
-    private SQSMessageProducer sqsMessageProducer;
+    private ISqsManagerService sqsManagerService;
 
     @Autowired
     private SQSConfig sqsConfig;
@@ -50,7 +48,7 @@ public class NotificationMessageProcessor {
 
     @PostConstruct
     public void initialize() {
-        threadPoolExecutor = new ThreadPoolExecutor(2, 4, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 4, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
         threadPoolExecutor.execute(this::consumeAndProduce);
         threadPoolExecutor.execute(this::consumeAndProduce);
     }
@@ -66,7 +64,7 @@ public class NotificationMessageProcessor {
                         if (requestJson != null) {
                             SMSDto dto = parseMessage(requestJson);
                             logger.debug("sms: {}", dto);
-                            sqsMessageProducer.produceMessage(dto);
+                            sqsManagerService.publishSQSMessage(dto);
                         }
                     }
                     sqsMessageConsumer.deleteMessages(notificationMessages, notificationMessageQueue);

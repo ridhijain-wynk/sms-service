@@ -18,9 +18,7 @@ public class HighPrioritySmsDto extends SMSDto {
 		this.setNineToNine(nineToNine);
 		this.setShortCode(SMSSource.getShortCodeFromName(source));
 
-		
-		// Redis Sorted set by default does lexographic sorting for elements of same score. 
-		// To main the order of incoming request adding time in score.
+
 		this.setPriorityScore(( SMSUtils.generateScoreWithTime(SMSPriority.HIGH.getScore())));
 		this.setPriority(SMSPriority.HIGH.name());
 		//msisdn = SMSUtils.getTenDigitMsisdn(msisdn);

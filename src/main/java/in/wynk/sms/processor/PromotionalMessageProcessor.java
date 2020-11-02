@@ -5,12 +5,12 @@ import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.config.SQSConfig;
 import in.wynk.sms.constants.SmsMarkers;
 import in.wynk.sms.consumer.SQSMessageConsumer;
 import in.wynk.sms.model.SMSDto;
 import in.wynk.sms.model.SendSmsRequest;
-import in.wynk.sms.producer.SQSMessageProducer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class PromotionalMessageProcessor {
     private SQSMessageConsumer sqsMessageConsumer;
 
     @Autowired
-    private SQSMessageProducer sqsMessageProducer;
+    private ISqsManagerService sqsManagerService;
 
     @Autowired
     private SQSConfig sqsConfig;
@@ -56,24 +56,24 @@ public class PromotionalMessageProcessor {
         threadPoolExecutor.execute(this::consumeAndProduce);
     }
 
-    private void consumeAndProduce(){
+    private void consumeAndProduce() {
         while (true) {
             try {
                 List<Message> promotionalMessages = sqsMessageConsumer.getMessages(sqsConfig.getPromotionalMessageQueue(), 10, 10);
-                if(CollectionUtils.isNotEmpty(promotionalMessages)) {
+                if (CollectionUtils.isNotEmpty(promotionalMessages)) {
                     for (Message message : promotionalMessages) {
                         List<SendSmsRequest> jsonArray = gson.fromJson(message.getBody(), new TypeToken<List<SendSmsRequest>>() {
                         }.getType());
                         for (SendSmsRequest requestJson : jsonArray) {
                             if (requestJson != null) {
                                 SMSDto dto = parseMessage(requestJson);
-                                sqsMessageProducer.produceMessage(dto);
+                                sqsManagerService.publishSQSMessage(dto);
                             }
                         }
                     }
                     sqsMessageConsumer.deleteMessages(promotionalMessages, sqsConfig.getPromotionalMessageQueue());
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 logger.error(SmsMarkers.PROMOTIONAL_MSG_ERROR, "Unable to process promotional messages", e);
             }
         }

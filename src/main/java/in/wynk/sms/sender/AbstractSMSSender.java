@@ -11,14 +11,6 @@ public abstract class AbstractSMSSender {
 
 	public abstract void sendMessage(String msisdn, String fromShortCode, String text, Boolean useDND, long createTimestamp, String priority, String id);
 
-	public abstract void shutdown();
-
-	public abstract String getConnectionPoolStats();
-
-	public abstract String getThreadPoolStats();
-
-	public abstract String getResponseCodeStats();
-
 	protected Object[] convertToHexString(String input, boolean xmlEncode) {
 		if (input == null) {
 			return null;

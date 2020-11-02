@@ -26,10 +26,6 @@ public class SendSmsResponse {
 		return sms;
 	}
 
-	public void setSms(SMSDto sms) {
-		this.sms = sms;
-	}
-
 	public SMSStatus getStatus() {
 		return status;
 	}

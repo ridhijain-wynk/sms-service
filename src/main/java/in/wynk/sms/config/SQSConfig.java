@@ -18,8 +18,6 @@ import static in.wynk.sms.constants.SmsMarkers.SQS_CONFIG_ERROR;
  * This class contains the methods for the configuration of the AWS SQS for the three queues for high, medium and low priority
  * messages.
  *
- * @author Abhishek
- * @created 25/09/19
  */
 @Configuration
 public class SQSConfig {
