@@ -2,8 +2,8 @@ package in.wynk.sms.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import in.wynk.sms.model.enums.SMSPriority;
-import in.wynk.sms.model.enums.SMSSource;
+import in.wynk.sms.constants.SMSPriority;
+import in.wynk.sms.constants.SMSSource;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +12,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.io.Serializable;
 
 @JsonIgnoreProperties(value = "true")
+@Deprecated
 public class SendSmsRequest implements Serializable {
 
     private static final long serialVersionUID = -289736810127565940L;

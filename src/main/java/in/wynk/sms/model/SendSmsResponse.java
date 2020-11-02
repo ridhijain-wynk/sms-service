@@ -2,6 +2,7 @@ package in.wynk.sms.model;
 
 import in.wynk.sms.model.enums.SMSStatus;
 
+@Deprecated
 public class SendSmsResponse {
 	
 	private SMSDto sms;

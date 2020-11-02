@@ -1,11 +1,11 @@
 package in.wynk.sms.util;
 
 
+import in.wynk.sms.constants.SMSPriority;
 import in.wynk.sms.model.HighPrioritySmsDto;
 import in.wynk.sms.model.LowPrioritySmsDto;
 import in.wynk.sms.model.MediumPrioritySmsDto;
 import in.wynk.sms.model.SMSDto;
-import in.wynk.sms.model.enums.SMSPriority;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;

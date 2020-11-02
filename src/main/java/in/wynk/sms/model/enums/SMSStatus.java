@@ -1,5 +1,6 @@
 package in.wynk.sms.model.enums;
 
+@Deprecated
 public enum SMSStatus {
 
 	DELIVERED,

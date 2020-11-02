@@ -1,4 +1,4 @@
-package in.wynk.sms.queue.message.consumer;
+package in.wynk.sms.queue.consumer;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
@@ -16,11 +16,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class MediumPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<MediumPriorityMessage> {
 
-    @Value("${sms.medium.queue.consumer.enabled}")
+    @Value("${sms.priority.medium.queue.consumer.enabled}")
     private boolean enabled;
-    @Value("${sms.medium.queue.consumer.delay}")
+    @Value("${sms.priority.medium.queue.consumer.delay}")
     private long consumerDelay;
-    @Value("${sms.medium.queue.consumer.delayTimeUnit}")
+    @Value("${sms.priority.medium.queue.consumer.delayTimeUnit}")
     private TimeUnit delayTimeUnit;
 
     private final ThreadPoolExecutor messageHandlerThreadPool;

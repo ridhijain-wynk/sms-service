@@ -1,8 +1,14 @@
 package in.wynk.sms.queue.message;
 
 import in.wynk.queue.dto.WynkQueue;
+import in.wynk.sms.constants.SMSPriority;
+import in.wynk.sms.dto.request.SmsRequest;
 
-@WynkQueue(queueName = "${sms.medium.priority.queue.name}", delaySeconds = "${sms.medium.priority.queue.delayInSecond}")
-public class MediumPriorityMessage {
+@WynkQueue(queueName = "${sms.priority.medium.priority.queue.name}", delaySeconds = "${sms.priority.medium.priority.queue.delayInSecond}")
+public class MediumPriorityMessage extends SmsRequest {
 
+    @Override
+    public SMSPriority priority() {
+        return SMSPriority.MEDIUM;
+    }
 }

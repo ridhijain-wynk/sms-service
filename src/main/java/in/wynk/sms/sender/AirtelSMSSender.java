@@ -2,8 +2,8 @@ package in.wynk.sms.sender;
 
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.sms.constants.SMSPriority;
 import in.wynk.sms.model.SMSDto;
-import in.wynk.sms.model.enums.SMSPriority;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.*;
@@ -49,7 +49,6 @@ public class AirtelSMSSender extends AbstractSMSSender {
     private static final Logger logger = LoggerFactory.getLogger(AirtelSMSSender.class);
 
     private static final int MAX_CONNECTIONS = 200;
-    private static final int MAX_NO_OF_THREADS = 200;
 
 
     private final PoolingHttpClientConnectionManager connectionManager;

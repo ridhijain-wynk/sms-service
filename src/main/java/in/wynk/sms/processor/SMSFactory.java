@@ -1,7 +1,7 @@
 package in.wynk.sms.processor;
 
+import in.wynk.sms.constants.SMSPriority;
 import in.wynk.sms.model.*;
-import in.wynk.sms.model.enums.SMSPriority;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

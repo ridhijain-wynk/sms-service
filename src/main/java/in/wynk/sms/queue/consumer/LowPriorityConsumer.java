@@ -1,11 +1,11 @@
-package in.wynk.sms.queue.message.consumer;
+package in.wynk.sms.queue.consumer;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
-import in.wynk.sms.queue.message.HighPriorityMessage;
+import in.wynk.sms.queue.message.LowPriorityMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -14,23 +14,23 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<HighPriorityMessage> {
+public class LowPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<LowPriorityMessage> {
 
-    @Value("${sms.high.queue.consumer.enabled}")
+    @Value("${sms.priority.low.queue.consumer.enabled}")
     private boolean enabled;
-    @Value("${sms.high.queue.consumer.delay}")
+    @Value("${sms.priority.low.queue.consumer.delay}")
     private long consumerDelay;
-    @Value("${sms.high.queue.consumer.delayTimeUnit}")
+    @Value("${sms.priority.low.queue.consumer.delayTimeUnit}")
     private TimeUnit delayTimeUnit;
 
     private final ThreadPoolExecutor messageHandlerThreadPool;
     private final ScheduledThreadPoolExecutor pollingThreadPool;
 
-    public HighPriorityConsumer(String queueName,
-                                AmazonSQS sqs,
-                                ISQSMessageExtractor messagesExtractor,
-                                ThreadPoolExecutor messageHandlerThreadPool,
-                                ScheduledThreadPoolExecutor pollingThreadPool) {
+    public LowPriorityConsumer(String queueName,
+                               AmazonSQS sqs,
+                               ISQSMessageExtractor messagesExtractor,
+                               ThreadPoolExecutor messageHandlerThreadPool,
+                               ScheduledThreadPoolExecutor pollingThreadPool) {
         super(queueName, sqs, messagesExtractor, messageHandlerThreadPool);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;
@@ -38,14 +38,14 @@ public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue
 
     @Override
     @AnalyseTransaction(name = "consumeMessage")
-    public void consume(HighPriorityMessage message) {
+    public void consume(LowPriorityMessage message) {
         AnalyticService.update(message);
         //TODO: write consumer logic
     }
 
     @Override
-    public Class<HighPriorityMessage> messageType() {
-        return HighPriorityMessage.class;
+    public Class<LowPriorityMessage> messageType() {
+        return LowPriorityMessage.class;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package in.wynk.sms.model.enums;
+package in.wynk.sms.constants;
 
 
 public enum SMSSource {

@@ -3,9 +3,9 @@ package in.wynk.sms.processor;
 import com.amazonaws.services.sqs.model.Message;
 import in.wynk.sms.config.SQSConfig;
 import in.wynk.sms.constants.SMSConstants;
+import in.wynk.sms.constants.SMSPriority;
 import in.wynk.sms.consumer.SQSMessageConsumer;
 import in.wynk.sms.model.SMSDto;
-import in.wynk.sms.model.enums.SMSPriority;
 import in.wynk.sms.sender.SMSService;
 import in.wynk.sms.task.SMSDeliveryTask;
 import in.wynk.sms.util.SMSUtils;
@@ -23,8 +23,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static in.wynk.sms.model.enums.SMSPriority.LOW;
-import static in.wynk.sms.model.enums.SMSPriority.MEDIUM;
+import static in.wynk.sms.constants.SMSPriority.LOW;
+import static in.wynk.sms.constants.SMSPriority.MEDIUM;
 
 
 /**
@@ -130,7 +130,7 @@ public class SMSDeliveryProcessor {
                         }
                     }
                 } catch (Exception e) {
-                    logger.error("Error while submitting task to " + SMSConstants.REDIS_QUEUE_KEY + "_" + priority + " " + e);
+                    logger.error("Error while submitting task to " + SMSConstants.SMS_QUEUE + "_" + priority + " " + e);
                 }
             }
         }
