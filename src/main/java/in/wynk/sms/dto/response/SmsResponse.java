@@ -1,6 +1,6 @@
-package in.wynk.sms.dto.request;
+package in.wynk.sms.dto.response;
 
-import in.wynk.commons.dto.BaseResponse;
+import in.wynk.common.dto.BaseResponse;
 import lombok.Builder;
 import lombok.Getter;
 

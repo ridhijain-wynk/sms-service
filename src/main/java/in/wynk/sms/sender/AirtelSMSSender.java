@@ -2,8 +2,9 @@ package in.wynk.sms.sender;
 
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.sms.constants.Country;
 import in.wynk.sms.constants.SMSPriority;
-import in.wynk.sms.model.SMSDto;
+import in.wynk.sms.dto.request.SmsRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.*;
@@ -110,17 +111,25 @@ public class AirtelSMSSender extends AbstractSMSSender {
         }
     }
 
-
     @Override
     @AnalyseTransaction(name = "sendSmsAirtel")
-    public void sendMessage(String msisdn, String shortCode, String text, String priority, String smsId) {
+    public void sendMessage(SmsRequest request) {
+        Country country = Country.getCountryByCountryCode(request.getCountryCode());
+        if (country.equals(Country.SRILANKA)) {
+            sendSmsToSriLanka(request);
+        }
+        sendMessage(request.getMsisdn(), request.getShortCode(), request.getText(), request.priority().name(), request.getMessageId());
+    }
+
+
+    private void sendMessage(String msisdn, String shortCode, String text, String priority, String smsId) {
         try {
             AnalyticService.update("message", text);
             SMSMsg sms = new SMSMsg();
             sms.shortcode = shortCode;
             sms.toMsisdn = msisdn;
             sms.message = filterHtmlEntity(text);
-            sms.messageId = "" + System.currentTimeMillis(); // Utils.generateUUID(true,true);
+            sms.messageId = smsId;
             String mtRequestXML = createMTRequestXML(sms);
             postCoreJava(mtRequestXML, msisdn, priority, smsId);
         } catch (Throwable th) {
@@ -128,19 +137,19 @@ public class AirtelSMSSender extends AbstractSMSSender {
         }
     }
 
-    public boolean sendSmsToSriLanka(SMSDto SMSDto) {
+    public boolean sendSmsToSriLanka(SmsRequest smsRequest) {
         boolean success = false;
-        if (SMSDto != null) {
+        if (smsRequest != null) {
             String requestUrl = "http://sms.airtel.lk:5000/sms/send_sms.php?username=wynk&password=W123Nk&src=Wynk&dr=1";
-            if (org.apache.commons.lang3.StringUtils.isNotBlank(SMSDto.getMsisdn())) {
-                requestUrl = requestUrl.concat("&dst=").concat(SMSDto.getMsisdn().replace("+", ""));
+            if (org.apache.commons.lang3.StringUtils.isNotBlank(smsRequest.getMsisdn())) {
+                requestUrl = requestUrl.concat("&dst=").concat(smsRequest.getMsisdn().replace("+", ""));
             }
-            if (org.apache.commons.lang3.StringUtils.isNotBlank(SMSDto.getMessage())) {
+            if (org.apache.commons.lang3.StringUtils.isNotBlank(smsRequest.getText())) {
                 try {
                     requestUrl = requestUrl.concat("&msg=");
-                    requestUrl = requestUrl.concat(URLEncoder.encode(SMSDto.getMessage(), "UTF-8"));
+                    requestUrl = requestUrl.concat(URLEncoder.encode(smsRequest.getText(), "UTF-8"));
                 } catch (Throwable th) {
-                    logger.error("Exception in url Encoding for the msisdn {}", SMSDto.getMsisdn());
+                    logger.error("Exception in url Encoding for the msisdn {}", smsRequest.getMsisdn());
                 }
             }
             HttpGet request = new HttpGet(requestUrl);
@@ -158,17 +167,17 @@ public class AirtelSMSSender extends AbstractSMSSender {
                 String responseStr = EntityUtils.toString(entity);
                 StatusLine statusLine = response.getStatusLine();
                 int currentStatusCode = statusLine.getStatusCode();
-                if (org.apache.commons.lang3.StringUtils.isNotBlank(responseStr) && responseStr.contains("Operation success")) {
-                    logger.info("Successfully sent message to msisdn: { " + SMSDto.getMsisdn() + "}, responseCode: { " +
+                if (StringUtils.isNotBlank(responseStr) && responseStr.contains("Operation success")) {
+                    logger.info("Successfully sent message to msisdn: { " + smsRequest.getMsisdn() + "}, responseCode: { " +
                             currentStatusCode + "}, response: { " + responseStr + "}");
-                    logger.info("Time by SriLanka.SMS Priority: " + SMSDto.getPriority() + " : Time :" + (System.currentTimeMillis() - startTime) + " ms");
+                    logger.info("Time by SriLanka.SMS Priority: " + smsRequest.priority() + " : Time :" + (System.currentTimeMillis() - startTime) + " ms");
                     success = true;
                 } else {
-                    logger.error("Error Sending SMS to Msisdn: {" + SMSDto.getMsisdn() + "} SMS: { " + SMSDto.getMessage() + "}, ERROR: { " + responseStr + "}");
+                    logger.error("Error Sending SMS to Msisdn: {" + smsRequest.getMsisdn() + "} SMS: { " + smsRequest.getText() + "}, ERROR: { " + responseStr + "}");
                     success = false;
                 }
             } catch (Throwable th) {
-                logger.error("Error Sending SMS to Msisdn: {" + SMSDto.getMsisdn() + "} SMS: { " + SMSDto.getMessage() + "}, ERROR: { " + th.getMessage() + "}", th);
+                logger.error("Error Sending SMS to Msisdn: {" + smsRequest.getMsisdn() + "} SMS: { " + smsRequest.getText() + "}, ERROR: { " + th.getMessage() + "}", th);
                 success = false;
             }
         }

@@ -31,9 +31,16 @@
         </dependency>
         <dependency>
             <groupId>in.wynk</groupId>
-            <artifactId>revenue-commons</artifactId>
+            <artifactId>lib-queue</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>in.wynk</groupId>
+            <artifactId>client-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 
 
         <dependency>
@@ -108,18 +115,6 @@
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>in.wynk</groupId>
-            <artifactId>lib-queue</artifactId>
-            <version>0.0.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>in.wynk</groupId>
-            <artifactId>client-api</artifactId>
-            <version>0.0.1</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

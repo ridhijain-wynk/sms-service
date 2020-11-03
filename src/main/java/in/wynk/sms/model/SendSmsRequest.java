@@ -78,6 +78,10 @@ public class SendSmsRequest implements Serializable {
         return source;
     }
 
+    public void setService(String service) {
+        this.service = service;
+    }
+
     public void setSource(String source) {
         this.source = source;
     }

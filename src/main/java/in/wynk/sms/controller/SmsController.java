@@ -4,7 +4,7 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.constants.SMSSource;
 import in.wynk.sms.dto.request.SmsRequest;
-import in.wynk.sms.dto.request.SmsResponse;
+import in.wynk.sms.dto.response.SmsResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

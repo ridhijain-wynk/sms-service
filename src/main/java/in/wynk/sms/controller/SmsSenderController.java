@@ -3,12 +3,12 @@ package in.wynk.sms.controller;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import com.google.gson.Gson;
-import in.wynk.sms.model.SMSDto;
+import in.wynk.queue.service.ISqsManagerService;
+import in.wynk.sms.dto.SMSFactory;
+import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.model.SendSmsRequest;
 import in.wynk.sms.model.SendSmsResponse;
-import in.wynk.sms.model.enums.SMSStatus;
-import in.wynk.sms.processor.SMSEnqueueProcessor;
-import in.wynk.sms.processor.SMSFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class SmsSenderController {
     private SMSFactory smsFactory;
 
     @Autowired
-    private SMSEnqueueProcessor smsEnqueueProcessor;
+    private ISqsManagerService sqsManagerService;
 
 
     @PostMapping(value = "/sms/send")
@@ -36,35 +36,21 @@ public class SmsSenderController {
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     @AnalyseTransaction(name = "sendSms")
-    public @ResponseBody
-    SendSmsResponse sendSMS(@RequestBody String requestStr) {
+    public SendSmsResponse sendSMS(@RequestBody String requestStr) {
         AnalyticService.update("request", requestStr);
         SendSmsRequest request = gson.fromJson(requestStr, SendSmsRequest.class);
-        SendSmsResponse response = new SendSmsResponse(null, SMSStatus.BAD_REQUEST);
         if (request.validRequest()) {
             try {
-                AnalyticService.update("msisdn", request.getMsisdn());
-                if (request.getService() != null) {
-                    AnalyticService.update("source", request.getService());
-                } else {
-                    AnalyticService.update("source", request.getSource());
+                if (StringUtils.isNotBlank(request.getSource())) {
+                    request.setService(request.getSource());
                 }
-                AnalyticService.update("priority", request.getPriority());
-                AnalyticService.update("message", request.getMessage());
-                SMSDto sms = smsFactory.getSMSDto(request);
-                String countryCode = request.getCountryCode();
-                sms.setCountryCode(countryCode);
-                AnalyticService.update("countryCode", countryCode);
-                logger.info("SMS Request - SMS id : " + sms.getId() + ", createTimestamp : " + sms.getCreationTimestamp() + " ms");
-                AnalyticService.update("SMSDto", sms.toString());
-                logger.info("processSMSSendRequest");
-                smsEnqueueProcessor.processSMSSendRequest(sms);
+                SmsRequest sms = smsFactory.getSMSDto(request);
+                AnalyticService.update(sms);
+                sqsManagerService.publishSQSMessage(sms);
             } catch (Exception e) {
                 logger.error("error while executing sendSMS ", e);
             }
         }
-        AnalyticService.update("response status", response.getStatus().name());
-        AnalyticService.update("response", response.toString());
-        return response;
+        return SendSmsResponse.defaultResponse();
     }
 }

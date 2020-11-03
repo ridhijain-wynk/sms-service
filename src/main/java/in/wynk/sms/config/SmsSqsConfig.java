@@ -1,4 +1,4 @@
-package in.wynk.sms.queue.config;
+package in.wynk.sms.config;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,51 +17,58 @@ import java.util.concurrent.*;
 @Configuration
 public class SmsSqsConfig {
 
+    @Value("${sms.sqs.messages.schedule.thread.pool.size:10}")
+    private int schedulerPoolSize;
+    @Value("${sms.sqs.messages.extractor.batchSize:100}")
+    private int batchSize;
+    @Value("${sms.sqs.messages.extractor.waitTimeInSeconds:1}")
+    private int waitTimeSeconds;
+
     @Bean
     public HighPriorityConsumer highPriorityConsumer(@Value("${sms.priority.high.queue.name}") String queueName,
-                                                     @Value("${sms.priority.high.queue.threads.parallelism:5}") int parallelism,
+                                                     @Value("${sms.priority.high.queue.threads:5}") int parallelism,
                                                      @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                      ObjectMapper objectMapper) {
         return new HighPriorityConsumer(queueName,
                 sqsClient,
                 objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient),
+                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds),
                 (ThreadPoolExecutor) threadPoolExecutor(parallelism),
-                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor());
+                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
     @Bean
     public LowPriorityConsumer lowPriorityConsumer(@Value("${sms.priority.low.queue.name}") String queueName,
-                                                   @Value("${sms.priority.low.queue.threads.parallelism:5}") int parallelism,
+                                                   @Value("${sms.priority.low.queue.threads:5}") int parallelism,
                                                    @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                    ObjectMapper objectMapper) {
         return new LowPriorityConsumer(queueName,
                 sqsClient,
                 objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient),
+                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds),
                 (ThreadPoolExecutor) threadPoolExecutor(parallelism),
-                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor());
+                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
     @Bean
     public MediumPriorityConsumer mediumPriorityConsumer(@Value("${sms.priority.low.queue.name}") String queueName,
-                                                         @Value("${sms.priority.low.queue.threads.parallelism:5}") int parallelism,
+                                                         @Value("${sms.priority.low.queue.threads:5}") int parallelism,
                                                          @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                          ObjectMapper objectMapper) {
         return new MediumPriorityConsumer(queueName,
                 sqsClient,
                 objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient),
+                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds),
                 (ThreadPoolExecutor) threadPoolExecutor(parallelism),
-                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor());
+                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
-    private ExecutorService threadPoolExecutor(int parallelism) {
-        return Executors.newWorkStealingPool(parallelism);
+    private ExecutorService threadPoolExecutor(int threads) {
+        return Executors.newFixedThreadPool(threads);
     }
 
-    private ScheduledExecutorService scheduledThreadPoolExecutor() {
-        return Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService scheduledThreadPoolExecutor(int schedulerPoolSize) {
+        return Executors.newScheduledThreadPool(schedulerPoolSize);
     }
 
 }

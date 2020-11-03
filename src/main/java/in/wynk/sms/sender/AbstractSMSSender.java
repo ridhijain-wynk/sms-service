@@ -1,5 +1,6 @@
 package in.wynk.sms.sender;
 
+import in.wynk.sms.dto.request.SmsRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +10,7 @@ public abstract class AbstractSMSSender {
 
 	protected Logger logger = LoggerFactory.getLogger(getClass().getCanonicalName());
 
-	public abstract void sendMessage(String msisdn, String fromShortCode, String text, String priority, String id);
+	public abstract void sendMessage(SmsRequest request);
 
 	protected Object[] convertToHexString(String input, boolean xmlEncode) {
 		if (input == null) {

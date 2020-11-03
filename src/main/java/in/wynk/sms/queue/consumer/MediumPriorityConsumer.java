@@ -47,7 +47,7 @@ public class MediumPriorityConsumer extends AbstractSQSMessageConsumerPollingQue
     @AnalyseTransaction(name = "consumeMessage")
     public void consume(MediumPriorityMessage message) {
         AnalyticService.update(message);
-        smsSender.sendMessage(message.getMsisdn(), message.getShortCode(), message.getText(), message.priority().name(), message.getMessageId());
+        smsSender.sendMessage(message);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class MediumPriorityConsumer extends AbstractSQSMessageConsumerPollingQue
     @Override
     public void start() {
         if (enabled) {
-            log.info("Starting PaymentReconciliationConsumerPollingQueue...");
+            log.info("Starting ...");
             pollingThreadPool.scheduleWithFixedDelay(
                     this::poll,
                     0,
@@ -71,7 +71,7 @@ public class MediumPriorityConsumer extends AbstractSQSMessageConsumerPollingQue
     @Override
     public void stop() {
         if (enabled) {
-            log.info("Shutting down PaymentReconciliationConsumerPollingQueue ...");
+            log.info("Shutting down ...");
             pollingThreadPool.shutdownNow();
             messageHandlerThreadPool.shutdown();
         }

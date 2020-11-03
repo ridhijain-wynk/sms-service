@@ -6,8 +6,8 @@ import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
-import in.wynk.sms.queue.message.HighPriorityMessage;
-import in.wynk.sms.sender.AbstractSMSSender;
+import in.wynk.queue.service.ISqsManagerService;
+import in.wynk.sms.dto.request.SmsRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,13 +17,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPollingQueue<HighPriorityMessage> {
+public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPollingQueue<SmsRequest> {
 
-    @Value("${sms.priority.high.queue.consumer.enabled}")
+    @Value("${sms.notification.queue.consumer.enabled}")
     private boolean enabled;
-    @Value("${sms.priority.high.queue.consumer.delay}")
+    @Value("${sms.notification.queue.consumer.delay}")
     private long consumerDelay;
-    @Value("${sms.priority.high.queue.consumer.delayTimeUnit}")
+    @Value("${sms.notification.queue.consumer.delayTimeUnit}")
     private TimeUnit delayTimeUnit;
 
     private final ThreadPoolExecutor messageHandlerThreadPool;
@@ -41,24 +41,24 @@ public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPolli
     }
 
     @Autowired
-    private AbstractSMSSender smsSender;
+    private ISqsManagerService sqsManagerService;
 
     @Override
-    @AnalyseTransaction(name = "consumeMessage")
-    public void consume(HighPriorityMessage message) {
+    @AnalyseTransaction(name = "consumeNotificationMessage")
+    public void consume(SmsRequest message) {
         AnalyticService.update(message);
-        smsSender.sendMessage(message.getMsisdn(), message.getShortCode(), message.getText(), message.priority().name(), message.getMessageId());
+        sqsManagerService.publishSQSMessage(message);
     }
 
     @Override
-    public Class<HighPriorityMessage> messageType() {
-        return HighPriorityMessage.class;
+    public Class<SmsRequest> messageType() {
+        return SmsRequest.class;
     }
 
     @Override
     public void start() {
         if (enabled) {
-            log.info("Starting PaymentReconciliationConsumerPollingQueue...");
+            log.info("Starting...");
             pollingThreadPool.scheduleWithFixedDelay(
                     this::poll,
                     0,
@@ -71,7 +71,7 @@ public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPolli
     @Override
     public void stop() {
         if (enabled) {
-            log.info("Shutting down PaymentReconciliationConsumerPollingQueue ...");
+            log.info("Shutting down ...");
             pollingThreadPool.shutdownNow();
             messageHandlerThreadPool.shutdown();
         }

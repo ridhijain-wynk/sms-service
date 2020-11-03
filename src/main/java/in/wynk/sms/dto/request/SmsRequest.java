@@ -9,13 +9,12 @@ import in.wynk.sms.queue.message.HighPriorityMessage;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-@Builder
-@NoArgsConstructor
+@SuperBuilder
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "priority")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = HighPriorityMessage.class, name = "HIGH"),
@@ -24,6 +23,7 @@ import lombok.Setter;
 })
 @Getter
 @AnalysedEntity
+@NoArgsConstructor
 public abstract class SmsRequest {
 
     @Analysed

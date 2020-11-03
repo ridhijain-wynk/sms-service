@@ -1,5 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false" scan="true" scanPeriod="30 seconds">
-    <timestamp key="_timestamp" datePattern="yyyy-MM-dd"/>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>
+                <Pattern>%level %date [%thread] [%X{rid}] [%file:%line] %msg%n</Pattern>
+            </pattern>
+        </layout>
+    </appender>
+
     <appender name="ERRORLOG"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -28,9 +36,6 @@
                 aux}/sms.${HOSTNAME}.%d{yyyy-MM-dd-HH}.log.gz
             </fileNamePattern>
             <maxHistory>72</maxHistory>
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>1GB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
     <appender name="ASYNC_FILE" queueSize="10000" class="ch.qos.logback.classic.AsyncAppender">
@@ -83,9 +88,35 @@
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
 
-    <root level="INFO">
-        <appender-ref ref="ASYNC_FILE"/>
-        <appender-ref ref="ASYNC_ERRORLOG"/>
-    </root>
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ASYNC_ERRORLOG"/>
+        </root>
+        <logger name="in.wynk" additivity="false" level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ASYNC_ERRORLOG"/>
+        </logger>
+    </springProfile>
+
+    <springProfile name="dev,preprod">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ASYNC_ERRORLOG"/>
+        </root>
+        <logger name="in.wynk" additivity="false" level="DEBUG">
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ASYNC_ERRORLOG"/>
+        </logger>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ASYNC_ERRORLOG"/>
+        </root>
+    </springProfile>
 
 </configuration>
