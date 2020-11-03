@@ -17,7 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<HighPriorityMessage> {
+public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPollingQueue<HighPriorityMessage> {
 
     @Value("${sms.priority.high.queue.consumer.enabled}")
     private boolean enabled;
@@ -29,12 +29,12 @@ public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue
     private final ThreadPoolExecutor messageHandlerThreadPool;
     private final ScheduledThreadPoolExecutor pollingThreadPool;
 
-    public HighPriorityConsumer(String queueName,
-                                AmazonSQS sqs,
-                                ObjectMapper objectMapper,
-                                ISQSMessageExtractor messagesExtractor,
-                                ThreadPoolExecutor messageHandlerThreadPool,
-                                ScheduledThreadPoolExecutor pollingThreadPool) {
+    public NotificationMessageConsumer(String queueName,
+                                       AmazonSQS sqs,
+                                       ObjectMapper objectMapper,
+                                       ISQSMessageExtractor messagesExtractor,
+                                       ThreadPoolExecutor messageHandlerThreadPool,
+                                       ScheduledThreadPoolExecutor pollingThreadPool) {
         super(queueName, sqs, objectMapper, messagesExtractor, messageHandlerThreadPool);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;

@@ -3,13 +3,13 @@ package in.wynk.sms.sender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public abstract class AbstractSMSSender {
 
 	protected Logger logger = LoggerFactory.getLogger(getClass().getCanonicalName());
 
-	public abstract void sendMessage(String msisdn, String fromShortCode, String text, Boolean useDND, long createTimestamp, String priority, String id);
+	public abstract void sendMessage(String msisdn, String fromShortCode, String text, String priority, String id);
 
 	protected Object[] convertToHexString(String input, boolean xmlEncode) {
 		if (input == null) {
@@ -22,7 +22,7 @@ public abstract class AbstractSMSSender {
 		boolean containNonAscii = false;
 		for (int i = 0; i < input.length(); i++) {
 			char ch = input.charAt(i);
-			if (ch >= 0 && ch <= 127) {
+			if (ch <= 127) {
 				sb.append(ch);
 			} else {
 				containNonAscii = true;
@@ -42,7 +42,7 @@ public abstract class AbstractSMSSender {
 	}
 
 	protected String xmlEncode(String s) {
-		StringBuffer str = new StringBuffer(new String("".getBytes(), Charset.forName("UTF-8")));
+		StringBuilder str = new StringBuilder(new String("".getBytes(), StandardCharsets.UTF_8));
 		int len = (s != null) ? s.length() : 0;
 		for (int i = 0; i < len; i++) {
 			char ch = s.charAt(i);

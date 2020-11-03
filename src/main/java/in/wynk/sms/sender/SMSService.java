@@ -8,22 +8,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-
 @Service("smsService")
 public class SMSService {
 
     private static final Logger logger = LoggerFactory.getLogger(SMSService.class.getCanonicalName());
 
-    private AbstractSMSSender smsSender;
+
 
     @Autowired
     private AirtelSMSSender airtelSMSSender;
 
-    @PostConstruct
-    private void init() {
-        smsSender = airtelSMSSender;
-    }
 
     public void sendMessage(SMSDto sms) {
         logger.debug("Started executing sendMessage() for ID:" + sms.getId());
@@ -32,10 +26,10 @@ public class SMSService {
             if (country.equals(Country.SRILANKA)) {
                 airtelSMSSender.sendSmsToSriLanka(sms);
             } else {
-                airtelSMSSender.sendMessage(sms.getMsisdn(), sms.getShortCode(), sms.getMessage(), sms.isUseDnd(), sms.getCreationTimestamp(), sms.getPriority(), sms.getId());
+                airtelSMSSender.sendMessage(sms.getMsisdn(), sms.getShortCode(), sms.getMessage(), sms.getPriority(), sms.getId());
             }
         } else {
-            airtelSMSSender.sendMessage(sms.getMsisdn(), sms.getShortCode(), sms.getMessage(), sms.isUseDnd(), sms.getCreationTimestamp(), sms.getPriority(), sms.getId());
+            airtelSMSSender.sendMessage(sms.getMsisdn(), sms.getShortCode(), sms.getMessage(), sms.getPriority(), sms.getId());
         }
     }
 }

@@ -1,12 +1,15 @@
 package in.wynk.sms.queue.consumer;
 
 import com.amazonaws.services.sqs.AmazonSQS;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
 import in.wynk.sms.queue.message.LowPriorityMessage;
+import in.wynk.sms.sender.AbstractSMSSender;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -26,12 +29,16 @@ public class LowPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<
     private final ThreadPoolExecutor messageHandlerThreadPool;
     private final ScheduledThreadPoolExecutor pollingThreadPool;
 
+    @Autowired
+    private AbstractSMSSender smsSender;
+
     public LowPriorityConsumer(String queueName,
                                AmazonSQS sqs,
+                               ObjectMapper objectMapper,
                                ISQSMessageExtractor messagesExtractor,
                                ThreadPoolExecutor messageHandlerThreadPool,
                                ScheduledThreadPoolExecutor pollingThreadPool) {
-        super(queueName, sqs, messagesExtractor, messageHandlerThreadPool);
+        super(queueName, sqs, objectMapper, messagesExtractor, messageHandlerThreadPool);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;
     }
@@ -40,7 +47,7 @@ public class LowPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<
     @AnalyseTransaction(name = "consumeMessage")
     public void consume(LowPriorityMessage message) {
         AnalyticService.update(message);
-        //TODO: write consumer logic
+        smsSender.sendMessage(message.getMsisdn(), message.getShortCode(), message.getText(), message.priority().name(), message.getMessageId());
     }
 
     @Override

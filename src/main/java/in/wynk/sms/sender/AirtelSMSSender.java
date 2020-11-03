@@ -113,7 +113,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
 
     @Override
     @AnalyseTransaction(name = "sendSmsAirtel")
-    public void sendMessage(String msisdn, String shortCode, String text, Boolean useDND, long createTimestamp, String priority, String smsId) {
+    public void sendMessage(String msisdn, String shortCode, String text, String priority, String smsId) {
         try {
             AnalyticService.update("message", text);
             SMSMsg sms = new SMSMsg();
@@ -122,7 +122,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
             sms.message = filterHtmlEntity(text);
             sms.messageId = "" + System.currentTimeMillis(); // Utils.generateUUID(true,true);
             String mtRequestXML = createMTRequestXML(sms);
-            postCoreJava(mtRequestXML, msisdn, createTimestamp, priority, smsId);
+            postCoreJava(mtRequestXML, msisdn, priority, smsId);
         } catch (Throwable th) {
             logger.error("Error while Delivering SMS, ERROR: {}", th.getMessage(), th);
         }
@@ -183,7 +183,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
 
     }
 
-    private boolean postCoreJava(String dataXml, String msisdn, long createTimestamp, String priority, String id) {
+    private boolean postCoreJava(String dataXml, String msisdn, String priority, String id) {
         AnalyticService.update("msisdn", msisdn);
         AnalyticService.update("smsAirtelRequest", dataXml);
         AnalyticService.update("priority", priority);

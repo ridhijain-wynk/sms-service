@@ -1,6 +1,7 @@
-package in.wynk.sms.queue;
+package in.wynk.sms.queue.config;
 
 import com.amazonaws.services.sqs.AmazonSQS;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import in.wynk.queue.constant.BeanConstant;
 import in.wynk.sms.queue.consumer.HighPriorityConsumer;
 import in.wynk.sms.queue.consumer.LowPriorityConsumer;
@@ -19,9 +20,11 @@ public class SmsSqsConfig {
     @Bean
     public HighPriorityConsumer highPriorityConsumer(@Value("${sms.priority.high.queue.name}") String queueName,
                                                      @Value("${sms.priority.high.queue.threads.parallelism:5}") int parallelism,
-                                                     @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient) {
+                                                     @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
+                                                     ObjectMapper objectMapper) {
         return new HighPriorityConsumer(queueName,
                 sqsClient,
+                objectMapper,
                 new SmsMessageExtractor(queueName, sqsClient),
                 (ThreadPoolExecutor) threadPoolExecutor(parallelism),
                 (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor());
@@ -30,9 +33,11 @@ public class SmsSqsConfig {
     @Bean
     public LowPriorityConsumer lowPriorityConsumer(@Value("${sms.priority.low.queue.name}") String queueName,
                                                    @Value("${sms.priority.low.queue.threads.parallelism:5}") int parallelism,
-                                                   @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient) {
+                                                   @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
+                                                   ObjectMapper objectMapper) {
         return new LowPriorityConsumer(queueName,
                 sqsClient,
+                objectMapper,
                 new SmsMessageExtractor(queueName, sqsClient),
                 (ThreadPoolExecutor) threadPoolExecutor(parallelism),
                 (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor());
@@ -40,10 +45,12 @@ public class SmsSqsConfig {
 
     @Bean
     public MediumPriorityConsumer mediumPriorityConsumer(@Value("${sms.priority.low.queue.name}") String queueName,
-                                                      @Value("${sms.priority.low.queue.threads.parallelism:5}") int parallelism,
-                                                      @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient) {
+                                                         @Value("${sms.priority.low.queue.threads.parallelism:5}") int parallelism,
+                                                         @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
+                                                         ObjectMapper objectMapper) {
         return new MediumPriorityConsumer(queueName,
                 sqsClient,
+                objectMapper,
                 new SmsMessageExtractor(queueName, sqsClient),
                 (ThreadPoolExecutor) threadPoolExecutor(parallelism),
                 (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor());

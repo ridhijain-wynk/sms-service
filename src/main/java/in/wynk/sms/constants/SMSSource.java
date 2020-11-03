@@ -1,6 +1,8 @@
 package in.wynk.sms.constants;
 
 
+import static in.wynk.sms.constants.SMSPriority.HIGH;
+
 public enum SMSSource {
 
 	WYNK("WYNK","A$-WYNKED", "A$-650018"),
@@ -42,6 +44,19 @@ public enum SMSSource {
 		for (SMSSource source:SMSSource.values()) {
 			if (source.getName().equalsIgnoreCase(name)) {
 				return source.getShortCode();
+			}
+		}
+		return null;
+	}
+
+	public static String getShortCode(String name, SMSPriority priority) {
+		for (SMSSource source:SMSSource.values()) {
+			if (source.getName().equalsIgnoreCase(name)) {
+				if(HIGH.equals(priority)){
+					return source.getShortCode();
+				} else {
+					return source.getShortCodeForLowMediumPriority();
+				}
 			}
 		}
 		return null;

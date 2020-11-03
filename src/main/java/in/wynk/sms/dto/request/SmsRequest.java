@@ -8,9 +8,11 @@ import in.wynk.sms.constants.SMSPriority;
 import in.wynk.sms.queue.message.HighPriorityMessage;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Builder
 @NoArgsConstructor
@@ -25,15 +27,19 @@ import lombok.NoArgsConstructor;
 public abstract class SmsRequest {
 
     @Analysed
-    private String sms;
+    private String text;
     @Analysed
     private String msisdn;
     @Analysed
     private String countryCode;
     @Analysed
-    private String priority;
-    @Analysed
+    @ApiModelProperty(hidden = true)
+    @Setter
     private String service;
+    @Analysed
+    @ApiModelProperty(hidden = true)
+    @Setter
+    private String shortCode;
     @Analysed
     private String messageId;
 
