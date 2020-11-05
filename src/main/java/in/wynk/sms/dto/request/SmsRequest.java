@@ -29,6 +29,7 @@ public abstract class SmsRequest {
     @Analysed
     private String text;
     @Analysed
+    @Setter //temporary
     private String msisdn;
     @Analysed
     private String countryCode;

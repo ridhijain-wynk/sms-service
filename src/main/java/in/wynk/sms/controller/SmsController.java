@@ -1,13 +1,18 @@
 package in.wynk.sms.controller;
 
 import in.wynk.client.service.ClientDetailsCachingService;
+import in.wynk.common.utils.BCEncryptor;
+import in.wynk.exception.WynkErrorType;
+import in.wynk.exception.WynkRuntimeException;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
 import in.wynk.sms.model.SendSmsRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
@@ -44,9 +49,17 @@ public class SmsController {
 //        smsRequest.setService(clientAlias);
 //        smsRequest.setShortCode(SMSSource.getShortCode(clientAlias, smsRequest.getPriority()));
 //        sqsManagerService.publishSQSMessage(smsRequest);
+        String msisdn = BCEncryptor.decrypt(smsRequest.getMsisdn(), BNKRFT_ENCRYPTION_TOKEN);
+        if (StringUtils.isBlank(msisdn)) {
+            throw new WynkRuntimeException(WynkErrorType.UT001, "Invalid msisdn");
+        }
+        smsRequest.setMsisdn(msisdn);
         sendToOldSystem(smsRequest);
         return SmsResponse.builder().build();
     }
+
+    @Value("${bnkrft.encryption.token:blabla}")
+    private String BNKRFT_ENCRYPTION_TOKEN;
 
     //TODO: temporary for bunkrft
     private final RestTemplate restTemplate = new RestTemplateBuilder()
