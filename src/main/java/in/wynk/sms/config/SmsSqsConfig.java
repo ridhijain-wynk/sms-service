@@ -23,6 +23,8 @@ public class SmsSqsConfig {
     private int batchSize;
     @Value("${sms.sqs.messages.extractor.waitTimeInSeconds:1}")
     private int waitTimeSeconds;
+    @Value("${sms.sqs.messages.extractor.visibilityTimeoutSeconds:30}")
+    private int visibilityTimeoutSeconds;
 
     @Bean
     public HighPriorityConsumer highPriorityConsumer(@Value("${sms.priority.high.queue.name}") String queueName,
@@ -32,7 +34,7 @@ public class SmsSqsConfig {
         return new HighPriorityConsumer(queueName,
                 sqsClient,
                 objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds),
+                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
                 (ThreadPoolExecutor) threadPoolExecutor(parallelism),
                 (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
     }
@@ -45,7 +47,7 @@ public class SmsSqsConfig {
         return new LowPriorityConsumer(queueName,
                 sqsClient,
                 objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds),
+                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
                 (ThreadPoolExecutor) threadPoolExecutor(parallelism),
                 (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
     }
@@ -58,7 +60,7 @@ public class SmsSqsConfig {
         return new MediumPriorityConsumer(queueName,
                 sqsClient,
                 objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds),
+                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
                 (ThreadPoolExecutor) threadPoolExecutor(parallelism),
                 (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
     }

@@ -8,14 +8,15 @@ public class SmsMessageExtractor extends AbstractSQSMessageExtractor {
 
     private int batchSize;
     private int waitTimeInSeconds;
-
+    private int visibilityTimeoutSeconds;
     private final String queueName;
 
 
-    public SmsMessageExtractor(String queueName, AmazonSQS sqs, int batchSize, int waitTimeInSeconds) {
+    public SmsMessageExtractor(String queueName, AmazonSQS sqs, int batchSize, int waitTimeInSeconds, int visibilityTimeoutSeconds) {
         super(sqs);
         this.queueName = queueName;
         this.batchSize = batchSize;
+        this.visibilityTimeoutSeconds = visibilityTimeoutSeconds;
         this.waitTimeInSeconds = waitTimeInSeconds;
     }
 
@@ -24,6 +25,7 @@ public class SmsMessageExtractor extends AbstractSQSMessageExtractor {
         return new ReceiveMessageRequest()
                 .withMaxNumberOfMessages(batchSize)
                 .withQueueUrl(getSqs().getQueueUrl(queueName).getQueueUrl())
+                .withVisibilityTimeout(visibilityTimeoutSeconds)
                 .withWaitTimeSeconds(waitTimeInSeconds);
     }
 }

@@ -63,7 +63,7 @@ public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollin
 
     @AnalyseTransaction(name = "consumePromotionalMessage")
     private SmsRequest parseMessage(SendSmsRequest request) {
-        SmsRequest smsRequest = smsFactory.getSMSDto(request);
+        SmsRequest smsRequest = SMSFactory.getSmsRequest(request);
         AnalyticService.update(smsRequest);
         return smsRequest;
     }

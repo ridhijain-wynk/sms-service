@@ -7,12 +7,10 @@ import in.wynk.sms.model.SendSmsRequest;
 import in.wynk.sms.queue.message.HighPriorityMessage;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SMSFactory {
 
-    public SmsRequest getSMSDto(SendSmsRequest request) {
+    public static SmsRequest getSmsRequest(SendSmsRequest request) {
         SMSPriority priority = SMSPriority.fromString(request.getPriority());
         switch (priority) {
             case HIGH:
@@ -35,4 +33,10 @@ public class SMSFactory {
         throw new IllegalArgumentException("Invalid message");
     }
 
+
+    public static SendSmsRequest getOldSendSmsRequest(SmsRequest smsRequest) {
+        return SendSmsRequest.builder().countryCode(smsRequest.getCountryCode())
+                .msisdn(smsRequest.getMsisdn()).message(smsRequest.getText()).priority(smsRequest.getPriority().name())
+                .service(smsRequest.getService()).build();
+    }
 }

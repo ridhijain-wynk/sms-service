@@ -20,9 +20,6 @@ public class SmsSenderController {
     private static final Logger logger = LoggerFactory.getLogger(SmsSenderController.class);
 
     @Autowired
-    private SMSFactory smsFactory;
-
-    @Autowired
     private ISqsManagerService sqsManagerService;
 
 
@@ -44,7 +41,7 @@ public class SmsSenderController {
                 if (StringUtils.isNotBlank(request.getSource())) {
                     request.setService(request.getSource());
                 }
-                SmsRequest sms = smsFactory.getSMSDto(request);
+                SmsRequest sms = SMSFactory.getSmsRequest(request);
                 AnalyticService.update(sms);
                 sqsManagerService.publishSQSMessage(sms);
             } catch (Exception e) {

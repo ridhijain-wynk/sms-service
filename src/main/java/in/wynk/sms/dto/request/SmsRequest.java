@@ -43,5 +43,5 @@ public abstract class SmsRequest {
     @Analysed
     private String messageId;
 
-    public abstract SMSPriority priority();
+    public abstract SMSPriority getPriority();
 }

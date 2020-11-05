@@ -1,6 +1,9 @@
 package in.wynk.sms.model;
 
+import lombok.Getter;
+
 @Deprecated
+@Getter
 public class SendSmsResponse {
 
     private final String status = "QUEUED";

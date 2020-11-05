@@ -118,7 +118,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
         if (country.equals(Country.SRILANKA)) {
             sendSmsToSriLanka(request);
         }
-        sendMessage(request.getMsisdn(), request.getShortCode(), request.getText(), request.priority().name(), request.getMessageId());
+        sendMessage(request.getMsisdn(), request.getShortCode(), request.getText(), request.getPriority().name(), request.getMessageId());
     }
 
 
@@ -170,7 +170,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
                 if (StringUtils.isNotBlank(responseStr) && responseStr.contains("Operation success")) {
                     logger.info("Successfully sent message to msisdn: { " + smsRequest.getMsisdn() + "}, responseCode: { " +
                             currentStatusCode + "}, response: { " + responseStr + "}");
-                    logger.info("Time by SriLanka.SMS Priority: " + smsRequest.priority() + " : Time :" + (System.currentTimeMillis() - startTime) + " ms");
+                    logger.info("Time by SriLanka.SMS Priority: " + smsRequest.getPriority() + " : Time :" + (System.currentTimeMillis() - startTime) + " ms");
                     success = true;
                 } else {
                     logger.error("Error Sending SMS to Msisdn: {" + smsRequest.getMsisdn() + "} SMS: { " + smsRequest.getText() + "}, ERROR: { " + responseStr + "}");

@@ -3,16 +3,18 @@ package in.wynk.sms.queue.message;
 import in.wynk.queue.dto.WynkQueue;
 import in.wynk.sms.constants.SMSPriority;
 import in.wynk.sms.dto.request.SmsRequest;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor
 @SuperBuilder
-@WynkQueue(queueName = "${sms.priority.medium.priority.queue.name}", delaySeconds = "${sms.priority.medium.priority.queue.delayInSecond}")
+@Getter
+@WynkQueue(queueName = "${sms.priority.medium.queue.name}", delaySeconds = "${sms.priority.medium.queue.delayInSecond}")
 public class MediumPriorityMessage extends SmsRequest {
 
-    @Override
-    public SMSPriority priority() {
-        return SMSPriority.MEDIUM;
-    }
+    @Builder.Default
+    private final SMSPriority priority = SMSPriority.MEDIUM;
+
 }
