@@ -6,7 +6,7 @@ env=$1
 env=${env:-local}
 
 echo "################ Buidling SMS projects for environment : $env ###################"
-mvn clean install -P ${env}
+mvn clean install -P "$env"
 
 echo "################ Building docker SMS for environment : $env ###################"
-docker build -f scripts/Dockerfile.local -t "ignite-sms-platform" --build-arg profile=${env} .
+docker build -f scripts/Dockerfile.local -t "wynk-sms" --build-arg profile="$env" .

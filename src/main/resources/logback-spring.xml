@@ -76,15 +76,7 @@
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
 
-    <logger name="setSmsControl" additivity="false" level="info">
-        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
-    </logger>
-
     <logger name="sendSmsAirtel" additivity="false" level="info">
-        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
-    </logger>
-
-    <logger name="logstashLogger" additivity="false" level="info">
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
 

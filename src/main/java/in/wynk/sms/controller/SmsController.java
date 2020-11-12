@@ -1,5 +1,7 @@
 package in.wynk.sms.controller;
 
+import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
+import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BCEncryptor;
 import in.wynk.exception.WynkErrorType;
@@ -43,6 +45,7 @@ public class SmsController {
         this.clientDetailsCachingService = clientDetailsCachingService;
     }
 
+    @AnalyseTransaction(name = "sendSms")
     @PostMapping("/send")
     public SmsResponse sendSms(Principal principal, @RequestBody SmsRequest smsRequest) {
 //        String clientAlias = clientDetailsCachingService.getClientById(principal.getName()).getAlias();
@@ -54,6 +57,7 @@ public class SmsController {
             throw new WynkRuntimeException(WynkErrorType.UT001, "Invalid msisdn");
         }
         smsRequest.setMsisdn(msisdn);
+        AnalyticService.update(smsRequest);
         sendToOldSystem(smsRequest);
         return SmsResponse.builder().build();
     }
