@@ -6,6 +6,7 @@ import in.wynk.queue.constant.BeanConstant;
 import in.wynk.sms.queue.consumer.HighPriorityConsumer;
 import in.wynk.sms.queue.consumer.LowPriorityConsumer;
 import in.wynk.sms.queue.consumer.MediumPriorityConsumer;
+import in.wynk.sms.queue.consumer.NotificationMessageConsumer;
 import in.wynk.sms.queue.extractor.SmsMessageExtractor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,19 @@ public class SmsSqsConfig {
     private int waitTimeSeconds;
     @Value("${sms.sqs.messages.extractor.visibilityTimeoutSeconds:30}")
     private int visibilityTimeoutSeconds;
+
+    @Bean
+    public NotificationMessageConsumer notificationConsumer(@Value("${sms.notification.queue.name}") String queueName,
+                                                     @Value("${sms.notification.queue.threads:5}") int parallelism,
+                                                     @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
+                                                     ObjectMapper objectMapper) {
+        return new NotificationMessageConsumer(queueName,
+                sqsClient,
+                objectMapper,
+                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
+                (ThreadPoolExecutor) threadPoolExecutor(parallelism),
+                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
+    }
 
     @Bean
     public HighPriorityConsumer highPriorityConsumer(@Value("${sms.priority.high.queue.name}") String queueName,
