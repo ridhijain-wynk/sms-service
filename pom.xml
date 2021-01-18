@@ -13,6 +13,11 @@
     <artifactId>wynk-sms</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>in.wynk</groupId>
+            <artifactId>sms-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--PROJECT DEPENDENCIES-->
         <dependency>
             <groupId>in.wynk</groupId>
@@ -173,6 +178,10 @@
                         <aspectLibrary>
                             <groupId>in.wynk</groupId>
                             <artifactId>lib-aspects</artifactId>
+                        </aspectLibrary>
+                        <aspectLibrary>
+                            <groupId>in.wynk</groupId>
+                            <artifactId>client-api</artifactId>
                         </aspectLibrary>
                     </aspectLibraries>
                 </configuration>

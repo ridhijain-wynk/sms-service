@@ -1,7 +1,10 @@
 package in.wynk.sms.queue.message;
 
+import in.wynk.common.dto.IObjectMapper;
 import in.wynk.queue.dto.WynkQueue;
-import in.wynk.sms.constants.SMSPriority;
+import in.wynk.sms.common.message.SmsNotificationMessage;
+import in.wynk.sms.common.constant.SMSPriority;
+import in.wynk.sms.common.constant.SMSSource;
 import in.wynk.sms.dto.request.SmsRequest;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +15,20 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @WynkQueue(queueName = "${sms.priority.high.queue.name}", delaySeconds = "${sms.priority.high.queue.delayInSecond}")
-public class HighPriorityMessage extends SmsRequest {
+public class HighPriorityMessage extends SmsRequest implements IObjectMapper {
 
     @Builder.Default
     private final SMSPriority priority = SMSPriority.HIGH;
+
+    public static HighPriorityMessage from(SmsNotificationMessage smsNotificationMessage) {
+        return HighPriorityMessage.builder()
+                .shortCode(SMSSource.getShortCode(smsNotificationMessage.getSource(), SMSPriority.HIGH))
+                .messageId(smsNotificationMessage.getMsisdn() + System.currentTimeMillis())
+                .countryCode(smsNotificationMessage.getCountryCode())
+                .service(smsNotificationMessage.getSource())
+                .msisdn(smsNotificationMessage.getMsisdn())
+                .text(smsNotificationMessage.getMessage())
+                .build();
+    }
+
 }

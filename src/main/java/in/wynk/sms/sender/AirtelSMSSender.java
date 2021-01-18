@@ -2,8 +2,8 @@ package in.wynk.sms.sender;
 
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
-import in.wynk.sms.constants.Country;
-import in.wynk.sms.constants.SMSPriority;
+import in.wynk.sms.common.constant.Country;
+import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.dto.request.SmsRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
