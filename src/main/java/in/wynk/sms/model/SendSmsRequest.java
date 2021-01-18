@@ -2,8 +2,8 @@ package in.wynk.sms.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import in.wynk.sms.constants.SMSPriority;
-import in.wynk.sms.constants.SMSSource;
+import in.wynk.sms.common.constant.SMSPriority;
+import in.wynk.sms.common.constant.SMSSource;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;

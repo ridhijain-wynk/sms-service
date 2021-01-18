@@ -7,6 +7,8 @@ import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
 import in.wynk.queue.service.ISqsManagerService;
+import in.wynk.sms.common.message.SmsNotificationMessage;
+import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.SmsRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPollingQueue<SmsRequest> {
+public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPollingQueue<SmsNotificationMessage> {
 
     @Value("${sms.notification.queue.consumer.enabled}")
     private boolean enabled;
@@ -45,14 +47,15 @@ public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPolli
 
     @Override
     @AnalyseTransaction(name = "consumeNotificationMessage")
-    public void consume(SmsRequest message) {
+    public void consume(SmsNotificationMessage message) {
         AnalyticService.update(message);
-        sqsManagerService.publishSQSMessage(message);
+        SmsRequest smsRequest = SMSFactory.getSmsRequest(message);
+        sqsManagerService.publishSQSMessage(smsRequest);
     }
 
     @Override
-    public Class<SmsRequest> messageType() {
-        return SmsRequest.class;
+    public Class<SmsNotificationMessage> messageType() {
+        return SmsNotificationMessage.class;
     }
 
     @Override
