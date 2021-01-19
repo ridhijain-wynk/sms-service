@@ -1,5 +1,6 @@
 package in.wynk.sms.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.github.annotation.analytic.core.annotations.Analysed;
@@ -27,6 +28,7 @@ import lombok.experimental.SuperBuilder;
 public abstract class SmsRequest {
 
     @Analysed
+    @JsonProperty("message")
     private String text;
     @Analysed
     @Setter //temporary
