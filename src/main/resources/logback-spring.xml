@@ -75,7 +75,10 @@
         <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
-
+    <logger name="consumeMessage" additivity="false">
+        <level value="info"/>
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
     <logger name="sendSmsAirtel" additivity="false" level="info">
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
