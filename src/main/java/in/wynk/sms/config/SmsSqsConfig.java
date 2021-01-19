@@ -77,8 +77,8 @@ public class SmsSqsConfig {
     }
 
     @Bean
-    public MediumPriorityConsumer mediumPriorityConsumer(@Value("${sms.priority.low.queue.name}") String queueName,
-                                                         @Value("${sms.priority.low.queue.threads:5}") int parallelism,
+    public MediumPriorityConsumer mediumPriorityConsumer(@Value("${sms.priority.medium.queue.name}") String queueName,
+                                                         @Value("${sms.priority.medium.queue.threads:5}") int parallelism,
                                                          @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                          ObjectMapper objectMapper) {
         return new MediumPriorityConsumer(queueName,
