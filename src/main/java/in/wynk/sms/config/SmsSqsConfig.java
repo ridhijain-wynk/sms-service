@@ -3,10 +3,7 @@ package in.wynk.sms.config;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.wynk.queue.constant.BeanConstant;
-import in.wynk.sms.queue.consumer.HighPriorityConsumer;
-import in.wynk.sms.queue.consumer.LowPriorityConsumer;
-import in.wynk.sms.queue.consumer.MediumPriorityConsumer;
-import in.wynk.sms.queue.consumer.NotificationMessageConsumer;
+import in.wynk.sms.queue.consumer.*;
 import in.wynk.sms.queue.extractor.SmsMessageExtractor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +30,19 @@ public class SmsSqsConfig {
                                                      @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                      ObjectMapper objectMapper) {
         return new NotificationMessageConsumer(queueName,
+                sqsClient,
+                objectMapper,
+                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
+                (ThreadPoolExecutor) threadPoolExecutor(parallelism),
+                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
+    }
+
+    @Bean
+    public PromotionalMessageConsumer promotionalConsumer(@Value("${sms.promotional.queue.name}") String queueName,
+                                                           @Value("${sms.promotional.queue.threads:5}") int parallelism,
+                                                           @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
+                                                           ObjectMapper objectMapper) {
+        return new PromotionalMessageConsumer(queueName,
                 sqsClient,
                 objectMapper,
                 new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
