@@ -32,8 +32,6 @@ public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollin
     private TimeUnit delayTimeUnit;
     @Autowired
     private ISqsManagerService sqsManagerService;
-    @Autowired
-    private SMSFactory smsFactory;
 
     public PromotionalMessageConsumer(String queueName,
                                       AmazonSQS sqs,
