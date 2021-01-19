@@ -1,9 +1,10 @@
 package in.wynk.sms.queue.message;
 
+import com.github.annotation.analytic.core.annotations.Analysed;
+import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.common.dto.IObjectMapper;
 import in.wynk.queue.dto.WynkQueue;
 import in.wynk.sms.common.constant.SMSPriority;
-import in.wynk.sms.common.constant.SMSSource;
 import in.wynk.sms.common.message.SmsNotificationMessage;
 import in.wynk.sms.dto.request.SmsRequest;
 import lombok.Builder;
@@ -15,9 +16,11 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @WynkQueue(queueName = "${sms.priority.high.queue.name}", delaySeconds = "${sms.priority.high.queue.delayInSecond}")
+@AnalysedEntity
 public class HighPriorityMessage extends SmsRequest implements IObjectMapper {
 
     @Builder.Default
+    @Analysed
     private final SMSPriority priority = SMSPriority.HIGH;
 
     public static HighPriorityMessage from(SmsNotificationMessage smsNotificationMessage) {

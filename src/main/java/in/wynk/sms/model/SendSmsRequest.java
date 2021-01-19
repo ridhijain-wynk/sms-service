@@ -2,6 +2,8 @@ package in.wynk.sms.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.github.annotation.analytic.core.annotations.Analysed;
+import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.common.constant.SMSSource;
 import lombok.AllArgsConstructor;
@@ -19,19 +21,25 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@AnalysedEntity
 public class SendSmsRequest implements Serializable {
 
     private static final long serialVersionUID = -289736810127565940L;
-
+    @Analysed
     private String priority;
+    @Analysed
     private String message;
+    @Analysed
     private String msisdn;
+    @Analysed
     private String source;
     private boolean nineToNine = false;
     private boolean useDnd = false;
     private Integer retryCount;
+    @Analysed
     private String countryCode;
     //Added service field to find out messages being sent by CAPI.
+    @Analysed
     private String service;
 
     public String getMessage() {
