@@ -59,7 +59,7 @@ public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue
     public void start() {
         if (enabled) {
             log.info("Starting ...");
-            pollingThreadPool.scheduleWithFixedDelay(
+            pollingThreadPool.scheduleAtFixedRate(
                     this::poll,
                     0,
                     consumerDelay,
