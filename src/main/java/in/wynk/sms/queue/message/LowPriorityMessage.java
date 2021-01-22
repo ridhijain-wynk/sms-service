@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @Getter
-@WynkQueue(queueName = "${sms.priority.low.queue.name}", delaySeconds = "${sms.priority.low.queue.delayInSecond}")
+@WynkQueue(queueName = "${sms.priority.low.queue.name}", delaySeconds = "${sms.priority.low.queue.delayInSecond}", maxRetryCount = 0)
 @AnalysedEntity
 public class LowPriorityMessage extends SmsRequest implements IObjectMapper {
 
