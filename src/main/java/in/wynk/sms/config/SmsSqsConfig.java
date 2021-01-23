@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Configuration
 public class SmsSqsConfig {
@@ -26,28 +28,28 @@ public class SmsSqsConfig {
 
     @Bean
     public NotificationMessageConsumer notificationConsumer(@Value("${sms.notification.queue.name}") String queueName,
-                                                     @Value("${sms.notification.queue.threads:5}") int parallelism,
-                                                     @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
-                                                     ObjectMapper objectMapper) {
+                                                            @Value("${sms.notification.queue.threads:5}") int parallelism,
+                                                            @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
+                                                            ObjectMapper objectMapper) {
         return new NotificationMessageConsumer(queueName,
                 sqsClient,
                 objectMapper,
                 new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                (ThreadPoolExecutor) threadPoolExecutor(parallelism),
-                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
+                executor(parallelism),
+                scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
     @Bean
     public PromotionalMessageConsumer promotionalConsumer(@Value("${sms.promotional.queue.name}") String queueName,
-                                                           @Value("${sms.promotional.queue.threads:5}") int parallelism,
-                                                           @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
-                                                           ObjectMapper objectMapper) {
+                                                          @Value("${sms.promotional.queue.threads:5}") int parallelism,
+                                                          @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
+                                                          ObjectMapper objectMapper) {
         return new PromotionalMessageConsumer(queueName,
                 sqsClient,
                 objectMapper,
                 new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                (ThreadPoolExecutor) threadPoolExecutor(parallelism),
-                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
+                executor(parallelism),
+                scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
     @Bean
@@ -59,8 +61,8 @@ public class SmsSqsConfig {
                 sqsClient,
                 objectMapper,
                 new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                (ThreadPoolExecutor) threadPoolExecutor(parallelism),
-                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
+                executor(parallelism),
+                scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
     @Bean
@@ -72,8 +74,8 @@ public class SmsSqsConfig {
                 sqsClient,
                 objectMapper,
                 new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                (ThreadPoolExecutor) threadPoolExecutor(parallelism),
-                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
+                executor(parallelism),
+                scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
     @Bean
@@ -85,11 +87,11 @@ public class SmsSqsConfig {
                 sqsClient,
                 objectMapper,
                 new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                (ThreadPoolExecutor) threadPoolExecutor(parallelism),
-                (ScheduledThreadPoolExecutor) scheduledThreadPoolExecutor(schedulerPoolSize));
+                executor(parallelism),
+                scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
-    private ExecutorService threadPoolExecutor(int threads) {
+    private ExecutorService executor(int threads) {
         return Executors.newWorkStealingPool(threads);
     }
 

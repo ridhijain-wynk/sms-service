@@ -15,15 +15,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollingQueue<SendSmsRequest[]> {
 
-    private final ThreadPoolExecutor messageHandlerThreadPool;
-    private final ScheduledThreadPoolExecutor pollingThreadPool;
+    private final ExecutorService messageHandlerThreadPool;
+    private final ScheduledExecutorService pollingThreadPool;
     @Value("${sms.promotional.queue.consumer.enabled}")
     private boolean enabled;
     @Value("${sms.promotional.queue.consumer.delay}")
@@ -37,8 +37,8 @@ public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollin
                                       AmazonSQS sqs,
                                       ObjectMapper objectMapper,
                                       ISQSMessageExtractor messagesExtractor,
-                                      ThreadPoolExecutor messageHandlerThreadPool,
-                                      ScheduledThreadPoolExecutor pollingThreadPool) {
+                                      ExecutorService messageHandlerThreadPool,
+                                      ScheduledExecutorService pollingThreadPool) {
         super(queueName, sqs, objectMapper, messagesExtractor, messageHandlerThreadPool);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;
