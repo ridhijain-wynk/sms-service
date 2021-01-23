@@ -62,7 +62,7 @@ public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPolli
     public void start() {
         if (enabled) {
             log.info("Starting...");
-            pollingThreadPool.scheduleAtFixedRate(
+            pollingThreadPool.scheduleWithFixedDelay(
                     this::poll,
                     0,
                     consumerDelay,

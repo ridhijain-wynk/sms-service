@@ -90,7 +90,7 @@ public class SmsSqsConfig {
     }
 
     private ExecutorService threadPoolExecutor(int threads) {
-        return Executors.newFixedThreadPool(threads);
+        return Executors.newWorkStealingPool(threads);
     }
 
     private ScheduledExecutorService scheduledThreadPoolExecutor(int schedulerPoolSize) {
