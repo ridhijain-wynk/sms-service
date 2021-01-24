@@ -74,7 +74,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create().register("https", sslsf).build();
             connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-            RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(1000).setConnectTimeout(2000).setSocketTimeout(2000).build();
+            RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(1000).setConnectTimeout(2000).setSocketTimeout(3000).build();
             connectionManager.setMaxTotal(MAX_CONNECTIONS);
             connectionManager.setDefaultMaxPerRoute(500);
             ConnectionKeepAliveStrategy keepAliveStrategy = new ConnectionKeepAliveStrategy() {
