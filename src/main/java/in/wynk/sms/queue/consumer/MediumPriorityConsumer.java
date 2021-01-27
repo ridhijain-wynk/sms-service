@@ -2,8 +2,6 @@ package in.wynk.sms.queue.consumer;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
-import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
@@ -44,9 +42,7 @@ public class MediumPriorityConsumer extends AbstractSQSMessageConsumerPollingQue
     private AbstractSMSSender smsSender;
 
     @Override
-    @AnalyseTransaction(name = "consumeMessage")
     public void consume(MediumPriorityMessage message) {
-        AnalyticService.update(message);
         smsSender.sendMessage(message);
     }
 

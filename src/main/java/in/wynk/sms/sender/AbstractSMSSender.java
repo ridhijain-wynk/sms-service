@@ -28,7 +28,7 @@ public abstract class AbstractSMSSender {
 			} else {
 				containNonAscii = true;
 				sb.append("&");
-				sb.append(Integer.toHexString((int) ch));
+				sb.append(Integer.toHexString(ch));
 				sb.append(";");
 			}
 		}

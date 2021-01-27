@@ -11,4 +11,5 @@ public interface SmsMarkers extends BaseLoggingMarkers {
     Marker PROMOTIONAL_MSG_ERROR = MarkerFactory.getMarker("PROMOTIONAL_MSG_ERROR");
     Marker TRANSACTIONAL_MSG_ERROR = MarkerFactory.getMarker("TRANSACTIONAL_MSG_ERROR");
     Marker SMS_ERROR = MarkerFactory.getMarker("SMS_ERROR");
+    Marker SL_SMS_ERROR = MarkerFactory.getMarker("SL_SMS_ERROR");
 }
