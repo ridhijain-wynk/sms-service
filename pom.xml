@@ -18,11 +18,6 @@
             <artifactId>sms-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>in.wynk</groupId>
-            <artifactId>lib-http</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!--PROJECT DEPENDENCIES-->
         <dependency>
             <groupId>in.wynk</groupId>
