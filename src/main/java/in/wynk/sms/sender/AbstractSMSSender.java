@@ -10,7 +10,7 @@ public abstract class AbstractSMSSender {
 
 	protected Logger logger = LoggerFactory.getLogger(getClass().getCanonicalName());
 
-	public abstract void sendMessage(SmsRequest request);
+	public abstract void sendMessage(SmsRequest request) throws Exception;
 
 	protected Object[] convertToHexString(String input, boolean xmlEncode) {
 		if (input == null) {

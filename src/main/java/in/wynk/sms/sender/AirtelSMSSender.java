@@ -2,11 +2,15 @@ package in.wynk.sms.sender;
 
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.auth.dao.entity.Client;
+import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.common.constant.SMSPriority;
+import in.wynk.sms.common.constant.SMSSource;
 import in.wynk.sms.dto.request.SmsRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -18,8 +22,9 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-import static in.wynk.sms.constants.SmsMarkers.*;
+import static in.wynk.sms.constants.SmsLoggingMarkers.*;
 
 @Component
 @Slf4j
@@ -36,7 +41,8 @@ public class AirtelSMSSender extends AbstractSMSSender {
     }
 
     private final RestTemplate smsRestTemplate;
-
+    @Autowired
+    private ClientDetailsCachingService clientDetailsCachingService;
 
     public AirtelSMSSender(RestTemplate smsRestTemplate) {
         this.smsRestTemplate = smsRestTemplate;
@@ -44,28 +50,20 @@ public class AirtelSMSSender extends AbstractSMSSender {
 
     @Override
     @AnalyseTransaction(name = "sendSmsAirtel")
-    public void sendMessage(SmsRequest request) {
+    public void sendMessage(SmsRequest request) throws Exception {
         AnalyticService.update(request);
         Country country = Country.getCountryByCountryCode(request.getCountryCode());
         if (country.equals(Country.SRILANKA)) {
             sendSmsToSriLanka(request);
         }
-        sendMessage(request.getMsisdn(), request.getShortCode(), request.getText(), request.getPriority().name(), request.getMessageId());
+        sendSms(request);
     }
 
-
-    private void sendMessage(String msisdn, String shortCode, String text, String priority, String smsId) {
-        try {
-            AnalyticService.update("message", text);
-            SMSMsg sms = new SMSMsg();
-            sms.shortcode = shortCode;
-            sms.toMsisdn = msisdn;
-            sms.message = filterHtmlEntity(text);
-            sms.messageId = smsId;
-            String mtRequestXML = createMTRequestXML(sms);
-            postCoreJava(mtRequestXML, msisdn, priority, smsId);
-        } catch (Throwable th) {
-            logger.error("Error while Delivering SMS, ERROR: {}", th.getMessage(), th);
+    private void sendSms(SmsRequest smsRequest) throws Exception {
+        if (!postSMS(smsRequest)) {
+            String shortCode = SMSSource.getShortCode(smsRequest.getService(), smsRequest.getPriority());
+            String mtRequestXML = createMTRequestXML(shortCode, smsRequest);
+            postCoreJava(mtRequestXML, smsRequest.getMsisdn(), smsRequest.getPriority());
         }
     }
 
@@ -95,14 +93,10 @@ public class AirtelSMSSender extends AbstractSMSSender {
             text = text.replaceAll(m.getKey(), m.getValue());
         }
         return text;
-
     }
 
-    private void postCoreJava(String dataXml, String msisdn, String priority, String id) {
-        AnalyticService.update("msisdn", msisdn);
-        AnalyticService.update("smsAirtelRequest", dataXml);
-        AnalyticService.update("priority", priority);
-        if (priority.equals(SMSPriority.HIGH.name())) {
+    private void postCoreJava(String dataXml, String msisdn, SMSPriority priority) {
+        if (priority == SMSPriority.HIGH) {
             postSmsForHighPriority(dataXml, msisdn);
         } else {
             postSmsForLowAndMediumPriority(dataXml, msisdn);
@@ -118,8 +112,32 @@ public class AirtelSMSSender extends AbstractSMSSender {
             sendSmsRequestToAirtel(dataXml, url, username, password);
         } catch (Exception e) {
             AnalyticService.update("smsAirtelException", e.toString());
-            logger.error(TRANSACTIONAL_MSG_ERROR, "Error Sending SMS to Msisdn: {" + msisdn + "} SMS: { " + dataXml + "}, ERROR: { " + e.getMessage() + "}", e);
+            logger.error(HIGH_PRIORITY_SMS_ERROR, "Error Sending SMS to Msisdn: {" + msisdn + "} SMS: { " + dataXml + "}, ERROR: { " + e.getMessage() + "}", e);
         }
+    }
+
+    private boolean postSMS(SmsRequest smsRequest) throws Exception {
+        Client client = clientDetailsCachingService.getClientByAlias(smsRequest.getClientAlias());
+        if (Objects.isNull(client)) {
+            client = clientDetailsCachingService.getClientByService(smsRequest.getService());
+        }
+        if (Objects.nonNull(client) && client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_URL").isPresent()) {
+            String url = (String) client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_URL").get();
+            String userName = (String) client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_USERNAME").get();
+            String password = (String) client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_PASSWORD").get();
+            String shortCode = (String) client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_SHORT_CODE").get();
+            HttpHeaders headers = new HttpHeaders();
+            if (StringUtils.isNoneBlank(url, shortCode)) {
+                if (StringUtils.isNoneBlank(userName, password)) {
+                    headers.setBasicAuth(userName, password);
+                }
+                String dataXml = createMTRequestXML(shortCode, smsRequest);
+                sendSmsRequestToAirtel(dataXml, url, headers);
+                return true;
+            }
+        }
+        //Temporary returning boolean as fallback for old pipeline.
+        return false;
     }
 
     private void postSmsForLowAndMediumPriority(String dataXml, String msisdn) {
@@ -130,9 +148,14 @@ public class AirtelSMSSender extends AbstractSMSSender {
         try {
             sendSmsRequestToAirtel(dataXml, url, username, password);
         } catch (Exception e) {
-            AnalyticService.update("smsAirtelException", e.toString());
             logger.error(PROMOTIONAL_MSG_ERROR, "Error Sending SMS to Msisdn: {" + msisdn + "} SMS: { " + dataXml + "}, ERROR: { " + e.getMessage() + "}", e);
         }
+    }
+
+    private void sendSmsRequestToAirtel(String dataXml, String url, HttpHeaders headers) throws Exception {
+        headers.setContentType(MediaType.TEXT_XML);
+        RequestEntity<String> requestEntity = new RequestEntity<>(dataXml, headers, HttpMethod.POST, new URI(url));
+        smsRestTemplate.exchange(requestEntity, String.class);
     }
 
     private void sendSmsRequestToAirtel(String dataXml, String url, String username, String password) throws Exception {
@@ -143,110 +166,38 @@ public class AirtelSMSSender extends AbstractSMSSender {
         smsRestTemplate.exchange(requestEntity, String.class);
     }
 
-    private String createMTRequestXML(SMSMsg mrObject) {
-        if (mrObject == null) {
+    private String createMTRequestXML(String shortCode, SmsRequest smsRequest) {
+        if (smsRequest == null) {
             return null;
         }
-        String toMsisdn = mrObject.getToMsisdn().startsWith("+") ? mrObject.getToMsisdn().substring(1) : mrObject.getToMsisdn();
+        String toMsisdn = smsRequest.getMsisdn().startsWith("+") ? smsRequest.getMsisdn().substring(1) : smsRequest.getMsisdn();
         StringBuilder strBuilder = new StringBuilder();
-        if(StringUtils.isAsciiPrintable(mrObject.message)){
+        if (StringUtils.isAsciiPrintable(smsRequest.getText())) {
             strBuilder.append("<?xml version=\"1.0\" standalone=\"yes\"?>");
-        }else {
+        } else {
             strBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
         }
         strBuilder.append("<message>");
         strBuilder.append("<sms type=\"mt\">");
-        if (mrObject.messageId != null && !mrObject.messageId.isEmpty()) {
-            strBuilder.append("<destination messageid=\"").append(mrObject.messageId).append("\">");
+        if (StringUtils.isNotBlank(smsRequest.getMessageId())) {
+            strBuilder.append("<destination messageid=\"").append(smsRequest.getMessageId()).append("\">");
         } else {
             strBuilder.append("<destination>");
         }
         strBuilder.append("<address>");
         strBuilder.append("<number type=\"international\">").append(toMsisdn).append("</number>");
         strBuilder.append("</address></destination>");
-        if (mrObject.shortcode != null) {
-            strBuilder.append("<source><address>").append("<alphanumeric>").append(mrObject.shortcode).append("</alphanumeric></address></source>");
-        } else if (mrObject.getFromMsisdn() != null) {
-            strBuilder.append("<source><address>").append(mrObject.getFromMsisdn()).append("</address></source>");
-        }
+        strBuilder.append("<source><address>").append("<alphanumeric>").append(shortCode).append("</alphanumeric></address></source>");
         strBuilder.append("<rsr type=\"all\"/>");
-        if(StringUtils.isAsciiPrintable(mrObject.message)){
-            strBuilder.append("<ud type=\"").append(mrObject.udType).append("\">");
-        }else {
-            strBuilder.append("<ud encoding=\"unicode\" type=\"").append(mrObject.udType).append("\">");
+        if (StringUtils.isAsciiPrintable(smsRequest.getText())) {
+            strBuilder.append("<ud type=\"").append("text").append("\">");
+        } else {
+            strBuilder.append("<ud encoding=\"unicode\" type=\"").append("text").append("\">");
         }
         // String is converted to hexString to support non english text too.
-        strBuilder.append(convertToHexString(mrObject.message, false)[1]).append("</ud>");
+        strBuilder.append(convertToHexString(smsRequest.getText(), false)[1]).append("</ud>");
         strBuilder.append("</sms></message>");
         return strBuilder.toString();
-    }
-
-
-    class SMSMsg {
-
-        public final String rsr = "all";     // all | failure | success | delayed |
-        public final String udType = "text";    // text or bindary
-        // success_failure | success_delayed |
-        // failure_delayed | sent | sent_delivered
-        public final String udEncoding = "default"; // unicode or default
-        public final String vpType = "relative"; // absolute, relative
-        public boolean isMT;
-
-        // public Date vpDate;
-        public String fromMsisdn;
-        public String toMsisdn;
-
-        public String message;
-        public String messageId;
-        public String shortcode;
-
-        public String getToMsisdn() {
-            return toMsisdn;
-        }
-
-        public void setToMsisdn(String toMsisdn) {
-            this.toMsisdn = toMsisdn;
-        }
-
-        public String getFromMsisdn() {
-            return fromMsisdn;
-        }
-
-        public void setFromMsisdn(String fromMsisdn) {
-            this.fromMsisdn = fromMsisdn;
-        }
-
-        public String getMessageId() {
-            return messageId;
-        }
-
-        public void setMessageId(String messageId) {
-            this.messageId = messageId;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-        @Override
-        public String toString() {
-            return "SMSMsg{" +
-                    "isMT=" + isMT +
-                    ", rsr='" + rsr + '\'' +
-                    ", udType='" + udType + '\'' +
-                    ", udEncoding='" + udEncoding + '\'' +
-                    ", vpType='" + vpType + '\'' +
-                    ", fromMsisdn='" + fromMsisdn + '\'' +
-                    ", toMsisdn='" + toMsisdn + '\'' +
-                    ", message='" + message + '\'' +
-                    ", messageId='" + messageId + '\'' +
-                    ", shortcode='" + shortcode + '\'' +
-                    '}';
-        }
     }
 
 

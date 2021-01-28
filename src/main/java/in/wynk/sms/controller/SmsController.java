@@ -7,7 +7,6 @@ import in.wynk.common.utils.BCEncryptor;
 import in.wynk.exception.WynkErrorType;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.queue.service.ISqsManagerService;
-import in.wynk.sms.common.constant.SMSSource;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -45,8 +44,7 @@ public class SmsController {
         smsRequest.setMsisdn(msisdn);
         AnalyticService.update(smsRequest);
         String clientAlias = clientDetailsCachingService.getClientById(principal.getName()).getAlias();
-        smsRequest.setService(clientAlias);
-        smsRequest.setShortCode(SMSSource.getShortCode(clientAlias, smsRequest.getPriority()));
+        smsRequest.setClientAlias(clientAlias);
         sqsManagerService.publishSQSMessage(smsRequest);
         return SmsResponse.builder().build();
     }

@@ -2,7 +2,6 @@ package in.wynk.sms.dto;
 
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.common.constant.SMSPriority;
-import in.wynk.sms.common.constant.SMSSource;
 import in.wynk.sms.common.message.SmsNotificationMessage;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.model.SendSmsRequest;
@@ -31,27 +30,17 @@ public class SMSFactory {
             case HIGH:
                 return HighPriorityMessage.builder().countryCode(request.getCountryCode())
                         .msisdn(request.getMsisdn()).service(request.getService()).text(request.getMessage())
-                        .messageId(request.getMsisdn() + System.currentTimeMillis())
-                        .shortCode(SMSSource.getShortCode(request.getService(), SMSPriority.HIGH)).build();
+                        .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
             case MEDIUM:
                 return MediumPriorityMessage.builder().countryCode(request.getCountryCode())
                         .msisdn(request.getMsisdn()).service(request.getService()).text(request.getMessage())
-                        .messageId(request.getMsisdn() + System.currentTimeMillis())
-                        .shortCode(SMSSource.getShortCode(request.getService(), SMSPriority.MEDIUM)).build();
+                        .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
 
             case LOW:
                 return LowPriorityMessage.builder().countryCode(request.getCountryCode())
                         .msisdn(request.getMsisdn()).service(request.getService()).text(request.getMessage())
-                        .messageId(request.getMsisdn() + System.currentTimeMillis())
-                        .shortCode(SMSSource.getShortCode(request.getService(), SMSPriority.LOW)).build();
+                        .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
         }
         throw new IllegalArgumentException("Invalid message");
-    }
-
-
-    public static SendSmsRequest getOldSendSmsRequest(SmsRequest smsRequest) {
-        return SendSmsRequest.builder().countryCode(smsRequest.getCountryCode())
-                .msisdn(smsRequest.getMsisdn()).message(smsRequest.getText()).priority(smsRequest.getPriority().name())
-                .service(smsRequest.getService()).build();
     }
 }

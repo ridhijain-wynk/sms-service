@@ -13,12 +13,25 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SMSApplication.class, HttpClientConfig.class})
 public class SMSSenderTest {
+
     @Autowired
     private AirtelSMSSender airtelSMSSender;
 
     @Test
-    public void testAirtelSmsSender() {
-        SmsRequest request = SmsTestUtils.lowPrioritySms("9911442662");
+    public void testMusicSMS() throws Exception {
+        SmsRequest request = SmsTestUtils.lowPrioritySms("9911442662", "music");
+        airtelSMSSender.sendMessage(request);
+    }
+
+    @Test
+    public void testBunkerFitSMS() throws Exception {
+        SmsRequest request = SmsTestUtils.lowPrioritySms("9911442662", null, "bunkerfit");
+        airtelSMSSender.sendMessage(request);
+    }
+
+    @Test
+    public void testBooksSMS() throws Exception {
+        SmsRequest request = SmsTestUtils.lowPrioritySms("9911442662", null, "AIRTEL_BOOKS");
         airtelSMSSender.sendMessage(request);
     }
 }

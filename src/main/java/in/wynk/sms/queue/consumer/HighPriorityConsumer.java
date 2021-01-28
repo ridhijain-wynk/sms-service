@@ -14,6 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static in.wynk.sms.constants.SmsLoggingMarkers.HIGH_PRIORITY_SMS_ERROR;
+
 @Slf4j
 public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<HighPriorityMessage> {
 
@@ -43,7 +45,11 @@ public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue
 
     @Override
     public void consume(HighPriorityMessage message) {
-        smsSender.sendMessage(message);
+        try {
+            smsSender.sendMessage(message);
+        } catch (Exception e) {
+            log.error(HIGH_PRIORITY_SMS_ERROR, e.getMessage(), e);
+        }
     }
 
     @Override

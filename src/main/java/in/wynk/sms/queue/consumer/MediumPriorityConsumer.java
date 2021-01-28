@@ -14,6 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static in.wynk.sms.constants.SmsLoggingMarkers.MEDIUM_PRIORITY_SMS_ERROR;
+
 @Slf4j
 public class MediumPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<MediumPriorityMessage> {
 
@@ -43,7 +45,11 @@ public class MediumPriorityConsumer extends AbstractSQSMessageConsumerPollingQue
 
     @Override
     public void consume(MediumPriorityMessage message) {
-        smsSender.sendMessage(message);
+        try {
+            smsSender.sendMessage(message);
+        } catch (Exception e) {
+            log.error(MEDIUM_PRIORITY_SMS_ERROR, e.getMessage(), e);
+        }
     }
 
     @Override

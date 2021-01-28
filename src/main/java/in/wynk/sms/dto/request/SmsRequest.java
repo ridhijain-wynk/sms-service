@@ -1,5 +1,6 @@
 package in.wynk.sms.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -25,6 +26,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @AnalysedEntity
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class SmsRequest {
 
     @Analysed
@@ -39,6 +41,10 @@ public abstract class SmsRequest {
     @ApiModelProperty(hidden = true)
     @Setter
     private String service;
+    @Setter
+    @Analysed
+    @ApiModelProperty(hidden = true)
+    private String clientAlias;
     @Analysed
     @ApiModelProperty(hidden = true)
     @Setter
