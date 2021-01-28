@@ -2,6 +2,7 @@ package in.wynk.sms.controller;
 
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BCEncryptor;
 import in.wynk.exception.WynkErrorType;
@@ -11,13 +12,14 @@ import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+
+import static in.wynk.sms.constants.SMSConstants.SMS_ENCRYPTION_TOKEN;
 
 @RestController
 @RequestMapping("/wynk/s2s/v1/sms")
@@ -26,8 +28,6 @@ public class SmsController {
 
     private final ISqsManagerService sqsManagerService;
     private final ClientDetailsCachingService clientDetailsCachingService;
-    @Value("${bnkrft.encryption.token:blabla}")
-    private String BNKRFT_ENCRYPTION_TOKEN;
 
     public SmsController(ISqsManagerService sqsManagerService, ClientDetailsCachingService clientDetailsCachingService) {
         this.sqsManagerService = sqsManagerService;
@@ -37,14 +37,17 @@ public class SmsController {
     @AnalyseTransaction(name = "sendSms")
     @PostMapping("/send")
     public SmsResponse sendSms(Principal principal, @RequestBody SmsRequest smsRequest) {
-        String msisdn = BCEncryptor.decrypt(smsRequest.getMsisdn(), BNKRFT_ENCRYPTION_TOKEN);
+        Client client = clientDetailsCachingService.getClientById(principal.getName());
+        String msisdn = smsRequest.getMsisdn();
+        if(client.getMeta(SMS_ENCRYPTION_TOKEN).isPresent()){
+            msisdn = BCEncryptor.decrypt(smsRequest.getMsisdn(), (String) client.getMeta(SMS_ENCRYPTION_TOKEN).get());
+        }
         if (StringUtils.isBlank(msisdn)) {
             throw new WynkRuntimeException(WynkErrorType.UT001, "Invalid msisdn");
         }
         smsRequest.setMsisdn(msisdn);
         AnalyticService.update(smsRequest);
-        String clientAlias = clientDetailsCachingService.getClientById(principal.getName()).getAlias();
-        smsRequest.setClientAlias(clientAlias);
+        smsRequest.setClientAlias(client.getAlias());
         sqsManagerService.publishSQSMessage(smsRequest);
         return SmsResponse.builder().build();
     }
