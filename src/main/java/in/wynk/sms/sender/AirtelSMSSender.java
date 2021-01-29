@@ -9,6 +9,7 @@ import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.common.constant.SMSSource;
 import in.wynk.sms.dto.request.SmsRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -195,7 +196,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
             strBuilder.append("<ud encoding=\"unicode\" type=\"").append("text").append("\">");
         }
         // String is converted to hexString to support non english text too.
-        strBuilder.append(convertToHexString(smsRequest.getText(), false)[1]).append("</ud>");
+        strBuilder.append(StringEscapeUtils.escapeXml(smsRequest.getText())).append("</ud>");
         strBuilder.append("</sms></message>");
         return strBuilder.toString();
     }

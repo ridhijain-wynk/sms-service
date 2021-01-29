@@ -1,7 +1,6 @@
 package in.wynk.sms.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.github.annotation.analytic.core.annotations.Analysed;
@@ -15,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 @SuperBuilder
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "priority")
@@ -30,7 +30,8 @@ import lombok.experimental.SuperBuilder;
 public abstract class SmsRequest {
 
     @Analysed
-    @JsonProperty("message")
+    private String message;
+    @Analysed
     private String text;
     @Analysed
     @Setter //temporary
@@ -53,4 +54,11 @@ public abstract class SmsRequest {
     private String messageId;
 
     public abstract SMSPriority getPriority();
+
+    public String getText() {
+        if (StringUtils.isBlank(text)) {
+            return message;
+        }
+        return text;
+    }
 }

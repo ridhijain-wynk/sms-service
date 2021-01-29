@@ -11,7 +11,7 @@ public class SmsTestUtils {
                 .messageId(msisdn + System.currentTimeMillis())
                 .service(service).clientAlias(clientAlias)
                 .msisdn(msisdn)
-                .text("Low priority SMS https://www.google.com")
+                .text("Low priority SMS नमस्कार <&> https://www.google.com")
                 .build();
     }
 
