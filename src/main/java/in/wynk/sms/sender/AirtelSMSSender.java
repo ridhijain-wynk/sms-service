@@ -142,7 +142,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
     }
 
     private void postSmsForLowAndMediumPriority(String dataXml, String msisdn) {
-        String url = "https://mbbf.airtelworld.com:9443";
+        String url = "https://mbbf.airtelworld.com:8443";
         AnalyticService.update("url", url);
         final String username = "wynk12";
         final String password = "12wynk";
