@@ -56,8 +56,9 @@ public class AirtelSMSSender extends AbstractSMSSender {
         Country country = Country.getCountryByCountryCode(request.getCountryCode());
         if (country.equals(Country.SRILANKA)) {
             sendSmsToSriLanka(request);
+        } else {
+            sendSms(request);
         }
-        sendSms(request);
     }
 
     private void sendSms(SmsRequest smsRequest) throws Exception {
