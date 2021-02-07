@@ -37,6 +37,7 @@
                 aux}/sms.${HOSTNAME}.%d{yyyy-MM-dd}.%i.log.gz
             </fileNamePattern>
             <maxHistory>72</maxHistory>
+            <maxFileSize>500MB</maxFileSize>
         </rollingPolicy>
     </appender>
     <appender name="ASYNC_FILE" queueSize="10000" class="ch.qos.logback.classic.AsyncAppender">
@@ -56,6 +57,7 @@
                 aux}/sms-logstashLogs.${HOSTNAME}.%d{yyyy-MM-dd}.%i.log.gz
             </fileNamePattern>
             <maxHistory>72</maxHistory>
+            <maxFileSize>500MB</maxFileSize>
         </rollingPolicy>
     </appender>
 
