@@ -174,11 +174,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
         }
         String toMsisdn = smsRequest.getMsisdn().startsWith("+") ? smsRequest.getMsisdn().substring(1) : smsRequest.getMsisdn();
         StringBuilder strBuilder = new StringBuilder();
-        if (StringUtils.isAsciiPrintable(smsRequest.getText())) {
-            strBuilder.append("<?xml version=\"1.0\" standalone=\"yes\"?>");
-        } else {
-            strBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
-        }
+        strBuilder.append("<?xml version=\"1.0\" standalone=\"yes\"?>");
         strBuilder.append("<message>");
         strBuilder.append("<sms type=\"mt\">");
         if (StringUtils.isNotBlank(smsRequest.getMessageId())) {
@@ -191,11 +187,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
         strBuilder.append("</address></destination>");
         strBuilder.append("<source><address>").append("<alphanumeric>").append(shortCode).append("</alphanumeric></address></source>");
         strBuilder.append("<rsr type=\"all\"/>");
-        if (StringUtils.isAsciiPrintable(smsRequest.getText())) {
-            strBuilder.append("<ud type=\"").append("text").append("\">");
-        } else {
-            strBuilder.append("<ud encoding=\"unicode\" type=\"").append("text").append("\">");
-        }
+        strBuilder.append("<ud type=\"").append("text").append("\">");
         // String is converted to hexString to support non english text too.
         strBuilder.append(StringEscapeUtils.escapeXml(smsRequest.getText())).append("</ud>");
         strBuilder.append("</sms></message>");
