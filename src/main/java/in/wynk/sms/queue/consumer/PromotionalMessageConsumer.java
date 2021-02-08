@@ -7,7 +7,6 @@ import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
 import in.wynk.queue.service.ISqsManagerService;
-import in.wynk.sms.constants.SmsMarkers;
 import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.model.SendSmsRequest;
@@ -18,6 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static in.wynk.sms.constants.SmsLoggingMarkers.PROMOTIONAL_MSG_ERROR;
 
 @Slf4j
 public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollingQueue<SendSmsRequest[]> {
@@ -53,7 +54,7 @@ public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollin
                     AnalyticService.update(message);
                     sqsManagerService.publishSQSMessage(message);
                 } catch (IllegalArgumentException ex) {
-                    log.error(SmsMarkers.PROMOTIONAL_MSG_ERROR, "Invalid message: {} for msisdn: {}", request.getMessage(), request.getMsisdn());
+                    log.error(PROMOTIONAL_MSG_ERROR, "Invalid message: {} for msisdn: {}", request.getMessage(), request.getMsisdn());
                 }
             }
         }
