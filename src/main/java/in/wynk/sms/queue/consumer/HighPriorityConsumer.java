@@ -2,8 +2,6 @@ package in.wynk.sms.queue.consumer;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
-import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
 import in.wynk.sms.queue.message.HighPriorityMessage;
@@ -15,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static in.wynk.sms.constants.SmsLoggingMarkers.HIGH_PRIORITY_SMS_ERROR;
 
 @Slf4j
 public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<HighPriorityMessage> {
@@ -44,10 +44,12 @@ public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue
     private AbstractSMSSender smsSender;
 
     @Override
-    @AnalyseTransaction(name = "consumeMessage")
     public void consume(HighPriorityMessage message) {
-        AnalyticService.update(message);
-        smsSender.sendMessage(message);
+        try {
+            smsSender.sendMessage(message);
+        } catch (Exception e) {
+            log.error(HIGH_PRIORITY_SMS_ERROR, e.getMessage(), e);
+        }
     }
 
     @Override
