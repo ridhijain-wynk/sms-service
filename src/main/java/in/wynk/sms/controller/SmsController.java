@@ -39,7 +39,7 @@ public class SmsController {
     public SmsResponse sendSms(Principal principal, @RequestBody SmsRequest smsRequest) {
         Client client = clientDetailsCachingService.getClientById(principal.getName());
         String msisdn = smsRequest.getMsisdn();
-        if(client.getMeta(SMS_ENCRYPTION_TOKEN).isPresent()){
+        if (client.getMeta(SMS_ENCRYPTION_TOKEN).isPresent()) {
             msisdn = BCEncryptor.decrypt(smsRequest.getMsisdn(), (String) client.getMeta(SMS_ENCRYPTION_TOKEN).get());
         }
         if (StringUtils.isBlank(msisdn)) {
