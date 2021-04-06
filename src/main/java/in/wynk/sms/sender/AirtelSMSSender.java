@@ -187,12 +187,25 @@ public class AirtelSMSSender extends AbstractSMSSender {
         strBuilder.append("</address></destination>");
         strBuilder.append("<source><address>").append("<alphanumeric>").append(shortCode).append("</alphanumeric></address></source>");
         strBuilder.append("<rsr type=\"all\"/>");
-        strBuilder.append("<ud type=\"").append("text").append("\">");
+        strBuilder.append("<ud type=\"text\"");
+        if (!isEnglish(smsRequest.getText())) {
+            strBuilder.append(" encoding=\"unicode\"");
+        }
+        strBuilder.append(">");
         // String is converted to hexString to support non english text too.
         strBuilder.append(StringEscapeUtils.escapeXml(smsRequest.getText())).append("</ud>");
         strBuilder.append("</sms></message>");
         return strBuilder.toString();
     }
 
+    private boolean isEnglish(String text) {
+        for (int i=0; i<text.length(); ++i) {
+            int asciiValue = text.charAt(i);
+            if (asciiValue <33 || asciiValue > 126) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }
