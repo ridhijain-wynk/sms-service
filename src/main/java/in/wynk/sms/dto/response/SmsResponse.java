@@ -6,11 +6,4 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class SmsResponse extends BaseResponse<Void> {
-
-
-    @Override
-    public Void getData() {
-        return null;
-    }
-}
+public class SmsResponse extends BaseResponse<Void, Void> { }
