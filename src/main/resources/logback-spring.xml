@@ -18,7 +18,7 @@
             <fileNamePattern>${LOG_PATH:-/tmp}/logs/sms/error/%d{yyyy-MM-dd,
                 aux}/sms-error.${HOSTNAME}.%d{yyyy-MM-dd}.%i.log.gz
             </fileNamePattern>
-            <maxHistory>72</maxHistory>
+            <maxHistory>3</maxHistory>
             <maxFileSize>500MB</maxFileSize>
         </rollingPolicy>
     </appender>
@@ -36,7 +36,7 @@
             <fileNamePattern>${LOG_PATH:-/tmp}/logs/sms/app/%d{yyyy-MM-dd,
                 aux}/sms.${HOSTNAME}.%d{yyyy-MM-dd}.%i.log.gz
             </fileNamePattern>
-            <maxHistory>72</maxHistory>
+            <maxHistory>3</maxHistory>
             <maxFileSize>500MB</maxFileSize>
         </rollingPolicy>
     </appender>
@@ -56,7 +56,7 @@
             <fileNamePattern>${LOG_PATH:-/tmp}/logs/sms/logstash/day=%d{yyyy-MM-dd,
                 aux}/sms-logstashLogs.${HOSTNAME}.%d{yyyy-MM-dd}.%i.log.gz
             </fileNamePattern>
-            <maxHistory>72</maxHistory>
+            <maxHistory>3</maxHistory>
             <maxFileSize>500MB</maxFileSize>
         </rollingPolicy>
     </appender>
