@@ -8,12 +8,14 @@ import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.sender.AbstractSMSSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static in.wynk.sms.constants.SMSConstants.AIRTEL_SMS_SENDER;
 import static in.wynk.sms.constants.SmsLoggingMarkers.LOW_PRIORITY_SMS_ERROR;
 
 @Slf4j
@@ -30,6 +32,7 @@ public class LowPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<
     private final ScheduledExecutorService pollingThreadPool;
 
     @Autowired
+    @Qualifier(AIRTEL_SMS_SENDER)
     private AbstractSMSSender smsSender;
 
     public LowPriorityConsumer(String queueName,

@@ -85,6 +85,9 @@
     <logger name="sendSmsAirtel" additivity="false" level="info">
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
+    <logger name="sendSmsAirtelIQ" additivity="false" level="info">
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
 
     <springProfile name="local">
         <root level="INFO">

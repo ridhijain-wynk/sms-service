@@ -25,9 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static in.wynk.sms.constants.SMSConstants.AIRTEL_SMS_SENDER;
 import static in.wynk.sms.constants.SmsLoggingMarkers.*;
 
-@Component
+@Component(AIRTEL_SMS_SENDER)
 @Slf4j
 public class AirtelSMSSender extends AbstractSMSSender {
 
