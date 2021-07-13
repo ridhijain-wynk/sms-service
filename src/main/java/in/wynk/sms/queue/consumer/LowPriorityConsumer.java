@@ -6,16 +6,15 @@ import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.sender.AbstractSMSSender;
+import in.wynk.sms.sender.ISmsSenderUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static in.wynk.sms.constants.SMSConstants.AIRTEL_SMS_SENDER;
 import static in.wynk.sms.constants.SmsLoggingMarkers.LOW_PRIORITY_SMS_ERROR;
 
 @Slf4j
@@ -32,8 +31,7 @@ public class LowPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<
     private final ScheduledExecutorService pollingThreadPool;
 
     @Autowired
-    @Qualifier(AIRTEL_SMS_SENDER)
-    private AbstractSMSSender smsSender;
+    private ISmsSenderUtils smsSenderUtils;
 
     public LowPriorityConsumer(String queueName,
                                AmazonSQS sqs,
@@ -49,6 +47,7 @@ public class LowPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<
     @Override
     public void consume(LowPriorityMessage message) {
         try {
+            AbstractSMSSender smsSender = smsSenderUtils.fetchSmsSender(message);
             smsSender.sendMessage(message);
         } catch (Exception e) {
             log.error(LOW_PRIORITY_SMS_ERROR, e.getMessage(), e);

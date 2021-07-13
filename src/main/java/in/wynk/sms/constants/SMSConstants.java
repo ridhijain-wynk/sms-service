@@ -6,4 +6,6 @@ public interface SMSConstants {
     String SMS_ENCRYPTION_TOKEN = "SMS_ENCRYPTION_TOKEN";
     String AIRTEL_IQ_SMS_SENDER_BEAN = "airtelIQSmsSender";
     String AIRTEL_SMS_SENDER = "smsSender";
+    String MESSAGE_STRATEGY_IQ = "airtelIQ";
+
 }
