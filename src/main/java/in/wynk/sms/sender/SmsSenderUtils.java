@@ -37,6 +37,7 @@ public class SmsSenderUtils implements ISmsSenderUtils{
             }
         } catch(Exception ex) {
             logger.error(SMS_SEND_BEAN_ERROR,"error while initializing message bean for msisdn - " + request.getMsisdn(),ex);
+            throw ex;
         }
         return smsSender;
     }
