@@ -77,7 +77,7 @@ public class MessageTemplateService implements IMessageTemplateService, IEntityC
         Map<Integer,String> variablesMap = getVarMapIfTemplateMatchesSmsText(templateContent,message);
         MessageTemplateDTO messageTemplateDTO = MessageTemplateDTO.builder().build();
         if(MapUtils.isNotEmpty(variablesMap)) {
-            messageTemplateDTO = MessageTemplateDTO.builder().messageTemplateId(messageTemplate.getId()).linkedHeader(messageTemplate.getLinkedHeaders()).vars(new ArrayList<>(variablesMap.values())).build();
+            messageTemplateDTO = MessageTemplateDTO.builder().messageTemplateId(messageTemplate.getId()).linkedHeader(messageTemplate.getLinkedHeader()).vars(new ArrayList<>(variablesMap.values())).build();
         }
         return messageTemplateDTO;
     }

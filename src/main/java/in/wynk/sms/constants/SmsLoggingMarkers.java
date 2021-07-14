@@ -13,4 +13,7 @@ public interface SmsLoggingMarkers extends BaseLoggingMarkers {
     Marker LOW_PRIORITY_SMS_ERROR = MarkerFactory.getMarker("LOW_PRIORITY_SMS_ERROR");
     Marker SL_SMS_ERROR = MarkerFactory.getMarker("SL_SMS_ERROR");
     Marker SMS_SEND_BEAN_ERROR = MarkerFactory.getMarker("SMS_SEND_BEAN_ERROR");
+    Marker NO_TEMPLATE_FOUND= MarkerFactory.getMarker("NO_TEMPLATE_FOUND");
+    Marker SMS_ERROR= MarkerFactory.getMarker("SMS_ERROR");
+    Marker REST_TEMPLATE_SMS_ERROR= MarkerFactory.getMarker("REST_TEMPLATE_SMS_ERROR");
 }

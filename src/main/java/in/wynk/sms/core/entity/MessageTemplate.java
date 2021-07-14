@@ -1,5 +1,6 @@
 package in.wynk.sms.core.entity;
 
+import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.data.entity.MongoBaseEntity;
 import in.wynk.sms.enums.CommunicationType;
 import lombok.AccessLevel;
@@ -14,8 +15,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @SuperBuilder
 @Document(collection = "message_template")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AnalysedEntity
 public class MessageTemplate extends MongoBaseEntity<String> {
-    private int linkedHeaders;
+    private String linkedHeader;
     private String templateName;
     private String templateContent;
     private CommunicationType communicationType;

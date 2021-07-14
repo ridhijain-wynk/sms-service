@@ -10,5 +10,5 @@ import java.util.List;
 public class MessageTemplateDTO {
     private List<String> vars;
     private String messageTemplateId;
-    private int linkedHeader;
+    private String linkedHeader;
 }
