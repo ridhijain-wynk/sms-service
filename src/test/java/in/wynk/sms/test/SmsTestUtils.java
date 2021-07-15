@@ -39,9 +39,7 @@ public class SmsTestUtils {
                 .messageId(msisdn + System.currentTimeMillis())
                 .service(service)
                 .msisdn(msisdn)
-                .priority(SMSPriority.HIGH)
-                .message("NEW MOVIES FOR YOU! We've recently added 100+ movies & TV shows on your Airtel Xstream app in 10+ languages. Binge watch on bit.ly/2OjTyov")
-                .text("High priority SMS https://www.apple.com")
+                .text("NEW MOVIES FOR YOU! We've recently added 100+ movies & TV shows on your Airtel Xstream app in 10+ languages. Binge watch on bit.ly/2OjTyov")
                 .build();
     }
 
@@ -50,9 +48,7 @@ public class SmsTestUtils {
                 .messageId(msisdn + System.currentTimeMillis())
                 .service(service)
                 .msisdn(msisdn)
-                .priority(SMSPriority.HIGH)
-                .message("Kabira HELLOTUNE is about to expire on your mobile number in %s days. Extend validity for FREE on Wynk app wynk.onelink.me/3330602766/hello")
-                .text("High priority SMS https://www.apple.com")
+                .text("Kabira HELLOTUNE is about to expire on your mobile number in %s days. Extend validity for FREE on Wynk app wynk.onelink.me/3330602766/hello")
                 .build();
     }
 }

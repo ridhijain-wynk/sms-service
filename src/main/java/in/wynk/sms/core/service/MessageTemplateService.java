@@ -67,26 +67,26 @@ public class MessageTemplateService implements IMessageTemplateService, IEntityC
     }
 
     @Override
-    public MessageTemplateDTO findMessageTemplateFromSmsText(String message) {
-        Optional<MessageTemplateDTO> result = messageTemplateMap.values().parallelStream().map(messageTemplate -> checkIfTemplateMatchesSmsText(messageTemplate,message)).filter(messageTemplateDTO -> Objects.nonNull(messageTemplateDTO)).findFirst();
+    public MessageTemplateDTO findMessageTemplateFromSmsText(String messageText) {
+        Optional<MessageTemplateDTO> result = messageTemplateMap.values().parallelStream().map(messageTemplate -> checkIfTemplateMatchesSmsText(messageTemplate,messageText)).filter(messageTemplateDTO -> Objects.nonNull(messageTemplateDTO)).findFirst();
         return result.isPresent()?result.get():null;
     }
 
-    private MessageTemplateDTO checkIfTemplateMatchesSmsText(MessageTemplate messageTemplate, String message) {
+    private MessageTemplateDTO checkIfTemplateMatchesSmsText(MessageTemplate messageTemplate, String messageText) {
         MessageTemplateDTO messageTemplateDTO = null;
         if(messageTemplate.isVariablesPresent()) {
-            Map<Integer, String> variablesMap = getVarMapIfTemplateMatchesSmsText(messageTemplate.getTemplateContent(), message);
+            Map<Integer, String> variablesMap = getVarMapIfTemplateMatchesSmsText(messageTemplate.getTemplateContent(), messageText);
             if (MapUtils.isNotEmpty(variablesMap)) {
                 messageTemplateDTO = MessageTemplateDTO.builder().messageTemplateId(messageTemplate.getId()).linkedHeader(messageTemplate.getLinkedHeader()).vars(new ArrayList<>(variablesMap.values())).build();
             }
         } else {
-            messageTemplateDTO = fetchTemplateByStringComparison(messageTemplate,message);
+            messageTemplateDTO = fetchTemplateByStringComparison(messageTemplate,messageText);
         }
         return messageTemplateDTO;
     }
 
-    private MessageTemplateDTO fetchTemplateByStringComparison(MessageTemplate messageTemplate,String message) {
-        if(messageTemplate.getTemplateContent().equals(message)) {
+    private MessageTemplateDTO fetchTemplateByStringComparison(MessageTemplate messageTemplate,String messageText) {
+        if(messageTemplate.getTemplateContent().equals(messageText)) {
             return MessageTemplateDTO.builder().linkedHeader(messageTemplate.getLinkedHeader())
                     .messageTemplateId(messageTemplate.getId())
                     .build();
