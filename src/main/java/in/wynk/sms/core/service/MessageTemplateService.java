@@ -73,13 +73,25 @@ public class MessageTemplateService implements IMessageTemplateService, IEntityC
     }
 
     private MessageTemplateDTO checkIfTemplateMatchesSmsText(MessageTemplate messageTemplate, String message) {
-        String templateContent = messageTemplate.getTemplateContent();
-        Map<Integer,String> variablesMap = getVarMapIfTemplateMatchesSmsText(templateContent,message);
-        MessageTemplateDTO messageTemplateDTO = MessageTemplateDTO.builder().build();
-        if(MapUtils.isNotEmpty(variablesMap)) {
-            messageTemplateDTO = MessageTemplateDTO.builder().messageTemplateId(messageTemplate.getId()).linkedHeader(messageTemplate.getLinkedHeader()).vars(new ArrayList<>(variablesMap.values())).build();
+        MessageTemplateDTO messageTemplateDTO = null;
+        if(messageTemplate.isVariablesPresent()) {
+            Map<Integer, String> variablesMap = getVarMapIfTemplateMatchesSmsText(messageTemplate.getTemplateContent(), message);
+            if (MapUtils.isNotEmpty(variablesMap)) {
+                messageTemplateDTO = MessageTemplateDTO.builder().messageTemplateId(messageTemplate.getId()).linkedHeader(messageTemplate.getLinkedHeader()).vars(new ArrayList<>(variablesMap.values())).build();
+            }
+        } else {
+            messageTemplateDTO = fetchTemplateByStringComparison(messageTemplate,message);
         }
         return messageTemplateDTO;
+    }
+
+    private MessageTemplateDTO fetchTemplateByStringComparison(MessageTemplate messageTemplate,String message) {
+        if(messageTemplate.getTemplateContent().equals(message)) {
+            return MessageTemplateDTO.builder().linkedHeader(messageTemplate.getLinkedHeader())
+                    .messageTemplateId(messageTemplate.getId())
+                    .build();
+        }
+        return null;
     }
 
     private Map<Integer, String> getVarMapIfTemplateMatchesSmsText(String template, String filledTemplate){

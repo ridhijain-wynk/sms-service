@@ -1,5 +1,6 @@
 package in.wynk.sms.test;
 
+import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
@@ -38,6 +39,19 @@ public class SmsTestUtils {
                 .messageId(msisdn + System.currentTimeMillis())
                 .service(service)
                 .msisdn(msisdn)
+                .priority(SMSPriority.HIGH)
+                .message("NEW MOVIES FOR YOU! We've recently added 100+ movies & TV shows on your Airtel Xstream app in 10+ languages. Binge watch on bit.ly/2OjTyov")
+                .text("High priority SMS https://www.apple.com")
+                .build();
+    }
+
+    public static SmsRequest highPrioritySms2(String msisdn, String service) {
+        return MediumPriorityMessage.builder()
+                .messageId(msisdn + System.currentTimeMillis())
+                .service(service)
+                .msisdn(msisdn)
+                .priority(SMSPriority.HIGH)
+                .message("Kabira HELLOTUNE is about to expire on your mobile number in %s days. Extend validity for FREE on Wynk app wynk.onelink.me/3330602766/hello")
                 .text("High priority SMS https://www.apple.com")
                 .build();
     }

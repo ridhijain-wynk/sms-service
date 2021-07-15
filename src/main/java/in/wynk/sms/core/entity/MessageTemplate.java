@@ -23,4 +23,5 @@ public class MessageTemplate extends MongoBaseEntity<String> {
     private CommunicationType communicationType;
     private String templateStatus;
     private String templateRegistered;
+    private boolean variablesPresent;
 }
