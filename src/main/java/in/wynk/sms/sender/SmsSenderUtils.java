@@ -3,6 +3,7 @@ package in.wynk.sms.sender;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BeanLocatorFactory;
+import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.dto.request.SmsRequest;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class SmsSenderUtils implements ISmsSenderUtils{
                 client = clientDetailsCachingService.getClientByService(request.getService());
             }
             if (Objects.nonNull(client)) {
-                if (StringUtils.isNotEmpty(client.getMessageStrategy()) && MESSAGE_STRATEGY_IQ.equals(client.getMessageStrategy())) {
+                if (StringUtils.isNotEmpty(client.getMessageStrategy()) && MESSAGE_STRATEGY_IQ.equals(client.getMessageStrategy()) && !SMSPriority.HIGH.equals(request.getPriority())) {
                     smsSender = BeanLocatorFactory.getBean(AIRTEL_IQ_SMS_SENDER_BEAN, AbstractSMSSender.class);
                 }
             }
