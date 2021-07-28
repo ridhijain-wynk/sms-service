@@ -9,5 +9,6 @@ public interface SMSConstants {
     String MESSAGE_STRATEGY_IQ = "airtelIQ";
     String PLACE_HOLDER_PATTERN = "\\{#var#\\}";
     String REPLACE_PATTERN = "(.+)";
+    String MESSAGE_TEXT = "messageText";
 
 }
