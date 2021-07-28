@@ -88,7 +88,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
                 IQSmsResponse response = smsRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, IQSmsResponse.class).getBody();
                 AnalyticService.update(response);
             } catch (Exception ex) {
-                log.error("External service failure due to {}", ex.getMessage());
+                log.error("External service failure due to {}", ex.getMessage(), ex);
                 throw new WynkRuntimeException(IQSMS003);
             }
         } catch (WynkRuntimeException ex) {
