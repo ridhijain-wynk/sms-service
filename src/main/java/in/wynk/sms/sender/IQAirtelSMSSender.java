@@ -90,7 +90,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
                 AnalyticService.update(response);
             } catch (Exception ex) {
                 log.error("External service failure due to {}", ex.getMessage(), ex);
-                throw new WynkRuntimeException(IQSMS003);
+                throw new WynkRuntimeException(IQSMS003,ex);
             }
         } catch (WynkRuntimeException ex) {
             throw ex;
