@@ -23,6 +23,7 @@ import java.util.Base64;
 import java.util.Objects;
 
 import static in.wynk.sms.constants.SMSConstants.AIRTEL_IQ_SMS_SENDER_BEAN;
+import static in.wynk.sms.constants.SMSConstants.MESSAGE_TEXT;
 import static in.wynk.sms.constants.SmsLoggingMarkers.NO_TEMPLATE_FOUND;
 import static in.wynk.sms.constants.SmsLoggingMarkers.SMS_ERROR;
 import static in.wynk.sms.enums.SmsErrorType.*;
@@ -58,9 +59,10 @@ public class IQAirtelSMSSender extends AbstractSMSSender{
     @AnalyseTransaction(name = "sendSmsAirtelIQ")
     public void sendMessage(SmsRequest request) {
         try {
+            AnalyticService.update(MESSAGE_TEXT,request.getText());
             MessageTemplateDTO messageTemplateDTO = messageTemplateService.findMessageTemplateFromSmsText(request.getText());
             if(Objects.isNull(messageTemplateDTO)) {
-                log.error(NO_TEMPLATE_FOUND,"No template found for message: ",request.getMessage());
+                log.error(NO_TEMPLATE_FOUND,"No template found for message: {}",request.getText());
                 throw new WynkRuntimeException(IQSMS001);
             }
             sendSmsThroughAirtelIQ(request,messageTemplateDTO);
