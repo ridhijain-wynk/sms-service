@@ -10,5 +10,7 @@ public interface SMSConstants {
     String PLACE_HOLDER_PATTERN = "\\{#var#\\}";
     String REPLACE_PATTERN = "(.+)";
     String MESSAGE_TEXT = "messageText";
+    String TIME_NOT_VALID_FOR_MESSAGE_TYPE = "TIME_NOT_VALID_FOR_MESSAGE_TYPE";
+    String FAILURE_CODE = "errorCode";
 
 }
