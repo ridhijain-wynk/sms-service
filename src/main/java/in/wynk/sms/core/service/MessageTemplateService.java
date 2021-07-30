@@ -1,5 +1,6 @@
 package in.wynk.sms.core.service;
 
+import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.data.dto.IEntityCacheService;
 import in.wynk.data.enums.State;
 import in.wynk.sms.core.entity.MessageTemplate;
@@ -8,6 +9,7 @@ import in.wynk.sms.dto.MessageTemplateDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -24,8 +26,7 @@ import java.util.regex.Pattern;
 import static in.wynk.common.constant.BaseConstants.IN_MEMORY_CACHE_CRON;
 import static in.wynk.common.constant.BaseConstants.UNKNOWN;
 import static in.wynk.logging.BaseLoggingMarkers.APPLICATION_ERROR;
-import static in.wynk.sms.constants.SMSConstants.PLACE_HOLDER_PATTERN;
-import static in.wynk.sms.constants.SMSConstants.REPLACE_PATTERN;
+import static in.wynk.sms.constants.SMSConstants.*;
 
 @Service
 @Slf4j
@@ -68,8 +69,14 @@ public class MessageTemplateService implements IMessageTemplateService, IEntityC
 
     @Override
     public MessageTemplateDTO findMessageTemplateFromSmsText(String messageText) {
-        Optional<MessageTemplateDTO> result = messageTemplateMap.values().parallelStream().map(messageTemplate -> checkIfTemplateMatchesSmsText(messageTemplate,messageText)).filter(messageTemplateDTO -> Objects.nonNull(messageTemplateDTO)).findFirst();
+        final String convertedMessageText = replaceUnicodesInMessageText(messageText);
+        AnalyticService.update(CONVERTED_MESSAGE_TEXT,convertedMessageText);
+        Optional<MessageTemplateDTO> result = messageTemplateMap.values().parallelStream().map(messageTemplate -> checkIfTemplateMatchesSmsText(messageTemplate,convertedMessageText)).filter(messageTemplateDTO -> Objects.nonNull(messageTemplateDTO)).findFirst();
         return result.isPresent()?result.get():null;
+    }
+
+    private String replaceUnicodesInMessageText(String text) {
+        return StringEscapeUtils.unescapeJava(text);
     }
 
     private MessageTemplateDTO checkIfTemplateMatchesSmsText(MessageTemplate messageTemplate, String messageText) {
