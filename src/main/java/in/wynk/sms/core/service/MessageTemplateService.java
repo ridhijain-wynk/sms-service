@@ -53,6 +53,7 @@ public class MessageTemplateService implements IMessageTemplateService, IEntityC
                 for (MessageTemplate messageTemplate : messageTemplateList) {
                     localTemplateMap.put(messageTemplate.getId(), messageTemplate);
                 }
+                messageTemplateMap.clear();
                 messageTemplateMap.putAll(localTemplateMap);
             }
         } catch (Throwable th) {
