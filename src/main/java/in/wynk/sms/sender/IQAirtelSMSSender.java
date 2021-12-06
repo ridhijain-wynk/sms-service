@@ -76,8 +76,8 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
         } catch (WynkRuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
-            log.error(SMS_ERROR, "sms error for messageId :" + request.getMessageId() + "for msisdn " + request.getMsisdn());
-            throw new WynkRuntimeException(IQSMS002);
+            log.error(SMS_ERROR, "sms error for messageId :" + request.getMessageId() + "for msisdn " + request.getMsisdn(), ex);
+            throw new WynkRuntimeException(IQSMS002, ex);
         }
     }
 
