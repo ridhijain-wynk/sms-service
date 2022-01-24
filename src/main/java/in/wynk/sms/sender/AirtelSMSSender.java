@@ -107,7 +107,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
     }
 
     private void postSmsForHighPriority(String dataXml, String msisdn) {
-        String url = "https://mbnf.airtelworld.com:8443";
+        String url = "https://mbnf.airtelworld.com:9443";
         AnalyticService.update("url", url);
         final String username = "bs1b";
         final String password = "bs1b";
@@ -144,7 +144,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
     }
 
     private void postSmsForLowAndMediumPriority(String dataXml, String msisdn) {
-        String url = "https://mbbf.airtelworld.com:8443";
+        String url = "https://mbbf.airtelworld.com:9443";
         AnalyticService.update("url", url);
         final String username = "wynk12";
         final String password = "12wynk";
