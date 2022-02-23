@@ -36,7 +36,7 @@ public class LobbySmsSender extends WebServiceGatewaySupport implements IMessage
             final Sender sender = new Sender();
             final in.wynk.sms.lobby.Client lobbyClient = new in.wynk.sms.lobby.Client();
             final Wrapper from = new Wrapper();
-            contact.setNumber(Integer.parseInt(request.getMsisdn().replace("+", "")));
+            contact.setNumber(Long.parseLong(request.getMsisdn().replace("+", "")));
             from.setAccount(accountName);
             from.setUsername(userName);
             from.setPassword(password);

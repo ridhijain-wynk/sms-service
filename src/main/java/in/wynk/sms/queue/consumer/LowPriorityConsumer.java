@@ -4,8 +4,10 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
+import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.sender.AbstractSMSSender;
+import in.wynk.sms.sender.IMessageSender;
 import in.wynk.sms.sender.ISmsSenderUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +49,7 @@ public class LowPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<
     @Override
     public void consume(LowPriorityMessage message) {
         try {
-            AbstractSMSSender smsSender = smsSenderUtils.fetchSmsSender(message);
+            IMessageSender<SmsRequest> smsSender = smsSenderUtils.fetchSmsSender(message);
             smsSender.sendMessage(message);
         } catch (Exception e) {
             log.error(LOW_PRIORITY_SMS_ERROR, e.getMessage(), e);

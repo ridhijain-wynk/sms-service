@@ -38,13 +38,13 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Contact {
 
-    protected int number;
+    protected long number;
 
     /**
      * Gets the value of the number property.
      * 
      */
-    public int getNumber() {
+    public long getNumber() {
         return number;
     }
 
@@ -52,7 +52,7 @@ public class Contact {
      * Sets the value of the number property.
      * 
      */
-    public void setNumber(int value) {
+    public void setNumber(long value) {
         this.number = value;
     }
 

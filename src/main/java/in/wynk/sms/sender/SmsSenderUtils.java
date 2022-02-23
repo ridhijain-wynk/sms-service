@@ -7,6 +7,7 @@ import in.wynk.sms.dto.request.SmsRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -22,8 +23,9 @@ public class SmsSenderUtils implements ISmsSenderUtils{
     private ClientDetailsCachingService clientDetailsCachingService;
 
     @Override
-    public AbstractSMSSender fetchSmsSender(SmsRequest request) {
-        AbstractSMSSender smsSender = BeanLocatorFactory.getBean(AIRTEL_SMS_SENDER, AbstractSMSSender.class);
+    public IMessageSender<SmsRequest> fetchSmsSender(SmsRequest request) {
+        IMessageSender<SmsRequest> smsSender = BeanLocatorFactory.getBean(AIRTEL_SMS_SENDER, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
+        });
         try {
             Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
             if (Objects.isNull(client)) {
@@ -31,7 +33,8 @@ public class SmsSenderUtils implements ISmsSenderUtils{
             }
             if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_SENDER").isPresent()) {
                 final String senderBeanName = client.<String>getMeta(request.getPriority().name() + "_PRIORITY_SMS_SENDER").get();
-                smsSender = BeanLocatorFactory.getBean(senderBeanName, AbstractSMSSender.class);
+                smsSender = BeanLocatorFactory.getBean(senderBeanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
+                });
             }
         } catch(Exception ex) {
             logger.error(SMS_SEND_BEAN_ERROR,"error while initializing message bean for msisdn - " + request.getMsisdn(),ex);
