@@ -34,11 +34,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "message"
-})
-@XmlRootElement(name = "SendSmsRequest")
 public class SendSmsRequest {
 
     @XmlElement(required = true)

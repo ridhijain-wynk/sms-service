@@ -39,7 +39,10 @@
             <artifactId>lib-queue</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
         <dependency>
             <groupId>in.wynk</groupId>
             <artifactId>client-api</artifactId>
@@ -99,10 +102,6 @@
         <dependency>
             <groupId>com.github</groupId>
             <artifactId>annotation-analytic-json2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web-services</artifactId>
         </dependency>
 
         <dependency>
@@ -237,27 +236,6 @@
                     </execution>
                 </executions>
             </plugin>
-<!--            Uncomment if you want to generate client from wsdl
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.14.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <schemaLanguage>WSDL</schemaLanguage>
-                    <generatePackage>in.wynk.sms.lobby</generatePackage>
-                    <schemaDirectory>src/main/resources/wsdl</schemaDirectory>
-                    <schemaIncludes>
-                        <schemaInclude>*.wsdl</schemaInclude>
-                    </schemaIncludes>
-                </configuration>
-            </plugin>-->
         </plugins>
     </build>
 </project>

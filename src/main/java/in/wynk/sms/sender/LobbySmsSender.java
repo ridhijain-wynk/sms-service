@@ -1,21 +1,32 @@
 package in.wynk.sms.sender;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
+import in.wynk.sms.constants.SMSConstants;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.lobby.*;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LobbySmsSender extends WebServiceGatewaySupport implements IMessageSender<SmsRequest> {
+@Service(SMSConstants.LOBBY_MESSAGE_STRATEGY)
+public class LobbySmsSender implements IMessageSender<SmsRequest> {
 
+    private final XmlMapper mapper;
+    private final RestTemplate smsRestTemplate;
     private final ClientDetailsCachingService clientDetailsCachingService;
 
+    @SneakyThrows
     @Override
     public void sendMessage(SmsRequest request) {
         Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
@@ -50,7 +61,11 @@ public class LobbySmsSender extends WebServiceGatewaySupport implements IMessage
             form.setFrom(lobbyClient);
             body.setSubmit(form);
             smsRequest.setMessage(body);
-            getWebServiceTemplate().marshalSendAndReceive(url, smsRequest);
+            final String payload = mapper.writeValueAsString(smsRequest.getMessage());
+            HttpHeaders headers = new HttpHeaders();
+            HttpEntity<String> entity = new HttpEntity<>(payload, headers);
+            headers.setContentType(MediaType.APPLICATION_XML);
+            smsRestTemplate.postForEntity(url, entity, String.class);
         }
     }
 
