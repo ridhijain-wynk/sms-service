@@ -8,12 +8,6 @@
 
 package in.wynk.sms.lobby;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
-
 /**
  * <p>Java class for sender complex type.
  * 
@@ -33,13 +27,8 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "sender", propOrder = {
-    "number"
-})
 public class Sender {
 
-    @XmlElement(required = true)
     protected String number;
 
     /**

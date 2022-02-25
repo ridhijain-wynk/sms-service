@@ -8,12 +8,6 @@
 
 package in.wynk.sms.lobby;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
-
 /**
  * <p>Java class for wrapper complex type.
  * 
@@ -35,19 +29,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "wrapper", propOrder = {
-    "username",
-    "password",
-    "account"
-})
 public class Wrapper {
 
-    @XmlElement(required = true)
     protected String username;
-    @XmlElement(required = true)
     protected String password;
-    @XmlElement(required = true)
     protected String account;
 
     /**

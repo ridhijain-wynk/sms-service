@@ -8,12 +8,6 @@
 
 package in.wynk.sms.lobby;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
-
 /**
  * <p>Java class for communication complex type.
  * 
@@ -34,16 +28,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "communication", propOrder = {
-    "mclass",
-    "coding"
-})
 public class Communication {
 
-    @XmlElement(defaultValue = "1")
     protected int mclass;
-    @XmlElement(defaultValue = "0")
     protected int coding;
 
     /**

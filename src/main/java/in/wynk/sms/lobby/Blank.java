@@ -8,11 +8,6 @@
 
 package in.wynk.sms.lobby;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
-
-
 /**
  * <p>Java class for blank complex type.
  * 
@@ -20,7 +15,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * <pre>
  * &lt;complexType name="blank"&gt;
- *   &lt;complexContent&gt;
+ *   &lt;complexContent&gt;Ø
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -29,8 +24,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "blank")
 public class Blank {
 
 

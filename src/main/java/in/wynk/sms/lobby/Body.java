@@ -8,7 +8,7 @@
 
 package in.wynk.sms.lobby;
 
-import javax.xml.bind.annotation.*;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
 /**
@@ -30,14 +30,9 @@ import javax.xml.bind.annotation.*;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "submit"
-})
-@XmlRootElement(name = "message")
+@JacksonXmlRootElement(localName = "message")
 public class Body {
 
-    @XmlElement(required = true)
     protected Form submit;
 
     /**

@@ -8,11 +8,6 @@
 
 package in.wynk.sms.lobby;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
-
-
 /**
  * <p>Java class for contact complex type.
  * 
@@ -32,10 +27,6 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "contact", propOrder = {
-    "number"
-})
 public class Contact {
 
     protected long number;
