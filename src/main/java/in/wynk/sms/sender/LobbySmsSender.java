@@ -1,6 +1,8 @@
 package in.wynk.sms.sender;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
+import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.sms.constants.SMSConstants;
@@ -28,7 +30,9 @@ public class LobbySmsSender implements IMessageSender<SmsRequest> {
 
     @SneakyThrows
     @Override
+    @AnalyseTransaction(name = "sendSmsLobby")
     public void sendMessage(SmsRequest request) {
+        AnalyticService.update(request);
         Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
         if (Objects.isNull(client)) {
             client = clientDetailsCachingService.getClientByService(request.getService());
