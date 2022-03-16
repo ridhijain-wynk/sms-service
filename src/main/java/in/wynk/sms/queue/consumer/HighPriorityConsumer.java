@@ -49,6 +49,7 @@ public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue
     @Override
     public void consume(HighPriorityMessage message) {
         try {
+            log.info("high priority message received {}", message);
             IMessageSender<SmsRequest> smsSender = smsSenderUtils.fetchSmsSender(message);
             smsSender.sendMessage(message);
         } catch (Exception e) {
