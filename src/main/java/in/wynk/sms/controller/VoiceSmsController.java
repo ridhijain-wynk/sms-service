@@ -8,6 +8,7 @@ import in.wynk.common.utils.BCEncryptor;
 import in.wynk.exception.WynkErrorType;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.queue.service.ISqsManagerService;
+import in.wynk.sms.core.service.IVoiceSmsService;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +29,12 @@ public class VoiceSmsController {
 
     private final ISqsManagerService sqsManagerService;
     private final ClientDetailsCachingService clientDetailsCachingService;
+    private final IVoiceSmsService voiceSmsService;
 
-    public VoiceSmsController(ISqsManagerService sqsManagerService, ClientDetailsCachingService clientDetailsCachingService) {
+    public VoiceSmsController(ISqsManagerService sqsManagerService, ClientDetailsCachingService clientDetailsCachingService, IVoiceSmsService voiceSmsService) {
         this.sqsManagerService = sqsManagerService;
         this.clientDetailsCachingService = clientDetailsCachingService;
+        this.voiceSmsService = voiceSmsService;
     }
 
     @AnalyseTransaction(name = "sendVoiceSms")
@@ -45,10 +48,11 @@ public class VoiceSmsController {
         if (StringUtils.isBlank(msisdn)) {
             throw new WynkRuntimeException(WynkErrorType.UT001, "Invalid msisdn");
         }
-        smsRequest.setMsisdn(msisdn);
+    //    smsRequest.setMsisdn(msisdn);
         AnalyticService.update(smsRequest);
         smsRequest.setClientAlias(client.getAlias());
-        sqsManagerService.publishSQSMessage(smsRequest);
+    //    sqsManagerService.publishSQSMessage(smsRequest);
+        voiceSmsService.sendVoiceSms(msisdn);
         return SmsResponse.builder().build();
     }
 }

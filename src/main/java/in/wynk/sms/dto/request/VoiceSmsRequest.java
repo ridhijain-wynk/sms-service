@@ -10,6 +10,7 @@ import in.wynk.sms.queue.message.HighPriorityMessage;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,17 +18,18 @@ import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
 
 @SuperBuilder
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "priority")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = HighPriorityMessage.class, name = "HIGH"),
-        @JsonSubTypes.Type(value = MediumPriorityMessage.class, name = "MEDIUM"),
-        @JsonSubTypes.Type(value = LowPriorityMessage.class, name = "LOW")
-})
+//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "priority")
+//@JsonSubTypes({
+//        @JsonSubTypes.Type(value = HighPriorityMessage.class, name = "HIGH"),
+//        @JsonSubTypes.Type(value = MediumPriorityMessage.class, name = "MEDIUM"),
+//        @JsonSubTypes.Type(value = LowPriorityMessage.class, name = "LOW")
+//})
 @Getter
 @AnalysedEntity
 @NoArgsConstructor
+@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class VoiceSmsRequest {
+public class VoiceSmsRequest {
 
     @Analysed
     private String callFlowId;
