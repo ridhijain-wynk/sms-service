@@ -22,7 +22,7 @@ import java.util.Objects;
 @Service(SMSConstants.LOBBY_MESSAGE_STRATEGY)
 public class LobbySmsSender implements IMessageSender<SmsRequest> {
 
-    private final XmlMapper mapper;
+    private final XmlMapper mapper = new XmlMapper();
     private final RestTemplate smsRestTemplate;
     private final ClientDetailsCachingService clientDetailsCachingService;
 
