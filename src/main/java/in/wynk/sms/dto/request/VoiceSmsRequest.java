@@ -18,12 +18,6 @@ import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
 
 @SuperBuilder
-//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "priority")
-//@JsonSubTypes({
-//        @JsonSubTypes.Type(value = HighPriorityMessage.class, name = "HIGH"),
-//        @JsonSubTypes.Type(value = MediumPriorityMessage.class, name = "MEDIUM"),
-//        @JsonSubTypes.Type(value = LowPriorityMessage.class, name = "LOW")
-//})
 @Getter
 @AnalysedEntity
 @NoArgsConstructor

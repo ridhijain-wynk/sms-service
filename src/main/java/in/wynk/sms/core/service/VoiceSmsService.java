@@ -41,14 +41,14 @@ public class VoiceSmsService implements IVoiceSmsService {
     }
 
     @Override
-    public VoiceSmsResponse sendVoiceSms(String msisdn) {
+    public VoiceSmsResponse sendVoiceSms(SmsRequest smsRequest) {
         try {
             List<Participant> participants = new ArrayList<>();
-            participants.add(Participant.builder().participantAddress(msisdn).maxRetries(maxRetries).build());
+            participants.add(Participant.builder().participantAddress(smsRequest.getMsisdn()).maxRetries(maxRetries).build());
             final VoiceSmsRequest request = VoiceSmsRequest.builder().callFlowId(callFlowId).callType(callType)
                     .callFlowId(callFlowId).customerId(customerId).callFlowConfiguration(CallFlowConfiguration.builder()
                     .initiateCall_1(InitiateCall.builder().callerId(callerId).participants(participants).build())
-                    .textToSpeech_1(TextToSpeech.builder().text("This is a test call your O T P is 6 6 7 5").textType(textType).build()).build()).build();
+                    .textToSpeech_1(TextToSpeech.builder().text(smsRequest.getText()).textType(textType).build()).build()).build();
             HttpHeaders headers = getHeaders();
             HttpEntity<VoiceSmsRequest> requestEntity = new HttpEntity<>(request, headers);
             VoiceSmsResponse response = smsRestTemplate.exchange(url, HttpMethod.POST, requestEntity, VoiceSmsResponse.class).getBody();

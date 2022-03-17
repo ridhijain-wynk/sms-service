@@ -45,14 +45,11 @@ public class VoiceSmsController {
         if (client.getMeta(SMS_ENCRYPTION_TOKEN).isPresent()) {
             msisdn = BCEncryptor.decrypt(smsRequest.getMsisdn(), (String) client.getMeta(SMS_ENCRYPTION_TOKEN).get());
         }
-        if (StringUtils.isBlank(msisdn)) {
-            throw new WynkRuntimeException(WynkErrorType.UT001, "Invalid msisdn");
+        if (StringUtils.isBlank(msisdn) || StringUtils.isEmpty(smsRequest.getText())) {
+            throw new WynkRuntimeException(WynkErrorType.UT001, "Invalid msisdn/msg text");
         }
-    //    smsRequest.setMsisdn(msisdn);
         AnalyticService.update(smsRequest);
-        smsRequest.setClientAlias(client.getAlias());
-    //    sqsManagerService.publishSQSMessage(smsRequest);
-        voiceSmsService.sendVoiceSms(msisdn);
+        AnalyticService.update(voiceSmsService.sendVoiceSms(smsRequest));
         return SmsResponse.builder().build();
     }
 }
