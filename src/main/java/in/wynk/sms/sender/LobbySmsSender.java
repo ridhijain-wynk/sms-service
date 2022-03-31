@@ -13,11 +13,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.util.Objects;
 
 @Slf4j
@@ -28,14 +26,6 @@ public class LobbySmsSender implements IMessageSender<SmsRequest> {
     private final XmlMapper mapper = new XmlMapper();
     private final RestTemplate smsRestTemplate;
     private final ClientDetailsCachingService clientDetailsCachingService;
-
-    @PostConstruct
-    public void init() {
-        smsRestTemplate.getInterceptors().add((request, body, execution) -> {
-            request.getHeaders().add(HttpHeaders.CONTENT_TYPE, "text/xml");
-            return execution.execute(request, body);
-        });
-    }
 
     @SneakyThrows
     @Override
@@ -78,7 +68,7 @@ public class LobbySmsSender implements IMessageSender<SmsRequest> {
             final String payload = mapper.writeValueAsString(body);
             HttpHeaders headers = new HttpHeaders();
             HttpEntity<String> entity = new HttpEntity<>(payload, headers);
-            headers.setContentType(MediaType.APPLICATION_XML);
+            headers.add(HttpHeaders.CONTENT_TYPE, "text/xml");
             smsRestTemplate.postForEntity(url, entity, String.class);
         }
     }
