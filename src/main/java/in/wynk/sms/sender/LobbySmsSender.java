@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.Objects;
 
 @Slf4j
@@ -27,6 +28,14 @@ public class LobbySmsSender implements IMessageSender<SmsRequest> {
     private final XmlMapper mapper = new XmlMapper();
     private final RestTemplate smsRestTemplate;
     private final ClientDetailsCachingService clientDetailsCachingService;
+
+    @PostConstruct
+    public void init() {
+        smsRestTemplate.getInterceptors().add((request, body, execution) -> {
+            request.getHeaders().add(HttpHeaders.CONTENT_TYPE, "text/xml");
+            return execution.execute(request, body);
+        });
+    }
 
     @SneakyThrows
     @Override
