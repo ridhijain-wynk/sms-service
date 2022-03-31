@@ -13,6 +13,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -68,7 +69,7 @@ public class LobbySmsSender implements IMessageSender<SmsRequest> {
             final String payload = mapper.writeValueAsString(body);
             HttpHeaders headers = new HttpHeaders();
             HttpEntity<String> entity = new HttpEntity<>(payload, headers);
-            headers.add(HttpHeaders.CONTENT_TYPE, "text/xml");
+            headers.setContentType(MediaType.TEXT_XML);
             smsRestTemplate.postForEntity(url, entity, String.class);
         }
     }
