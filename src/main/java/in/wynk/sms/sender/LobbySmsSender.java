@@ -68,8 +68,8 @@ public class LobbySmsSender implements IMessageSender<SmsRequest> {
             body.setSubmit(form);
             final String payload = mapper.writeValueAsString(body);
             HttpHeaders headers = new HttpHeaders();
-            HttpEntity<String> entity = new HttpEntity<>(payload, headers);
             headers.setContentType(MediaType.TEXT_XML);
+            HttpEntity<String> entity = new HttpEntity<>(payload, headers);
             smsRestTemplate.postForEntity(url, entity, String.class);
         }
     }
