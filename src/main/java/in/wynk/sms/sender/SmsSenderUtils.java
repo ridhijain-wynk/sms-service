@@ -27,12 +27,12 @@ public class SmsSenderUtils implements ISmsSenderUtils{
         IMessageSender<SmsRequest> smsSender = BeanLocatorFactory.getBean(AIRTEL_SMS_SENDER, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
         });
         try {
-            logger.info("received request {}", request);
+            logger.info("received request {}", request.toString());
             Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
             if (Objects.isNull(client)) {
                 client = clientDetailsCachingService.getClientByService(request.getService());
             }
-            logger.info("found sender {} for client {}", request.getPriority().name() + "_PRIORITY_SMS_SENDER", client);
+            logger.info("found sender {} for client {}", request.getPriority().name() + "_PRIORITY_SMS_SENDER", client.toString());
             if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_SENDER").isPresent()) {
                 final String senderBeanName = client.<String>getMeta(request.getPriority().name() + "_PRIORITY_SMS_SENDER").get();
                 smsSender = BeanLocatorFactory.getBean(senderBeanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
