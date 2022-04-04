@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static in.wynk.sms.constants.SMSConstants.AIRTEL_SMS_SENDER;
+import static in.wynk.sms.constants.SMSConstants.LOBBY_MESSAGE_STRATEGY;
 import static in.wynk.sms.constants.SmsLoggingMarkers.SMS_SEND_BEAN_ERROR;
 
 @Component
@@ -24,7 +24,7 @@ public class SmsSenderUtils implements ISmsSenderUtils{
 
     @Override
     public IMessageSender<SmsRequest> fetchSmsSender(SmsRequest request) {
-        IMessageSender<SmsRequest> smsSender = BeanLocatorFactory.getBean(AIRTEL_SMS_SENDER, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
+        IMessageSender<SmsRequest> smsSender = BeanLocatorFactory.getBean(LOBBY_MESSAGE_STRATEGY, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
         });
         try {
             logger.info("received request {}", request.toString());
