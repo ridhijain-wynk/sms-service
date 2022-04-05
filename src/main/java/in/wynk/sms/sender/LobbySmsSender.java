@@ -44,7 +44,7 @@ public class LobbySmsSender implements IMessageSender<SmsRequest> {
             String accountName = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_ACCOUNT_NAME").orElse("Testnorth");
             String password = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_PASSWORD").get();
             String shortCode = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_SHORT_CODE").get();
-            int mclass = (Integer) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_MCLASS").orElse(1);
+            int mclass = request.isEnglish() ? 0: (Integer) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_MCLASS").orElse(2);
             int coding = (Integer) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_CODING").orElse(0);
             final Body body = new Body();
             final Form form = new Form();

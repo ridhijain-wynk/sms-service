@@ -61,4 +61,16 @@ public abstract class SmsRequest {
         }
         return text;
     }
+
+    public boolean isEnglish() {
+        for (int i = 0; i < getMessage().length(); ++i) {
+            int asciiValue = text.charAt(i);
+            if (asciiValue < 32 || asciiValue > 126) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 }
