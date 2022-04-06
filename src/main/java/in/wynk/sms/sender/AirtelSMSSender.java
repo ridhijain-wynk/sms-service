@@ -191,6 +191,8 @@ public class AirtelSMSSender extends AbstractSMSSender {
         strBuilder.append("<ud type=\"text\"");
         if (!isEnglish(smsRequest.getText())) {
             strBuilder.append(" encoding=\"unicode\"");
+        } else {
+            strBuilder.append(" encoding=\"default\"");
         }
         strBuilder.append(">");
         // String is converted to hexString to support non english text too.
@@ -202,7 +204,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
     private boolean isEnglish(String text) {
         for (int i=0; i<text.length(); ++i) {
             int asciiValue = text.charAt(i);
-            if (asciiValue <33 || asciiValue > 126) {
+            if (asciiValue <32 || asciiValue > 126) {
                 return false;
             }
         }
