@@ -1,5 +1,6 @@
 package in.wynk.sms.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -64,6 +65,7 @@ public abstract class SmsRequest {
         return text;
     }
 
+    @JsonIgnore
     public boolean isEnglish() {
         final String message = getMessage();
         for (int i = 0; i < message.length(); ++i) {
