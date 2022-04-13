@@ -10,6 +10,7 @@ import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.common.message.SmsNotificationMessage;
 import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.SmsRequest;
+import in.wynk.sms.event.SmsNotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +50,12 @@ public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPolli
     @Override
     @AnalyseTransaction(name = "consumeNotificationMessage")
     public void consume(SmsNotificationMessage message) {
-        eventPublisher.publishEvent(message);
+        eventPublisher.publishEvent(SmsNotificationEvent.builder()
+                .messageId(message.getMessageId())
+                .msisdn(message.getMsisdn())
+                .service(message.getService())
+                .contextMap(message.getContextMap())
+                .build());
     }
 
     @Override

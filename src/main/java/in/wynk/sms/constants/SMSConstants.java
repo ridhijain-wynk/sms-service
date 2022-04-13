@@ -1,9 +1,8 @@
 package in.wynk.sms.constants;
 
-import org.springframework.expression.ParserContext;
-import org.springframework.expression.common.TemplateParserContext;
+import in.wynk.common.constant.BaseConstants;
 
-public interface SMSConstants {
+public interface SMSConstants extends BaseConstants {
 
     String SMS_QUEUE = "sms_queue";
     String SMS_ENCRYPTION_TOKEN = "SMS_ENCRYPTION_TOKEN";
@@ -16,10 +15,5 @@ public interface SMSConstants {
     String CONVERTED_MESSAGE_TEXT = "convertedMessageText";
     String TIME_NOT_VALID_FOR_MESSAGE_TYPE = "TIME_NOT_VALID_FOR_MESSAGE_TYPE";
     String FAILURE_CODE = "errorCode";
-    String MESSAGE_DATA_MAP = "data";
-    String CIRCLE_CODE = "circleCode";
-    String DEFAULT = "Default";
-    String REMINDER_COUNT = "reminderCount";
-    ParserContext SMS_MESSAGE_TEMPLATE_CONTEXT = new TemplateParserContext("${", "}");
 
 }
