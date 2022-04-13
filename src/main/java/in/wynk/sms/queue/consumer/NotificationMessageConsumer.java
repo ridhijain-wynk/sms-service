@@ -13,6 +13,7 @@ import in.wynk.sms.dto.request.SmsRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,14 +44,12 @@ public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPolli
     }
 
     @Autowired
-    private ISqsManagerService sqsManagerService;
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     @AnalyseTransaction(name = "consumeNotificationMessage")
     public void consume(SmsNotificationMessage message) {
-        AnalyticService.update(message);
-        SmsRequest smsRequest = SMSFactory.getSmsRequest(message);
-        sqsManagerService.publishSQSMessage(smsRequest);
+        eventPublisher.publishEvent(message);
     }
 
     @Override
