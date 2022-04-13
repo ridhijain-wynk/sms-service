@@ -28,7 +28,7 @@ public class SmsSqsConfig {
 
     @Bean
     public NotificationMessageConsumer notificationConsumer(@Value("${sms.notification.queue.name}") String queueName,
-                                                            @Value("${sms.notification.queue.threads:5}") int parallelism,
+                                                            @Value("${sms.notification.queue.threads:80}") int parallelism,
                                                             @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                             ObjectMapper objectMapper) {
         return new NotificationMessageConsumer(queueName,
@@ -54,7 +54,7 @@ public class SmsSqsConfig {
 
     @Bean
     public HighPriorityConsumer highPriorityConsumer(@Value("${sms.priority.high.queue.name}") String queueName,
-                                                     @Value("${sms.priority.high.queue.threads:5}") int parallelism,
+                                                     @Value("${sms.priority.high.queue.threads:100}") int parallelism,
                                                      @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                      ObjectMapper objectMapper) {
         return new HighPriorityConsumer(queueName,
