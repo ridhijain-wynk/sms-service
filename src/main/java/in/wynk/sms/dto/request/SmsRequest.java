@@ -65,7 +65,7 @@ public abstract class SmsRequest {
 
     @JsonIgnore
     public boolean isEnglish() {
-        final String message = getMessage();
+        final String message = getText();
         for (int i = 0; i < message.length(); ++i) {
             int asciiValue = message.charAt(i);
             if (asciiValue < 32 || asciiValue > 126) {
