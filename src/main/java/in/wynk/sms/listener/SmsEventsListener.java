@@ -18,7 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
+import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static in.wynk.common.constant.BaseConstants.*;
 import static in.wynk.sms.constants.SmsLoggingMarkers.MESSAGE_NOT_FOUND;
@@ -50,10 +52,11 @@ public class SmsEventsListener {
 
             final String smsMessage = message.getMessage();
             if(message.isEnabled()){
+                long lapsedDays = TimeUnit.DAYS.convert(System.currentTimeMillis() - ((Date) event.getContextMap().get(SUBSCRIPTION_START_DATE)).getTime(), TimeUnit.MILLISECONDS);
                 final StandardEvaluationContext seContext = DefaultStandardExpressionContextBuilder.builder()
                         .variable(CONTEXT_MAP, event.getContextMap())
                         .variable(CIRCLE_CODE, circleCode)
-                        .variable(REMINDER_COUNT, event.getContextMap().get(REMINDER_COUNT))
+                        .variable(LAPSED_DAYS, lapsedDays)
                         .build();
                 final String evaluatedMessage = ruleEvaluator.evaluate(smsMessage, () -> seContext, SMS_MESSAGE_TEMPLATE_CONTEXT, String.class);
 
