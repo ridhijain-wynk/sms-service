@@ -37,6 +37,7 @@ public class SmsEventsListener {
     @EventListener
     @AnalyseTransaction(name = "smsNotificationEvent")
     public void onSmsNotificationEvent(SmsNotificationEvent event) {
+        AnalyticService.update(event);
         if (StringUtils.isNotEmpty(event.getMsisdn()) && Objects.nonNull(event.getContextMap())) {
             String circleCode = String.valueOf(event.getContextMap().getOrDefault(CIRCLE_CODE, SMSConstants.DEFAULT));
             Messages message = messageCachingService.get(event.getMessageId().concat(circleCode));
@@ -52,15 +53,15 @@ public class SmsEventsListener {
 
             final String smsMessage = message.getMessage();
             if(message.isEnabled()){
-                long lapsedDays = TimeUnit.DAYS.convert(System.currentTimeMillis() - ((Date) event.getContextMap().get(SUBSCRIPTION_START_DATE)).getTime(), TimeUnit.MILLISECONDS);
+                Date startDate = (Date) event.getContextMap().get(SUBSCRIPTION_START_DATE);
+                long lapsedDays = TimeUnit.DAYS.convert(System.currentTimeMillis() - startDate.getTime(), TimeUnit.MILLISECONDS);
                 final StandardEvaluationContext seContext = DefaultStandardExpressionContextBuilder.builder()
                         .variable(CONTEXT_MAP, event.getContextMap())
                         .variable(CIRCLE_CODE, circleCode)
                         .variable(LAPSED_DAYS, lapsedDays)
                         .build();
                 final String evaluatedMessage = ruleEvaluator.evaluate(smsMessage, () -> seContext, SMS_MESSAGE_TEMPLATE_CONTEXT, String.class);
-
-                AnalyticService.update(event);
+                
                 SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
                         .message(evaluatedMessage)
                         .msisdn(event.getMsisdn())
