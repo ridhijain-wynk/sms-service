@@ -53,12 +53,8 @@ public class SmsEventsListener {
 
             final String smsMessage = message.getMessage();
             if(message.isEnabled()){
-                Date startDate = (Date) event.getContextMap().get(SUBSCRIPTION_START_DATE);
-                long lapsedDays = TimeUnit.DAYS.convert(System.currentTimeMillis() - startDate.getTime(), TimeUnit.MILLISECONDS);
                 final StandardEvaluationContext seContext = DefaultStandardExpressionContextBuilder.builder()
                         .variable(CONTEXT_MAP, event.getContextMap())
-                        .variable(CIRCLE_CODE, circleCode)
-                        .variable(LAPSED_DAYS, lapsedDays)
                         .build();
                 final String evaluatedMessage = ruleEvaluator.evaluate(smsMessage, () -> seContext, SMS_MESSAGE_TEMPLATE_CONTEXT, String.class);
                 
