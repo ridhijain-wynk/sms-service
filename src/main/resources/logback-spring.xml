@@ -78,6 +78,10 @@
         <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
+    <logger name="smsNotificationEvent" additivity="false">
+        <level value="info"/>
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
     <logger name="consumeMessage" additivity="false">
         <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
