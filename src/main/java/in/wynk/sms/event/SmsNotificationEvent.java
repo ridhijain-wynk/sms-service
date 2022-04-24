@@ -26,6 +26,5 @@ public class SmsNotificationEvent {
     private String priority;
     @Analysed
     private String messageId;
-    @Analysed
     private Map<String, Object> contextMap;
 }

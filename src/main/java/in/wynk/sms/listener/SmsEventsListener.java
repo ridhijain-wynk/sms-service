@@ -37,15 +37,11 @@ public class SmsEventsListener {
     @EventListener
     @AnalyseTransaction(name = "smsNotificationEvent")
     public void onSmsNotificationEvent(SmsNotificationEvent event) {
-        AnalyticService.update(event);
+        //AnalyticService.update(event);
         if (StringUtils.isNotEmpty(event.getMsisdn()) && Objects.nonNull(event.getContextMap())) {
-            String circleCode = String.valueOf(event.getContextMap().getOrDefault(CIRCLE_CODE, SMSConstants.DEFAULT));
-            Messages message = messageCachingService.get(event.getMessageId().concat(circleCode));
-            if (Objects.isNull(message)) {
-                message = messageCachingService.get(event.getMessageId());
-            }
+            final String circleCode = String.valueOf(event.getContextMap().get(CIRCLE_CODE));
+            Messages message = getMessage(event.getMessageId(), circleCode);
 
-            //todo: this check can be removed
             if(Objects.isNull(message)){
                 log.error(MESSAGE_NOT_FOUND, "Unable to find linked message {} ", event.getMessageId());
                 return;
@@ -66,6 +62,18 @@ public class SmsEventsListener {
                         .build());
                 sqsManagerService.publishSQSMessage(smsRequest);
             }
+        }
+    }
+
+    private Messages getMessage(String messageId, String circleCode) {
+        if(StringUtils.equalsIgnoreCase(circleCode, SMSConstants.DEFAULT)){
+            return messageCachingService.get(messageId);
+        } else {
+            Messages message = messageCachingService.get(messageId.concat(circleCode));
+            if(Objects.isNull(message)){
+                return messageCachingService.get(messageId);
+            }
+            return message;
         }
     }
 }
