@@ -1,5 +1,6 @@
 package in.wynk.sms.sender;
 
+import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
@@ -23,15 +24,16 @@ public class SmppSender implements IMessageSender<SmsRequest> {
     private final ClientDetailsCachingService clientDetailsCachingService;
 
     @Override
+    @AnalyseTransaction(name = "sendSmsSmsc")
     public void sendMessage(SmsRequest request) throws Exception {
         AnalyticService.update(request);
         Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
         if (Objects.isNull(client)) {
             client = clientDetailsCachingService.getClientByService(request.getService());
         }
-        String shortCode = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_SHORT_CODE").get();
-        SenderManager senderManager = BeanLocatorFactory.getBean(client.getAlias() + SMSBeanConstant.SMPP_SENDER_MANAGER_BEAN, SenderManager.class);
-        MessageResponse response = senderManager.send(Message.simple(request.getText()).messageId(request.getMessageId()).from(shortCode).to(request.getMsisdn()).build());
+        final String shortCode = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_SHORT_CODE").get();
+        final SenderManager senderManager = BeanLocatorFactory.getBean(client.getAlias() + SMSBeanConstant.SMPP_SENDER_MANAGER_BEAN, SenderManager.class);
+        final MessageResponse response = senderManager.send(Message.simple(request.getText()).messageId(request.getMessageId()).from(shortCode).to(request.getMsisdn()).build());
         AnalyticService.update(response);
     }
 

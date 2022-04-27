@@ -8,7 +8,7 @@ import in.wynk.smpp.core.receiver.DeliveryReportConsumer;
 public class DefaultDeliveryReportConsumer implements DeliveryReportConsumer {
 
     @Override
-    @AnalyseTransaction(name = "SmppDeliveryReport")
+    @AnalyseTransaction(name = "smppDeliveryReport")
     public void accept(DeliveryReport deliveryReport) {
         AnalyticService.update(deliveryReport);
     }
