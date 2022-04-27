@@ -60,6 +60,7 @@ public class SmsEventsListener {
                         .service(event.getService())
                         .priority(message.getPriority())
                         .build());
+                AnalyticService.update(smsRequest);
                 sqsManagerService.publishSQSMessage(smsRequest);
             }
         }
