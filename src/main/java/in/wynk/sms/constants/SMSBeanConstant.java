@@ -1,0 +1,7 @@
+package in.wynk.sms.constants;
+
+public interface SMSBeanConstant {
+    String SMPP_SENDER_WRAPPER = "smppSender";
+    String SMPP_SENDER_MANAGER_BEAN = "SmppSenderManagerBean";
+    String SMSC_CONNECTION_HOLDER_BEAN = "SmscConnectionHolderBean";
+}
