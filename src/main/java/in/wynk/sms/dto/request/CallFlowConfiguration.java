@@ -1,0 +1,25 @@
+package in.wynk.sms.dto.request;
+
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.github.annotation.analytic.core.annotations.Analysed;
+import com.github.annotation.analytic.core.annotations.AnalysedEntity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Builder
+@AnalysedEntity
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CallFlowConfiguration {
+
+    @Analysed
+    private InitiateCall initiateCall_1;
+    @Analysed
+    private TextToSpeech textToSpeech_1;
+
+}
