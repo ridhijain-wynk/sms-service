@@ -48,7 +48,7 @@ public class VoiceSmsService implements IVoiceSmsService {
             final VoiceSmsRequest request = VoiceSmsRequest.builder().callFlowId(callFlowId).callType(callType)
                     .callFlowId(callFlowId).customerId(customerId).callFlowConfiguration(CallFlowConfiguration.builder()
                     .initiateCall_1(InitiateCall.builder().callerId(callerId).participants(participants).build())
-                    .textToSpeech_1(TextToSpeech.builder().text(smsRequest.getText()).textType(textType).build()).build()).build();
+                    .textToSpeech_1(TextToSpeech.builder().text("<speak>" + smsRequest.getText() +"</speak>").textType(textType).build()).build()).build();
             HttpHeaders headers = getHeaders();
             HttpEntity<VoiceSmsRequest> requestEntity = new HttpEntity<>(request, headers);
             VoiceSmsResponse response = smsRestTemplate.exchange(url, HttpMethod.POST, requestEntity, VoiceSmsResponse.class).getBody();
