@@ -48,7 +48,7 @@ public class VoiceSmsService implements IVoiceSmsService {
             final VoiceSmsRequest request = VoiceSmsRequest.builder().callFlowId(callFlowId).callType(callType)
                     .callFlowId(callFlowId).customerId(customerId).callFlowConfiguration(CallFlowConfiguration.builder()
                     .initiateCall_1(InitiateCall.builder().callerId(callerId).participants(participants).build())
-                    .textToSpeech_1(TextToSpeech.builder().text("<speak>" + smsRequest.getText() +"</speak>").textType(textType).build()).build()).build();
+                    .textToSpeech_1(TextToSpeech.builder().text(updateTextMsg(smsRequest.getText())).textType(textType).build()).build()).build();
             HttpHeaders headers = getHeaders();
             HttpEntity<VoiceSmsRequest> requestEntity = new HttpEntity<>(request, headers);
             VoiceSmsResponse response = smsRestTemplate.exchange(url, HttpMethod.POST, requestEntity, VoiceSmsResponse.class).getBody();
@@ -57,6 +57,24 @@ public class VoiceSmsService implements IVoiceSmsService {
             log.info("failed to send voice sms", ex);
             return null;
         }
+    }
+
+    private String updateTextMsg(String txt){
+        String text[] = txt.split(" ");
+        if(text[text.length-1].length() >1){
+
+
+            StringBuilder finalTxt = new StringBuilder();
+           char arr[] = text[text.length-1].toCharArray();
+           for(int i =0; i < text.length-1; i++)
+               finalTxt.append(text[i] + " ");
+
+            for(int i =0; i < arr.length; i++)
+                finalTxt.append(arr[i] + " ");
+
+           return "<speak>" + finalTxt.toString() + "</speak>";
+        }
+        return  "<speak>" + txt + "</speak>";
     }
 
     private HttpHeaders getHeaders() {
