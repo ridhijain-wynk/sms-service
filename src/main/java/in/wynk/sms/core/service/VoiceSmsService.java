@@ -2,6 +2,7 @@ package in.wynk.sms.core.service;
 
 import in.wynk.sms.dto.request.*;
 import in.wynk.sms.dto.response.VoiceSmsResponse;
+import jnr.ffi.Struct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import in.wynk.exception.WynkRuntimeException;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,27 +57,37 @@ public class VoiceSmsService implements IVoiceSmsService {
             VoiceSmsResponse response = smsRestTemplate.exchange(url, HttpMethod.POST, requestEntity, VoiceSmsResponse.class).getBody();
             return response;
         } catch (Exception ex) {
-            log.info("failed to send voice sms", ex);
-            return null;
+            throw new WynkRuntimeException("failed to send voice sms", ex);
         }
     }
 
     private String updateTextMsg(String txt){
         String text[] = txt.split(" ");
-        if(text[text.length-1].length() >1){
-
-
             StringBuilder finalTxt = new StringBuilder();
-           char arr[] = text[text.length-1].toCharArray();
-           for(int i =0; i < text.length-1; i++)
+           for(int i =0; i < text.length; i++) {
+               isNumeric(text[i], i, text);
                finalTxt.append(text[i] + " ");
-
-            for(int i =0; i < arr.length; i++)
-                finalTxt.append(arr[i] + " ");
-
+           }
            return "<speak>" + finalTxt.toString() + "</speak>";
+
+    }
+
+    public static boolean isNumeric(String strNum, int idx, String txt[]) {
+        if (strNum == null) {
+            return false;
         }
-        return  "<speak>" + txt + "</speak>";
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        StringBuilder otp = new StringBuilder();
+        char nums[] = strNum.toCharArray();
+        for(int i =0; i <nums.length; i++){
+            otp.append(nums[i] + " ");
+        }
+        txt[idx] = otp.toString();
+        return true;
     }
 
     private HttpHeaders getHeaders() {
