@@ -9,6 +9,7 @@ public interface SMSConstants extends BaseConstants {
     String AIRTEL_IQ_SMS_SENDER_BEAN = "airtelIQSmsSender";
     String AIRTEL_SMS_SENDER = "smsSender";
     String MESSAGE_STRATEGY_IQ = "airtelIQ";
+    String LOBBY_MESSAGE_STRATEGY = "lobby";
     String PLACE_HOLDER_PATTERN = "\\{#var#\\}";
     String REPLACE_PATTERN = "(.+)";
     String MESSAGE_TEXT = "messageText";

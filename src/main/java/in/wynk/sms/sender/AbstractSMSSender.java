@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
-public abstract class AbstractSMSSender {
+public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
 
 	protected Logger logger = LoggerFactory.getLogger(getClass().getCanonicalName());
 
