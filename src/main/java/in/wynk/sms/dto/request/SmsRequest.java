@@ -8,6 +8,7 @@ import com.github.annotation.analytic.core.annotations.Analysed;
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.queue.message.HighPriorityMessage;
+import in.wynk.sms.queue.message.HighestPriorityMessage;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 @SuperBuilder
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "priority")
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = HighestPriorityMessage.class, name = "HIGHEST"),
         @JsonSubTypes.Type(value = HighPriorityMessage.class, name = "HIGH"),
         @JsonSubTypes.Type(value = MediumPriorityMessage.class, name = "MEDIUM"),
         @JsonSubTypes.Type(value = LowPriorityMessage.class, name = "LOW")
