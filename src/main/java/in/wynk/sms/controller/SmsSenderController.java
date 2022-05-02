@@ -4,6 +4,7 @@ import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import com.google.gson.Gson;
 import in.wynk.queue.service.ISqsManagerService;
+import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.model.SendSmsRequest;
@@ -41,6 +42,8 @@ public class SmsSenderController {
                 if (StringUtils.isNotBlank(request.getSource())) {
                     request.setService(request.getSource());
                 }
+                if (StringUtils.isNotEmpty(request.getMessage()) && (request.getMessage().contains("PIN") || request.getMessage().contains("OTP")))
+                    request.setPriority(SMSPriority.HIGHEST.getSmsPriority());
                 SmsRequest sms = SMSFactory.getSmsRequest(request);
                 AnalyticService.update(sms);
                 sqsManagerService.publishSQSMessage(sms);

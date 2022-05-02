@@ -10,6 +10,7 @@ import in.wynk.exception.WynkRuntimeException;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
+import in.wynk.sms.queue.message.HighestPriorityMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +47,8 @@ public class SmsController {
             throw new WynkRuntimeException(WynkErrorType.UT001, "Invalid msisdn");
         }
         smsRequest.setMsisdn(msisdn);
+        if (StringUtils.isNotEmpty(smsRequest.getMessage()) && (smsRequest.getMessage().contains("PIN") || smsRequest.getMessage().contains("OTP")))
+            smsRequest = HighestPriorityMessage.builder().countryCode(smsRequest.getCountryCode()).msisdn(smsRequest.getMsisdn()).service(smsRequest.getService()).text(smsRequest.getText()).message(smsRequest.getText()).clientAlias(client.getAlias()).shortCode(smsRequest.getShortCode()).messageId(smsRequest.getMsisdn() + System.currentTimeMillis()).build();
         AnalyticService.update(smsRequest);
         smsRequest.setClientAlias(client.getAlias());
         sqsManagerService.publishSQSMessage(smsRequest);
