@@ -49,6 +49,7 @@ public class VoiceSmsController {
             throw new WynkRuntimeException(WynkErrorType.UT001, "Invalid msisdn/msg text");
         }
         AnalyticService.update(smsRequest);
+        if(voiceSmsService.sendVoiceSms(smsRequest) != null)
         AnalyticService.update(voiceSmsService.sendVoiceSms(smsRequest));
         return SmsResponse.builder().build();
     }
