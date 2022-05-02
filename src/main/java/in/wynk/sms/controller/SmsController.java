@@ -48,7 +48,7 @@ public class SmsController {
         }
         smsRequest.setMsisdn(msisdn);
         if (StringUtils.isNotEmpty(smsRequest.getMessage()) && (smsRequest.getMessage().contains("PIN") || smsRequest.getMessage().contains("OTP")))
-            smsRequest = HighestPriorityMessage.builder().countryCode(smsRequest.getCountryCode()).msisdn(smsRequest.getMsisdn()).service(smsRequest.getService()).text(smsRequest.getText()).message(smsRequest.getText()).clientAlias(client.getAlias()).shortCode(smsRequest.getShortCode()).messageId(smsRequest.getMsisdn() + System.currentTimeMillis()).build();
+            smsRequest = HighestPriorityMessage.builder().countryCode(smsRequest.getCountryCode()).msisdn(smsRequest.getMsisdn()).service(smsRequest.getService()).text(smsRequest.getText()).message(smsRequest.getText()).shortCode(smsRequest.getShortCode()).messageId(smsRequest.getMsisdn() + System.currentTimeMillis()).build();
         AnalyticService.update(smsRequest);
         smsRequest.setClientAlias(client.getAlias());
         sqsManagerService.publishSQSMessage(smsRequest);
