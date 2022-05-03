@@ -18,12 +18,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static in.wynk.common.constant.BaseConstants.*;
 import static in.wynk.sms.constants.SmsLoggingMarkers.MESSAGE_NOT_FOUND;
+import static in.wynk.sms.constants.SmsLoggingMarkers.OLD_MESSAGE_PATTERN;
 
 @Slf4j
 @Service
@@ -37,40 +39,50 @@ public class SmsEventsListener {
     @EventListener
     @AnalyseTransaction(name = "smsNotificationEvent")
     public void onSmsNotificationEvent(SmsNotificationEvent event) {
-        //AnalyticService.update(event);
-        if (StringUtils.isNotEmpty(event.getMsisdn()) && Objects.nonNull(event.getContextMap())) {
-            final String circleCode = String.valueOf(event.getContextMap().get(CIRCLE_CODE));
-            Messages message = getMessage(event.getMessageId(), circleCode);
-
-            if(Objects.isNull(message)){
-                log.error(MESSAGE_NOT_FOUND, "Unable to find linked message {} ", event.getMessageId());
-                return;
-            }
-
-            final String smsMessage = message.getMessage();
-            if(message.isEnabled()){
-                final StandardEvaluationContext seContext = DefaultStandardExpressionContextBuilder.builder()
-                        .variable(CONTEXT_MAP, event.getContextMap())
-                        .build();
-                final String evaluatedMessage = ruleEvaluator.evaluate(smsMessage, () -> seContext, SMS_MESSAGE_TEMPLATE_CONTEXT, String.class);
-                
+        if (StringUtils.isNotEmpty(event.getMsisdn())) {
+            if (StringUtils.isNotEmpty(event.getMessage())) {
+                log.info(OLD_MESSAGE_PATTERN, "Resolved message present for ", event.getMsisdn());
                 SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
-                        .message(evaluatedMessage)
+                        .message(event.getMessage())
                         .msisdn(event.getMsisdn())
                         .service(event.getService())
-                        .priority(message.getPriority())
+                        .priority(event.getPriority())
                         .build());
                 sqsManagerService.publishSQSMessage(smsRequest);
+            } else if (Objects.nonNull(event.getContextMap())) {
+                final String circleCode = String.valueOf(event.getContextMap().get(CIRCLE_CODE));
+                Messages message = getMessage(event.getMessageId(), circleCode);
+
+                if (Objects.isNull(message)) {
+                    log.error(MESSAGE_NOT_FOUND, "Unable to find linked message {} ", event.getMessageId());
+                    return;
+                }
+
+                final String smsMessage = message.getMessage();
+                if (message.isEnabled()) {
+                    final StandardEvaluationContext seContext = DefaultStandardExpressionContextBuilder.builder()
+                            .variable(CONTEXT_MAP, event.getContextMap())
+                            .build();
+                    final String evaluatedMessage = ruleEvaluator.evaluate(smsMessage, () -> seContext, SMS_MESSAGE_TEMPLATE_CONTEXT, String.class);
+
+                    SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
+                            .message(evaluatedMessage)
+                            .msisdn(event.getMsisdn())
+                            .service(event.getService())
+                            .priority(message.getPriority())
+                            .build());
+                    sqsManagerService.publishSQSMessage(smsRequest);
+                }
             }
         }
     }
 
     private Messages getMessage(String messageId, String circleCode) {
-        if(StringUtils.equalsIgnoreCase(circleCode, SMSConstants.DEFAULT)){
+        if (StringUtils.equalsIgnoreCase(circleCode, SMSConstants.DEFAULT)) {
             return messageCachingService.get(messageId);
         } else {
             Messages message = messageCachingService.get(messageId.concat(circleCode));
-            if(Objects.isNull(message)){
+            if (Objects.isNull(message)) {
                 return messageCachingService.get(messageId);
             }
             return message;
