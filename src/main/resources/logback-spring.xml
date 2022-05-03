@@ -65,7 +65,7 @@
         <appender-ref ref="ANALYTIC_LOG_FILE"/>
         <includeCallerData>true</includeCallerData>
     </appender>
- 
+
     <logger name="sendSms" additivity="false">
         <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
@@ -75,6 +75,10 @@
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
     <logger name="consumeNotificationMessage" additivity="false">
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
+    <logger name="smsNotificationEvent" additivity="false">
+        <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
     <logger name="consumeMessage" additivity="false">
