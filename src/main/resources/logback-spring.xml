@@ -65,7 +65,11 @@
         <appender-ref ref="ANALYTIC_LOG_FILE"/>
         <includeCallerData>true</includeCallerData>
     </appender>
-
+    
+    <logger name="sendVoiceSms" additivity="false">
+        <level value="info"/>
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
     <logger name="sendSms" additivity="false">
         <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
