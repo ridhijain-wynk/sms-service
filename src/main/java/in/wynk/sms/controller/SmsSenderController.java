@@ -42,7 +42,7 @@ public class SmsSenderController {
                 if (StringUtils.isNotBlank(request.getSource())) {
                     request.setService(request.getSource());
                 }
-                if (StringUtils.isNotEmpty(request.getMessage()) && (request.getMessage().contains("PIN") || request.getMessage().contains("OTP")))
+                if (StringUtils.isNotEmpty(request.getMessage()) && (request.getMessage().contains("PIN") || request.getMessage().contains("pin") || request.getMessage().contains("OTP") || request.getMessage().contains("otp") || request.getMessage().contains("CODE") || request.getMessage().contains("code")))
                     request.setPriority(SMSPriority.HIGHEST.getSmsPriority());
                 SmsRequest sms = SMSFactory.getSmsRequest(request);
                 AnalyticService.update(sms);
