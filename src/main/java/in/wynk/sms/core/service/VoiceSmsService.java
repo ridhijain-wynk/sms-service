@@ -68,7 +68,7 @@ public class VoiceSmsService implements IVoiceSmsService {
                isNumeric(text[i], i, text);
                finalTxt.append(text[i] + " ");
            }
-           return "<speak><prosody rate='75%'>" + finalTxt.toString() + "</prosody></speak>";
+           return "<speak>" + finalTxt.toString() + "</speak>";
     }
 
     public static boolean isNumeric(String strNum, int idx, String txt[]) {
