@@ -53,6 +53,19 @@ public class SmsSqsConfig {
     }
 
     @Bean
+    public HighestPriorityConsumer highestPriorityConsumer(@Value("${sms.priority.highest.queue.name}") String queueName,
+                                                     @Value("${sms.priority.highest.queue.threads:100}") int parallelism,
+                                                     @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
+                                                     ObjectMapper objectMapper) {
+        return new HighestPriorityConsumer(queueName,
+                sqsClient,
+                objectMapper,
+                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
+                executor(parallelism),
+                scheduledThreadPoolExecutor(schedulerPoolSize));
+    }
+
+    @Bean
     public HighPriorityConsumer highPriorityConsumer(@Value("${sms.priority.high.queue.name}") String queueName,
                                                      @Value("${sms.priority.high.queue.threads:100}") int parallelism,
                                                      @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
