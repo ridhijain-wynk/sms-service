@@ -6,7 +6,8 @@ import org.slf4j.MarkerFactory;
 
 public interface SmsLoggingMarkers extends BaseLoggingMarkers {
 
-
+    Marker MULTI_SMPP_BEAN_DEFINITION_REGISTRATION = MarkerFactory.getMarker("MULTI_SMPP_BEAN_DEFINITION_REGISTRATION");
+    Marker MULTI_SMPP_BEAN_REFERENCE_RESOLUTION = MarkerFactory.getMarker("MULTI_SMPP_BEAN_REFERENCE_RESOLUTION");
     Marker PROMOTIONAL_MSG_ERROR = MarkerFactory.getMarker("PROMOTIONAL_MSG_ERROR");
     Marker HIGH_PRIORITY_SMS_ERROR = MarkerFactory.getMarker("HIGH_PRIORITY_SMS_ERROR");
     Marker MEDIUM_PRIORITY_SMS_ERROR = MarkerFactory.getMarker("MEDIUM_PRIORITY_SMS_ERROR");
