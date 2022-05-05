@@ -9,6 +9,7 @@ import in.wynk.sms.queue.message.HighPriorityMessage;
 import in.wynk.sms.queue.message.HighestPriorityMessage;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
+import in.wynk.sms.utils.BackwardServiceCompatibilitySupport;
 
 public class SMSFactory {
 
@@ -27,6 +28,7 @@ public class SMSFactory {
 
     public static SmsRequest getSmsRequest(SendSmsRequest request) {
         SMSPriority priority = SMSPriority.fromString(request.getPriority());
+        final String alias = BackwardServiceCompatibilitySupport.resolve(request.getService(), request.getService());
         switch (priority) {
             case HIGHEST:
                 return HighestPriorityMessage.builder().countryCode(request.getCountryCode())
@@ -34,17 +36,18 @@ public class SMSFactory {
                         .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
             case HIGH:
                 return HighPriorityMessage.builder().countryCode(request.getCountryCode())
-                        .msisdn(request.getMsisdn()).service(request.getService()).text(request.getMessage())
+                        .msisdn(request.getMsisdn()).clientAlias(alias).service(request.getService()).text(request.getMessage())
                         .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
             case MEDIUM:
                 return MediumPriorityMessage.builder().countryCode(request.getCountryCode())
-                        .msisdn(request.getMsisdn()).service(request.getService()).text(request.getMessage())
+                        .msisdn(request.getMsisdn()).clientAlias(alias).service(request.getService()).text(request.getMessage())
                         .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
             case LOW:
                 return LowPriorityMessage.builder().countryCode(request.getCountryCode())
-                        .msisdn(request.getMsisdn()).service(request.getService()).text(request.getMessage())
+                        .msisdn(request.getMsisdn()).clientAlias(alias).service(request.getService()).text(request.getMessage())
                         .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
         }
         throw new IllegalArgumentException("Invalid message");
     }
+
 }
