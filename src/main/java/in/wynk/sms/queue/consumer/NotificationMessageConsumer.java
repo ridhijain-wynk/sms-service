@@ -55,6 +55,7 @@ public class NotificationMessageConsumer extends AbstractSQSMessageConsumerPolli
                 .msisdn(message.getMsisdn())
                 .message(message.getMessage())
                 .service(message.getService())
+                .priority(message.getPriority().getSmsPriority())
                 .contextMap(message.getContextMap())
                 .build());
     }

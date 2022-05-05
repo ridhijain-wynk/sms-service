@@ -48,6 +48,7 @@ public class SmsEventsListener {
                         .service(event.getService())
                         .priority(event.getPriority())
                         .build());
+                AnalyticService.update(smsRequest);
                 sqsManagerService.publishSQSMessage(smsRequest);
             } else if (Objects.nonNull(event.getContextMap())) {
                 final String circleCode = String.valueOf(event.getContextMap().get(CIRCLE_CODE));
@@ -71,6 +72,7 @@ public class SmsEventsListener {
                             .service(event.getService())
                             .priority(message.getPriority())
                             .build());
+                    AnalyticService.update(smsRequest);
                     sqsManagerService.publishSQSMessage(smsRequest);
                 }
             }
