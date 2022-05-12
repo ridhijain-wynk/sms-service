@@ -32,7 +32,7 @@ public class SMSFactory {
         switch (priority) {
             case HIGHEST:
                 return HighestPriorityMessage.builder().countryCode(request.getCountryCode())
-                        .msisdn(request.getMsisdn()).service(request.getService()).text(request.getMessage())
+                        .msisdn(request.getMsisdn()).clientAlias(alias).service(request.getService()).text(request.getMessage())
                         .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
             case HIGH:
                 return HighPriorityMessage.builder().countryCode(request.getCountryCode())
