@@ -1,5 +1,6 @@
 package in.wynk.sms.sender;
 
+import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BeanLocatorFactory;
@@ -24,6 +25,7 @@ public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
             }
             if (client.<Boolean>getMeta(SMSConstants.MESSAGE_SCRUBBING_ENABLED).orElse(false)) validate(request);
         } catch (Exception e) {
+            AnalyticService.update("scrubbed", true);
             return;
         }
         send(request);
