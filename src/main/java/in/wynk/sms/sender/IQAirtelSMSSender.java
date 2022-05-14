@@ -64,7 +64,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
 
     @Override
     @AnalyseTransaction(name = "sendSmsAirtelIQ")
-    public void sendMessage(SmsRequest request) {
+    public void send(SmsRequest request) {
         try {
             AnalyticService.update(MESSAGE_TEXT, request.getText());
             MessageTemplateDTO messageTemplateDTO = messageTemplateService.findMessageTemplateFromSmsText(request.getText());

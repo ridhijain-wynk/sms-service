@@ -52,7 +52,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
 
     @Override
     @AnalyseTransaction(name = "sendSmsAirtel")
-    public void sendMessage(SmsRequest request) throws Exception {
+    public void send(SmsRequest request) throws Exception {
         AnalyticService.update(request);
         Country country = Country.getCountryByCountryCode(request.getCountryCode());
         if (country.equals(Country.SRILANKA)) {
