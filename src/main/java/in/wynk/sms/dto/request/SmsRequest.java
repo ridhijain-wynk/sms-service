@@ -12,6 +12,7 @@ import in.wynk.sms.queue.message.HighestPriorityMessage;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -55,6 +56,10 @@ public abstract class SmsRequest {
     private String shortCode;
     @Analysed
     private String messageId;
+
+    @Setter
+    @Builder.Default
+    private CommunicationType communicationType = CommunicationType.SMS;
 
     public abstract SMSPriority getPriority();
 
