@@ -8,6 +8,7 @@ import in.wynk.common.utils.BCEncryptor;
 import in.wynk.exception.WynkErrorType;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.queue.service.ISqsManagerService;
+import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
 import in.wynk.sms.queue.message.HighestPriorityMessage;
@@ -23,7 +24,7 @@ import java.security.Principal;
 import static in.wynk.sms.constants.SMSConstants.SMS_ENCRYPTION_TOKEN;
 
 @RestController
-@RequestMapping("/wynk/s2s/v1/sms")
+@RequestMapping({"/wynk/s2s/v1"})
 @Slf4j
 public class SmsController {
 
@@ -35,9 +36,20 @@ public class SmsController {
         this.clientDetailsCachingService = clientDetailsCachingService;
     }
 
+    @AnalyseTransaction(name = "sendVoiceSms")
+    @PostMapping("/voiceSms/send")
+    public SmsResponse sendVoiceSms(Principal principal, @RequestBody SmsRequest smsRequest) {
+        smsRequest.setCommunicationType(CommunicationType.VOICE);
+        return sendSms(principal, smsRequest);
+    }
+
     @AnalyseTransaction(name = "sendSms")
-    @PostMapping("/send")
+    @PostMapping("/sms/send")
     public SmsResponse sendSms(Principal principal, @RequestBody SmsRequest smsRequest) {
+        return send(principal, smsRequest);
+    }
+
+    private SmsResponse send(Principal principal, SmsRequest smsRequest) {
         Client client = clientDetailsCachingService.getClientById(principal.getName());
         String msisdn = smsRequest.getMsisdn();
         if (client.getMeta(SMS_ENCRYPTION_TOKEN).isPresent()) {
