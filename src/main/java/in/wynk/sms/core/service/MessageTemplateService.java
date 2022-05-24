@@ -77,7 +77,7 @@ public class MessageTemplateService implements IMessageTemplateService, IEntityC
                 .map(messageTemplate -> checkIfTemplateMatchesSmsText(messageTemplate, convertedMessageText))
                 .filter(messageTemplateDTO -> Objects.nonNull(messageTemplateDTO))
                 .findFirst()
-                .orElseGet(null);
+                .orElse(null);
     }
 
     private String replaceUnicodesInMessageText(String text) {
