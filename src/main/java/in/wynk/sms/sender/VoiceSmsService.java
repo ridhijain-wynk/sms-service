@@ -4,6 +4,7 @@ import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.exception.WynkRuntimeException;
+import in.wynk.sms.constants.SMSBeanConstant;
 import in.wynk.sms.dto.request.*;
 import in.wynk.sms.dto.response.VoiceSmsResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +21,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Service
 @Slf4j
+@Service(SMSBeanConstant.AIRTEL_VOICE_MESSAGE_SENDER)
 public class VoiceSmsService extends AbstractSMSSender {
 
     @Value("${sms.voice.messages.callFlowId}")
