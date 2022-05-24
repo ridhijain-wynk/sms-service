@@ -24,7 +24,7 @@ import java.security.Principal;
 import static in.wynk.sms.constants.SMSConstants.SMS_ENCRYPTION_TOKEN;
 
 @RestController
-@RequestMapping({"/wynk/s2s/v1"})
+@RequestMapping({"/wynk/s2s", "/iq/s2s/message"})
 @Slf4j
 public class SmsController {
 
@@ -37,14 +37,14 @@ public class SmsController {
     }
 
     @AnalyseTransaction(name = "sendVoiceSms")
-    @PostMapping("/voiceSms/send")
+    @PostMapping({"/v1/voiceSms/send", "/v1/voice/send"})
     public SmsResponse sendVoiceSms(Principal principal, @RequestBody SmsRequest smsRequest) {
         smsRequest.setCommunicationType(CommunicationType.VOICE);
         return sendSms(principal, smsRequest);
     }
 
     @AnalyseTransaction(name = "sendSms")
-    @PostMapping("/sms/send")
+    @PostMapping("/v1/sms/send")
     public SmsResponse sendSms(Principal principal, @RequestBody SmsRequest smsRequest) {
         return send(principal, smsRequest);
     }
