@@ -34,8 +34,8 @@ import static in.wynk.sms.enums.SmsErrorType.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
-@Component(AIRTEL_IQ_SMS_SENDER_BEAN)
 @Slf4j
+@Component(AIRTEL_IQ_SMS_SENDER_BEAN)
 public class IQAirtelSMSSender extends AbstractSMSSender {
 
     @Value("${sms.airtel.iq.customerId}")
