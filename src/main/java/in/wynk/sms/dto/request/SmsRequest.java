@@ -30,9 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class SmsRequest {
 
-    @Analysed
     private String message;
-    @Analysed
     private String text;
     @Analysed
     @Setter //temporary
@@ -60,6 +58,7 @@ public abstract class SmsRequest {
 
     public abstract SMSPriority getPriority();
 
+    @Analysed(name = "text")
     public String getText() {
         if (StringUtils.isBlank(text)) {
             return message;

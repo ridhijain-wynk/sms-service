@@ -71,7 +71,6 @@ public class MessageTemplateService implements IMessageTemplateService, IEntityC
     @Override
     public MessageTemplateDTO findMessageTemplateFromSmsText(String messageText) {
         final String convertedMessageText = replaceUnicodesInMessageText(messageText);
-        AnalyticService.update(CONVERTED_MESSAGE_TEXT, convertedMessageText);
         return messageTemplateMap.values()
                 .parallelStream()
                 .map(messageTemplate -> checkIfTemplateMatchesSmsText(messageTemplate, convertedMessageText))
