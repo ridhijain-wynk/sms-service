@@ -12,10 +12,7 @@ import in.wynk.sms.queue.message.HighestPriorityMessage;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
 

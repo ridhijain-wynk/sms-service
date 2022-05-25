@@ -21,6 +21,7 @@ public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
 
     public void sendMessage(SmsRequest request) throws Exception {
         try {
+            AnalyticService.update(request);
             final ClientDetailsCachingService clientCache = BeanLocatorFactory.getBean(ClientDetailsCachingService.class);
             Client client = clientCache.getClientByAlias(request.getClientAlias());
             if (Objects.isNull(client)) {
@@ -32,7 +33,7 @@ public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
             if (e.getErrorType() != SmsErrorType.IQSMS001)
                 throw e;
             AnalyticService.update("scrubbed", true);
-            logger.warn(SmsLoggingMarkers.NO_TEMPLATE_FOUND, "message is scrubbed as no matching template is found {}", request);
+            logger.warn(SmsLoggingMarkers.NO_TEMPLATE_FOUND, "message is scrubbed as no matching template is found {}", request.getText());
             return;
         }
         send(request);
