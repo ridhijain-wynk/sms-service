@@ -27,7 +27,7 @@ public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
             if (Objects.isNull(client)) {
                 client = clientCache.getClientByService(request.getService());
             }
-            if (client.<Boolean>getMeta(SMSConstants.MESSAGE_SCRUBBING_ENABLED).orElse(false) || client.<Boolean>getMeta(request.getPriority().getSmsPriority() + SMSConstants.PRIORITY_BASED_MESSAGE_SCRUBBING_ENABLED).orElse(false))
+            if (client.<Boolean>getMeta(SMSConstants.MESSAGE_SCRUBBING_ENABLED).orElse(false) || client.<Boolean>getMeta(request.getPriority().getSmsPriority() + "_PRIORITY_" + request.getCommunicationType() + "_SCRUBBING_ENABLED").orElse(false))
                 validate(request);
         } catch (WynkRuntimeException e) {
             if (e.getErrorType() != SmsErrorType.IQSMS001)
