@@ -52,6 +52,11 @@ public class AirtelSMSSender extends AbstractSMSSender {
 
     @Override
     @AnalyseTransaction(name = "sendSmsAirtel")
+    public void sendMessage(SmsRequest request) throws Exception {
+        super.sendMessage(request);
+    }
+
+    @Override
     public void send(SmsRequest request) throws Exception {
         AnalyticService.update(request);
         Country country = Country.getCountryByCountryCode(request.getCountryCode());

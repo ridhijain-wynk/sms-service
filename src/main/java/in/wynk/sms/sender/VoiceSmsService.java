@@ -1,5 +1,6 @@
 package in.wynk.sms.sender;
 
+import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
@@ -48,6 +49,12 @@ public class VoiceSmsService extends AbstractSMSSender {
     public VoiceSmsService(RestTemplate smsRestTemplate, ClientDetailsCachingService clientDetailsCachingService) {
         this.smsRestTemplate = smsRestTemplate;
         this.clientDetailsCachingService = clientDetailsCachingService;
+    }
+
+    @Override
+    @AnalyseTransaction(name = "airtelVoiceSender")
+    public void sendMessage(SmsRequest request) throws Exception {
+        super.sendMessage(request);
     }
 
     @Override

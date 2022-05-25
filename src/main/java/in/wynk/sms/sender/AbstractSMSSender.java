@@ -6,6 +6,7 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BeanLocatorFactory;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.constants.SMSConstants;
+import in.wynk.sms.constants.SmsLoggingMarkers;
 import in.wynk.sms.core.service.IScrubEngine;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.enums.SmsErrorType;
@@ -31,6 +32,7 @@ public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
             if (e.getErrorType() != SmsErrorType.IQSMS001)
                 throw e;
             AnalyticService.update("scrubbed", true);
+            logger.warn(SmsLoggingMarkers.NO_TEMPLATE_FOUND, "message is scrubbed as no matching template is found {}", request);
             return;
         }
         send(request);

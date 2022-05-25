@@ -25,6 +25,12 @@ public class SmppSender extends AbstractSMSSender {
 
     @Override
     @AnalyseTransaction(name = "sendSmsSmsc")
+    public void sendMessage(SmsRequest request) throws Exception {
+        super.sendMessage(request);
+    }
+
+
+    @Override
     public void send(SmsRequest request) throws Exception {
         AnalyticService.update(request);
         Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());

@@ -28,9 +28,14 @@ public class LobbySmsSender extends AbstractSMSSender {
     private final RestTemplate smsRestTemplate;
     private final ClientDetailsCachingService clientDetailsCachingService;
 
-    @SneakyThrows
     @Override
     @AnalyseTransaction(name = "sendSmsLobby")
+    public void sendMessage(SmsRequest request) throws Exception {
+        super.sendMessage(request);
+    }
+
+    @SneakyThrows
+    @Override
     public void send(SmsRequest request) {
         AnalyticService.update(request);
         Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
