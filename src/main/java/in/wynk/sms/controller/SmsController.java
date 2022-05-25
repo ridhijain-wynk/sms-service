@@ -23,33 +23,28 @@ import java.security.Principal;
 
 import static in.wynk.sms.constants.SMSConstants.SMS_ENCRYPTION_TOKEN;
 
+@Slf4j
 @RestController
 @RequestMapping({"/wynk/s2s", "/iq/s2s/message"})
-@Slf4j
 public class SmsController {
 
-    private final ISqsManagerService sqsManagerService;
+    private final ISqsManagerService<Object> sqsManagerService;
     private final ClientDetailsCachingService clientDetailsCachingService;
 
-    public SmsController(ISqsManagerService sqsManagerService, ClientDetailsCachingService clientDetailsCachingService) {
+    public SmsController(ISqsManagerService<Object> sqsManagerService, ClientDetailsCachingService clientDetailsCachingService) {
         this.sqsManagerService = sqsManagerService;
         this.clientDetailsCachingService = clientDetailsCachingService;
     }
 
-    @AnalyseTransaction(name = "sendVoiceSms")
     @PostMapping({"/v1/voiceSms/send", "/v1/voice/send"})
     public SmsResponse sendVoiceSms(Principal principal, @RequestBody SmsRequest smsRequest) {
         smsRequest.setCommunicationType(CommunicationType.VOICE);
         return sendSms(principal, smsRequest);
     }
 
-    @AnalyseTransaction(name = "sendSms")
     @PostMapping("/v1/sms/send")
+    @AnalyseTransaction(name = "sendSms")
     public SmsResponse sendSms(Principal principal, @RequestBody SmsRequest smsRequest) {
-        return send(principal, smsRequest);
-    }
-
-    private SmsResponse send(Principal principal, SmsRequest smsRequest) {
         Client client = clientDetailsCachingService.getClientById(principal.getName());
         String msisdn = smsRequest.getMsisdn();
         if (client.getMeta(SMS_ENCRYPTION_TOKEN).isPresent()) {
@@ -66,4 +61,5 @@ public class SmsController {
         sqsManagerService.publishSQSMessage(smsRequest);
         return SmsResponse.builder().build();
     }
+
 }
