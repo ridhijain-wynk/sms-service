@@ -22,16 +22,21 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 @Service(SMSConstants.LOBBY_MESSAGE_STRATEGY)
-public class LobbySmsSender implements IMessageSender<SmsRequest> {
+public class LobbySmsSender extends AbstractSMSSender {
 
     private final XmlMapper mapper = new XmlMapper();
     private final RestTemplate smsRestTemplate;
     private final ClientDetailsCachingService clientDetailsCachingService;
 
-    @SneakyThrows
     @Override
     @AnalyseTransaction(name = "sendSmsLobby")
-    public void sendMessage(SmsRequest request) {
+    public void sendMessage(SmsRequest request) throws Exception {
+        super.sendMessage(request);
+    }
+
+    @SneakyThrows
+    @Override
+    public void send(SmsRequest request) {
         AnalyticService.update(request);
         Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
         if (Objects.isNull(client)) {

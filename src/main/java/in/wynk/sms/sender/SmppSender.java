@@ -19,13 +19,19 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 @Service(SMSBeanConstant.SMPP_SENDER_WRAPPER)
-public class SmppSender implements IMessageSender<SmsRequest> {
+public class SmppSender extends AbstractSMSSender {
 
     private final ClientDetailsCachingService clientDetailsCachingService;
 
     @Override
     @AnalyseTransaction(name = "sendSmsSmsc")
     public void sendMessage(SmsRequest request) throws Exception {
+        super.sendMessage(request);
+    }
+
+
+    @Override
+    public void send(SmsRequest request) throws Exception {
         AnalyticService.update(request);
         Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
         if (Objects.isNull(client)) {

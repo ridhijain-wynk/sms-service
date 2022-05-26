@@ -1,74 +1,48 @@
 package in.wynk.sms.sender;
 
+import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.auth.dao.entity.Client;
+import in.wynk.client.service.ClientDetailsCachingService;
+import in.wynk.common.utils.BeanLocatorFactory;
+import in.wynk.exception.WynkRuntimeException;
+import in.wynk.sms.constants.SMSConstants;
+import in.wynk.sms.constants.SmsLoggingMarkers;
+import in.wynk.sms.core.service.IScrubEngine;
 import in.wynk.sms.dto.request.SmsRequest;
+import in.wynk.sms.enums.SmsErrorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
 
-	protected Logger logger = LoggerFactory.getLogger(getClass().getCanonicalName());
+    protected Logger logger = LoggerFactory.getLogger(getClass().getCanonicalName());
 
-	public abstract void sendMessage(SmsRequest request) throws Exception;
+    public void sendMessage(SmsRequest request) throws Exception {
+        try {
+            AnalyticService.update(request);
+            final ClientDetailsCachingService clientCache = BeanLocatorFactory.getBean(ClientDetailsCachingService.class);
+            Client client = clientCache.getClientByAlias(request.getClientAlias());
+            if (Objects.isNull(client)) {
+                client = clientCache.getClientByService(request.getService());
+            }
+            if (client.<Boolean>getMeta(SMSConstants.MESSAGE_SCRUBBING_ENABLED).orElse(false) || client.<Boolean>getMeta(request.getPriority().getSmsPriority() + "_PRIORITY_" + request.getCommunicationType() + "_SCRUBBING_ENABLED").orElse(false))
+                validate(request);
+        } catch (WynkRuntimeException e) {
+            if (e.getErrorType() != SmsErrorType.IQSMS001)
+                throw e;
+            AnalyticService.update("scrubbed", true);
+            logger.warn(SmsLoggingMarkers.NO_TEMPLATE_FOUND, "message is scrubbed as no matching template is found {}", request.getText());
+            return;
+        }
+        send(request);
+    }
 
-	protected Object[] convertToHexString(String input, boolean xmlEncode) {
-		if (input == null) {
-			return null;
-		}
-		StringBuilder sb = new StringBuilder();
-		if (xmlEncode) {
-			input = xmlEncode(input);
-		}
-		boolean containNonAscii = false;
-		for (int i = 0; i < input.length(); i++) {
-			char ch = input.charAt(i);
-			if (ch <= 127) {
-				sb.append(ch);
-			} else {
-				containNonAscii = true;
-				sb.append("&");
-				sb.append(Integer.toHexString(ch));
-				sb.append(";");
-			}
-		}
-		String msg = sb.toString();
-		if (containNonAscii) {
-			msg = msg.replaceAll("&#xa;", " ");
-		}
-		Object[] obj = new Object[2];
-		obj[0] = containNonAscii;
-		obj[1] = msg;
-		return obj;
-	}
+    protected abstract void send(SmsRequest request) throws Exception;
 
-	protected String xmlEncode(String s) {
-		StringBuilder str = new StringBuilder(new String("".getBytes(), StandardCharsets.UTF_8));
-		int len = (s != null) ? s.length() : 0;
-		for (int i = 0; i < len; i++) {
-			char ch = s.charAt(i);
-			switch (ch) {
-			case '<':
-				str.append("&lt;");
-				break;
-			case '>':
-				str.append("&gt;");
-				break;
-			case '&':
-				str.append("&amp;");
-				break;
-			case '"':
-				str.append("&quot;");
-				break;
-			case '\r':
-			case '\n':
-				str.append("&#x" + Integer.toHexString(ch) + ';');
-				break;
-			default:
-				str.append(ch);
-			}
-		}
-		return str.toString();
-	}
+    protected void validate(SmsRequest request) {
+        BeanLocatorFactory.getBean(IScrubEngine.class).scrub(request.getText());
+    }
 
 }

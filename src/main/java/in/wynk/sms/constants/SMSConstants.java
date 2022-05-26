@@ -5,6 +5,7 @@ import in.wynk.common.constant.BaseConstants;
 public interface SMSConstants extends BaseConstants {
 
     String SMS_QUEUE = "sms_queue";
+    String MESSAGE_SCRUBBING_ENABLED = "MESSAGE_SCRUBBING_ENABLED";
     String SMS_ENCRYPTION_TOKEN = "SMS_ENCRYPTION_TOKEN";
     String AIRTEL_IQ_SMS_SENDER_BEAN = "airtelIQSmsSender";
     String AIRTEL_SMS_SENDER = "smsSender";

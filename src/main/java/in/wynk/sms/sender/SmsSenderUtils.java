@@ -16,7 +16,7 @@ import static in.wynk.sms.constants.SMSConstants.LOBBY_MESSAGE_STRATEGY;
 import static in.wynk.sms.constants.SmsLoggingMarkers.SMS_SEND_BEAN_ERROR;
 
 @Component
-public class SmsSenderUtils implements ISmsSenderUtils{
+public class SmsSenderUtils implements ISmsSenderUtils {
     protected Logger logger = LoggerFactory.getLogger(getClass().getCanonicalName());
 
     @Autowired
@@ -32,14 +32,13 @@ public class SmsSenderUtils implements ISmsSenderUtils{
             if (Objects.isNull(client)) {
                 client = clientDetailsCachingService.getClientByService(request.getService());
             }
-            logger.info("found sender {} for client {}", request.getPriority().name() + "_PRIORITY_SMS_SENDER", client.toString());
-            if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_SENDER").isPresent()) {
-                final String senderBeanName = client.<String>getMeta(request.getPriority().name() + "_PRIORITY_SMS_SENDER").get();
+            if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_SENDER").isPresent()) {
+                final String senderBeanName = client.<String>getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_SENDER").get();
                 smsSender = BeanLocatorFactory.getBean(senderBeanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
                 });
             }
-        } catch(Exception ex) {
-            logger.error(SMS_SEND_BEAN_ERROR,"error while initializing message bean for msisdn - " + request.getMsisdn(),ex);
+        } catch (Exception ex) {
+            logger.error(SMS_SEND_BEAN_ERROR, "error while initializing message bean for msisdn - " + request.getMsisdn(), ex);
             throw ex;
         }
         return smsSender;
