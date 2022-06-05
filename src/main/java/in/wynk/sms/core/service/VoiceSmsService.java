@@ -19,7 +19,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class VoiceSmsService implements IVoiceSmsService {
+public class VoiceSmsService  {
     @Value("${sms.voice.messages.callFlowId}")
     private String callFlowId;
     @Value("${sms.voice.messages.callerId}")
@@ -42,8 +42,7 @@ public class VoiceSmsService implements IVoiceSmsService {
     public VoiceSmsService(RestTemplate smsRestTemplate) {
         this.smsRestTemplate = smsRestTemplate;
     }
-
-    @Override
+    
     public VoiceSmsResponse sendVoiceSms(SmsRequest smsRequest) {
         try {
             List<Participant> participants = new ArrayList<>();

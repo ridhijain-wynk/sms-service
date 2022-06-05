@@ -34,8 +34,8 @@ import static in.wynk.sms.enums.SmsErrorType.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
-@Component(AIRTEL_IQ_SMS_SENDER_BEAN)
 @Slf4j
+@Component(AIRTEL_IQ_SMS_SENDER_BEAN)
 public class IQAirtelSMSSender extends AbstractSMSSender {
 
     @Value("${sms.airtel.iq.customerId}")
@@ -64,13 +64,18 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
 
     @Override
     @AnalyseTransaction(name = "sendSmsAirtelIQ")
+    public void sendMessage(SmsRequest request) throws Exception {
+        super.sendMessage(request);
+    }
+
+    @Override
     public void send(SmsRequest request) {
         try {
             AnalyticService.update(MESSAGE_TEXT, request.getText());
             MessageTemplateDTO messageTemplateDTO = messageTemplateService.findMessageTemplateFromSmsText(request.getText());
             if (Objects.isNull(messageTemplateDTO)) {
                 log.error(NO_TEMPLATE_FOUND, "No template found for message: {}", request.getText());
-                throw new WynkRuntimeException(IQSMS001);
+                return;
             }
             sendSmsThroughAirtelIQ(request, messageTemplateDTO);
         } catch (WynkRuntimeException ex) {

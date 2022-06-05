@@ -12,9 +12,7 @@ import in.wynk.sms.queue.message.HighestPriorityMessage;
 import in.wynk.sms.queue.message.LowPriorityMessage;
 import in.wynk.sms.queue.message.MediumPriorityMessage;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,9 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class SmsRequest {
 
-    @Analysed
     private String message;
-    @Analysed
     private String text;
     @Analysed
     @Setter //temporary
@@ -56,8 +52,13 @@ public abstract class SmsRequest {
     @Analysed
     private String messageId;
 
+    @Setter
+    @Builder.Default
+    private CommunicationType communicationType = CommunicationType.SMS;
+
     public abstract SMSPriority getPriority();
 
+    @Analysed(name = "text")
     public String getText() {
         if (StringUtils.isBlank(text)) {
             return message;

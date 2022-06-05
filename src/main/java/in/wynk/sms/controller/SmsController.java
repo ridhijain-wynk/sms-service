@@ -8,6 +8,7 @@ import in.wynk.common.utils.BCEncryptor;
 import in.wynk.exception.WynkErrorType;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.queue.service.ISqsManagerService;
+import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
 import in.wynk.sms.queue.message.HighestPriorityMessage;
@@ -22,21 +23,27 @@ import java.security.Principal;
 
 import static in.wynk.sms.constants.SMSConstants.SMS_ENCRYPTION_TOKEN;
 
-@RestController
-@RequestMapping("/wynk/s2s/v1/sms")
 @Slf4j
+@RestController
+@RequestMapping({"/wynk/s2s", "/iq/s2s/message"})
 public class SmsController {
 
-    private final ISqsManagerService sqsManagerService;
+    private final ISqsManagerService<Object> sqsManagerService;
     private final ClientDetailsCachingService clientDetailsCachingService;
 
-    public SmsController(ISqsManagerService sqsManagerService, ClientDetailsCachingService clientDetailsCachingService) {
+    public SmsController(ISqsManagerService<Object> sqsManagerService, ClientDetailsCachingService clientDetailsCachingService) {
         this.sqsManagerService = sqsManagerService;
         this.clientDetailsCachingService = clientDetailsCachingService;
     }
 
+    @PostMapping({"/v1/voiceSms/send", "/v1/voice/send"})
+    public SmsResponse sendVoiceSms(Principal principal, @RequestBody SmsRequest smsRequest) {
+        smsRequest.setCommunicationType(CommunicationType.VOICE);
+        return sendSms(principal, smsRequest);
+    }
+
+    @PostMapping("/v1/sms/send")
     @AnalyseTransaction(name = "sendSms")
-    @PostMapping("/send")
     public SmsResponse sendSms(Principal principal, @RequestBody SmsRequest smsRequest) {
         Client client = clientDetailsCachingService.getClientById(principal.getName());
         String msisdn = smsRequest.getMsisdn();
@@ -48,10 +55,11 @@ public class SmsController {
         }
         smsRequest.setMsisdn(msisdn);
         if (StringUtils.isNotEmpty(smsRequest.getText()) && (smsRequest.getText().contains("PIN") || smsRequest.getText().contains("pin") || smsRequest.getText().contains("OTP") || smsRequest.getText().contains("otp") || smsRequest.getText().contains("CODE") || smsRequest.getText().contains("code")))
-            smsRequest = HighestPriorityMessage.builder().countryCode(smsRequest.getCountryCode()).msisdn(smsRequest.getMsisdn()).service(smsRequest.getService()).text(smsRequest.getText()).message(smsRequest.getText()).shortCode(smsRequest.getShortCode()).messageId(smsRequest.getMsisdn() + System.currentTimeMillis()).build();
+            smsRequest = HighestPriorityMessage.builder().countryCode(smsRequest.getCountryCode()).communicationType(smsRequest.getCommunicationType()).msisdn(smsRequest.getMsisdn()).service(smsRequest.getService()).text(smsRequest.getText()).message(smsRequest.getText()).shortCode(smsRequest.getShortCode()).messageId(smsRequest.getMsisdn() + System.currentTimeMillis()).build();
         AnalyticService.update(smsRequest);
         smsRequest.setClientAlias(client.getAlias());
         sqsManagerService.publishSQSMessage(smsRequest);
         return SmsResponse.builder().build();
     }
+
 }

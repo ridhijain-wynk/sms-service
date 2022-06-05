@@ -4,9 +4,12 @@ import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BeanLocatorFactory;
+import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.constants.SMSConstants;
+import in.wynk.sms.constants.SmsLoggingMarkers;
 import in.wynk.sms.core.service.IScrubEngine;
 import in.wynk.sms.dto.request.SmsRequest;
+import in.wynk.sms.enums.SmsErrorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,14 +21,19 @@ public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
 
     public void sendMessage(SmsRequest request) throws Exception {
         try {
+            AnalyticService.update(request);
             final ClientDetailsCachingService clientCache = BeanLocatorFactory.getBean(ClientDetailsCachingService.class);
             Client client = clientCache.getClientByAlias(request.getClientAlias());
             if (Objects.isNull(client)) {
                 client = clientCache.getClientByService(request.getService());
             }
-            if (client.<Boolean>getMeta(SMSConstants.MESSAGE_SCRUBBING_ENABLED).orElse(false) || client.<Boolean>getMeta(request.getPriority().getSmsPriority() + SMSConstants.PRIORITY_BASED_MESSAGE_SCRUBBING_ENABLED).orElse(false)) validate(request);
-        } catch (Exception e) {
+            if (client.<Boolean>getMeta(SMSConstants.MESSAGE_SCRUBBING_ENABLED).orElse(false) || client.<Boolean>getMeta(request.getPriority().getSmsPriority() + "_PRIORITY_" + request.getCommunicationType() + "_SCRUBBING_ENABLED").orElse(false))
+                validate(request);
+        } catch (WynkRuntimeException e) {
+            if (e.getErrorType() != SmsErrorType.IQSMS001)
+                throw e;
             AnalyticService.update("scrubbed", true);
+            logger.warn(SmsLoggingMarkers.NO_TEMPLATE_FOUND, "message is scrubbed as no matching template is found {}", request.getText());
             return;
         }
         send(request);
