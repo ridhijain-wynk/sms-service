@@ -69,7 +69,6 @@
         <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
-
     <logger name="sendSms" additivity="false">
         <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
