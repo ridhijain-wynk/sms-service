@@ -1,6 +1,8 @@
 package in.wynk.sms.core.service;
 
+import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.exception.WynkRuntimeException;
+import in.wynk.sms.constants.SMSConstants;
 import in.wynk.sms.dto.MessageTemplateDTO;
 import in.wynk.sms.enums.SmsErrorType;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +20,13 @@ public class MessageScrubEngineImpl implements IScrubEngine {
 
     @Override
     public void scrub(String message) {
-       final MessageTemplateDTO templateDTO = templateService.findMessageTemplateFromSmsText(message);
-       if (Objects.isNull(templateDTO)) throw new WynkRuntimeException(SmsErrorType.IQSMS001, "Template is not register, Hence Scrubbing message");
+        final MessageTemplateDTO templateDTO = templateService.findMessageTemplateFromSmsText(message);
+        if (Objects.isNull(templateDTO)) {
+            AnalyticService.update(SMSConstants.IS_MESSAGE_SCRUBBED, true);
+            throw new WynkRuntimeException(SmsErrorType.IQSMS001, "Template is not register, Hence Scrubbing message");
+        }
+        AnalyticService.update(SMSConstants.IS_MESSAGE_SCRUBBED, false);
+        AnalyticService.update(SMSConstants.SCRUBBING_TEMPLATE_ID, templateDTO.getMessageTemplateId());
     }
 
 }
