@@ -12,10 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static in.wynk.common.constant.BaseConstants.HTTP_STATUS_CODE;
 import static in.wynk.sms.constants.SMSConstants.AIRTEL_SMS_SENDER;
 import static in.wynk.sms.constants.SmsLoggingMarkers.*;
 
@@ -88,7 +86,8 @@ public class AirtelSMSSender extends AbstractSMSSender {
                     org.springframework.http.HttpHeaders headers = new HttpHeaders();
                     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
                     RequestEntity<String> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, new URI(requestUrl));
-                    smsRestTemplate.exchange(requestEntity, String.class);
+                    ResponseEntity<String> response = smsRestTemplate.exchange(requestEntity, String.class);
+                    AnalyticService.update(HTTP_STATUS_CODE, response.getStatusCode().name());
                 } catch (Throwable th) {
                     logger.error(SL_SMS_ERROR, "Error Sending SMS to Msisdn: {" + smsRequest.getMsisdn() + "} ERROR: { " + th.getMessage() + "}", th);
                 }
