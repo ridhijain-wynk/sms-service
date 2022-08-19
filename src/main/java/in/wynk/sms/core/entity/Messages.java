@@ -17,4 +17,7 @@ public class Messages extends MongoBaseEntity<String> {
     private String message;
     private String priority;
     private boolean enabled;
+    private String sender;
+    private String linkedHeader;
+    private String templateId;
 }

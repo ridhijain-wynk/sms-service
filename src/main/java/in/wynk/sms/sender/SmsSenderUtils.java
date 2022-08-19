@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import java.util.*;
 
-import static in.wynk.sms.constants.SMSConstants.LOBBY_MESSAGE_STRATEGY;
-import static in.wynk.sms.constants.SmsLoggingMarkers.SMS_SEND_BEAN_ERROR;
+import static in.wynk.sms.constants.SMSConstants.*;
+import static in.wynk.sms.constants.SmsLoggingMarkers.*;
 
 @Component
 public class SmsSenderUtils implements ISmsSenderUtils {
@@ -23,23 +23,30 @@ public class SmsSenderUtils implements ISmsSenderUtils {
     private ClientDetailsCachingService clientDetailsCachingService;
 
     @Override
-    public IMessageSender<SmsRequest> fetchSmsSender(SmsRequest request) {
+    public Map<String, IMessageSender<SmsRequest>> fetchSmsSender(SmsRequest request) {
+        Map<String, IMessageSender<SmsRequest>> senderMap = new HashMap<>();
         IMessageSender<SmsRequest> smsSender = BeanLocatorFactory.getBean(LOBBY_MESSAGE_STRATEGY, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
         });
+        senderMap.put(PRIMARY, smsSender);
         try {
             Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
             if (Objects.isNull(client)) {
                 client = clientDetailsCachingService.getClientByService(request.getService());
             }
-            if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_SENDER").isPresent()) {
-                final String senderBeanName = client.<String>getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_SENDER").get();
-                smsSender = BeanLocatorFactory.getBean(senderBeanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
-                });
+            if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_" + PRIMARY + "_SENDER").isPresent()) {
+                final String primarySenderBeanName = client.<String>getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_" + PRIMARY + "_SENDER").get();
+                senderMap.put(PRIMARY, BeanLocatorFactory.getBean(primarySenderBeanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
+                }));
+            }
+            if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_" + SECONDARY + "_SENDER").isPresent()) {
+                final String secondarySenderBeanName = client.<String>getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_" + SECONDARY + "_SENDER").get();
+                senderMap.put(SECONDARY, BeanLocatorFactory.getBean(secondarySenderBeanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
+                }));
             }
         } catch (Exception ex) {
             logger.error(SMS_SEND_BEAN_ERROR, "error while initializing message bean for msisdn - " + request.getMsisdn(), ex);
             throw ex;
         }
-        return smsSender;
+        return senderMap;
     }
 }

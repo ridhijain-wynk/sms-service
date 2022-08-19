@@ -17,5 +17,7 @@ public interface SMSConstants extends BaseConstants {
     String CONVERTED_MESSAGE_TEXT = "convertedMessageText";
     String TIME_NOT_VALID_FOR_MESSAGE_TYPE = "TIME_NOT_VALID_FOR_MESSAGE_TYPE";
     String FAILURE_CODE = "errorCode";
+    String PRIMARY = "PRIMARY";
+    String SECONDARY = "SECONDARY";
 
 }

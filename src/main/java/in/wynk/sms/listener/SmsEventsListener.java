@@ -41,7 +41,7 @@ public class SmsEventsListener {
     public void onSmsNotificationEvent(SmsNotificationEvent event) {
         if (StringUtils.isNotEmpty(event.getMsisdn())) {
             if (StringUtils.isNotEmpty(event.getMessage())) {
-                log.info(OLD_MESSAGE_PATTERN, "Resolved message present for ", event.getMsisdn());
+                log.info(OLD_MESSAGE_PATTERN, "Resolved message present for {}", event.getMsisdn());
                 SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
                         .message(event.getMessage())
                         .msisdn(event.getMsisdn())
