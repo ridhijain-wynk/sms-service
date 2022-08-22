@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Getter
 @ToString
@@ -18,6 +19,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AnalysedEntity
 public class MessageTemplate extends MongoBaseEntity<String> {
     private String linkedHeader;
+    @Field("template_name")
     private String templateName;
     private String templateContent;
     private CommunicationType communicationType;
