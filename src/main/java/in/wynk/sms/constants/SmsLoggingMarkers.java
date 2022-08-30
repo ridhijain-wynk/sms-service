@@ -22,4 +22,6 @@ public interface SmsLoggingMarkers extends BaseLoggingMarkers {
     Marker REST_TEMPLATE_SMS_ERROR= MarkerFactory.getMarker("REST_TEMPLATE_SMS_ERROR");
     Marker MESSAGE_NOT_FOUND = MarkerFactory.getMarker("MESSAGE_NOT_FOUND");
     Marker OLD_MESSAGE_PATTERN = MarkerFactory.getMarker("OLD_MESSAGE_PATTERN");
+    Marker SENDER_CONFIGURATIONS_CACHING_FAILURE = MarkerFactory.getMarker("SENDER_CONFIGURATIONS_CACHING_FAILURE");
+    Marker SENDERS_CACHING_FAILURE = MarkerFactory.getMarker("SENDERS_CACHING_FAILURE");
 }

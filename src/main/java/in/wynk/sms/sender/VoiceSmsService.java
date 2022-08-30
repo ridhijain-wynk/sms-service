@@ -6,6 +6,8 @@ import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.constants.SMSBeanConstant;
+import in.wynk.sms.core.entity.Senders;
+import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.request.*;
 import in.wynk.sms.dto.response.VoiceSmsResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -45,10 +47,12 @@ public class VoiceSmsService extends AbstractSMSSender {
 
     private final RestTemplate smsRestTemplate;
     private final ClientDetailsCachingService clientDetailsCachingService;
+    private final SendersCachingService sendersCachingService;
 
-    public VoiceSmsService(RestTemplate smsRestTemplate, ClientDetailsCachingService clientDetailsCachingService) {
+    public VoiceSmsService(RestTemplate smsRestTemplate, ClientDetailsCachingService clientDetailsCachingService, SendersCachingService sendersCachingService) {
         this.smsRestTemplate = smsRestTemplate;
         this.clientDetailsCachingService = clientDetailsCachingService;
+        this.sendersCachingService = sendersCachingService;
     }
 
     @Override
@@ -75,15 +79,16 @@ public class VoiceSmsService extends AbstractSMSSender {
             Optional<String> callTypeOption = Optional.empty();
             Optional<String> urlOption = Optional.empty();
 
-            if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_URL").isPresent()) {
-                urlOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_URL");
-                callTypeOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_CALL_TYPE");
-                textTypeOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_TEXT_TYPE");
-                maxRetriesOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_MAX_RETRY");
-                customerIdOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_CUSTOMER_ID");
-                tokenOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_TOKEN");
-                callerIdOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_CALLER_ID");
-                callFlowIdOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_CALL_FLOW_ID");
+            Senders senders = sendersCachingService.getSenderByNameAndClient(SMSBeanConstant.AIRTEL_VOICE_MESSAGE_SENDER, client.getAlias());
+            if (Objects.nonNull(senders) && senders.isUrlPresent()) {
+                urlOption = Optional.of(senders.getUrl());
+                callTypeOption = Optional.of(senders.getCallType());
+                textTypeOption = Optional.of(senders.getTextType());
+                maxRetriesOption = Optional.of(senders.getMaxRetry());
+                customerIdOption = Optional.of(senders.getCustomerId());
+                tokenOption = Optional.of(senders.getToken());
+                callerIdOption = Optional.of(senders.getCallerId());
+                callFlowIdOption = Optional.of(senders.getCallFlowId());
             }
 
 

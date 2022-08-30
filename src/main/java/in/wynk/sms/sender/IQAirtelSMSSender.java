@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.exception.WynkRuntimeException;
-import in.wynk.sms.core.service.IMessageTemplateService;
+import in.wynk.sms.core.service.IMessageService;
 import in.wynk.sms.dto.MessageTemplateDTO;
 import in.wynk.sms.dto.request.IQSmsRequest;
 import in.wynk.sms.dto.request.SmsRequest;
@@ -54,7 +54,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
     private String airtelIqApiPassword;
 
     @Autowired
-    private IMessageTemplateService messageTemplateService;
+    private IMessageService messageService;
 
     @Autowired
     private RestTemplate smsRestTemplate;
@@ -72,7 +72,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
     public void send(SmsRequest request) {
         try {
             AnalyticService.update(MESSAGE_TEXT, request.getText());
-            MessageTemplateDTO messageTemplateDTO = messageTemplateService.findMessageTemplateFromSmsText(request.getText());
+            MessageTemplateDTO messageTemplateDTO = messageService.findMessagesFromSmsText(request.getText());
             if (Objects.isNull(messageTemplateDTO)) {
                 log.error(NO_TEMPLATE_FOUND, "No template found for message: {}", request.getText());
                 return;
