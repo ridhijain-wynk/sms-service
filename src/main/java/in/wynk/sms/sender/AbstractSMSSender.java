@@ -29,7 +29,7 @@ public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
                 client = clientCache.getClientByService(request.getService());
             }
             SenderConfigurations senderConfigurations = BeanLocatorFactory.getBean(SenderConfigurationsCachingService.class).getSenderConfigurationsByAlias(client.getAlias());
-            if(Objects.nonNull(senderConfigurations) && (senderConfigurations.isScrubbingEnabled() || senderConfigurations.getDetails().get(request.getPriority()).get(request.getCommunicationType()).isScrubbingEnabled())){
+            if(Objects.nonNull(senderConfigurations) && (senderConfigurations.getDetails().containsKey(request.getPriority())) && (senderConfigurations.isScrubbingEnabled() || senderConfigurations.getDetails().get(request.getPriority()).get(request.getCommunicationType()).isScrubbingEnabled())){
                 validate(request);
             }
             /*if (client.<Boolean>getMeta(SMSConstants.MESSAGE_SCRUBBING_ENABLED).orElse(false) || client.<Boolean>getMeta(request.getPriority().getSmsPriority() + "_PRIORITY_" + request.getCommunicationType() + "_SCRUBBING_ENABLED").orElse(false))
