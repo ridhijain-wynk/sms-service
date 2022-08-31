@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -51,7 +52,7 @@ public class MessageCachingService implements IEntityCacheService<Messages, Stri
         if (CollectionUtils.isNotEmpty(allMessages) && writeLock.tryLock()) {
             try {
                 Map<String, Messages> idMap = allMessages.stream().collect(Collectors.toMap(Messages::getId, Function.identity()));
-                Map<String, Messages> templateIdMap = allMessages.stream().collect(Collectors.toMap(Messages::getTemplateId, Function.identity()));
+                Map<String, Messages> templateIdMap = allMessages.stream().filter(m -> Objects.nonNull(m.getTemplateId())).collect(Collectors.toMap(Messages::getTemplateId, Function.identity()));
                 MESSAGES_BY_IDS_CACHE.clear();
                 MESSAGES_BY_TEMPLATE_IDS_CACHE.clear();
                 MESSAGES_BY_IDS_CACHE.putAll(idMap);
