@@ -40,6 +40,7 @@ public class SmsSenderUtils implements ISmsSenderUtils {
             if (Objects.isNull(client)) {
                 client = clientDetailsCachingService.getClientByService(request.getService());
             }
+            if (Objects.isNull(client)) return senderMap;
             SenderConfigurations senderConfigurations = senderConfigCachingService.getSenderConfigurationsByAlias(client.getAlias());
             if(Objects.nonNull(senderConfigurations)){
                 Map<CommunicationType, SenderDetails> senderDetailsMap = senderConfigurations.getDetails().get(request.getPriority());
