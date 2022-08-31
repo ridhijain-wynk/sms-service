@@ -6,6 +6,7 @@ import in.wynk.common.utils.BeanLocatorFactory;
 import in.wynk.sms.core.entity.SenderConfigurations;
 import in.wynk.sms.core.entity.SenderDetails;
 import in.wynk.sms.core.service.SenderConfigurationsCachingService;
+import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import org.slf4j.Logger;
@@ -30,6 +31,9 @@ public class SmsSenderUtils implements ISmsSenderUtils {
     @Autowired
     private SenderConfigurationsCachingService senderConfigCachingService;
 
+    @Autowired
+    private SendersCachingService sendersCachingService;
+
     @Override
     public Map<String, IMessageSender<SmsRequest>> fetchSmsSender(SmsRequest request) {
         Map<String, IMessageSender<SmsRequest>> senderMap = new HashMap<>();
@@ -45,12 +49,12 @@ public class SmsSenderUtils implements ISmsSenderUtils {
             if(Objects.nonNull(senderConfigurations)){
                 Map<CommunicationType, SenderDetails> senderDetailsMap = senderConfigurations.getDetails().get(request.getPriority());
                 if(!CollectionUtils.isEmpty(senderDetailsMap) && senderDetailsMap.containsKey(request.getCommunicationType()) && senderDetailsMap.get(request.getCommunicationType()).isPrimaryPresent()){
-                    final String primarySenderBeanName = senderDetailsMap.get(request.getCommunicationType()).getPrimary();
-                    senderMap.put(PRIMARY, BeanLocatorFactory.getBean(primarySenderBeanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
+                    final String primarySenderId = senderDetailsMap.get(request.getCommunicationType()).getPrimary();
+                    senderMap.put(PRIMARY, BeanLocatorFactory.getBean(sendersCachingService.getSenderById(primarySenderId).getName(), new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
                     }));
                     if(senderDetailsMap.get(request.getCommunicationType()).isSecondaryPresent()){
-                        final String secondarySenderBeanName = senderDetailsMap.get(request.getCommunicationType()).getSecondary();
-                        senderMap.put(SECONDARY, BeanLocatorFactory.getBean(secondarySenderBeanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
+                        final String secondarySenderId = senderDetailsMap.get(request.getCommunicationType()).getSecondary();
+                        senderMap.put(SECONDARY, BeanLocatorFactory.getBean(sendersCachingService.getSenderById(secondarySenderId).getName(), new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
                         }));
                     }
                 }
