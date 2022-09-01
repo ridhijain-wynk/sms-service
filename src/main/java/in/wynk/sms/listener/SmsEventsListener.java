@@ -19,9 +19,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import static in.wynk.common.constant.BaseConstants.*;
 import static in.wynk.sms.constants.SmsLoggingMarkers.MESSAGE_NOT_FOUND;
@@ -58,7 +56,10 @@ public class SmsEventsListener {
                     log.error(MESSAGE_NOT_FOUND, "Unable to find linked message {} ", event.getMessageId());
                     return;
                 }
-
+                AnalyticService.update(CIRCLE_CODE, circleCode);
+                AnalyticService.update(IS_ENABLED, message.isEnabled());
+                AnalyticService.update(MESSAGE_TEMPLATE_TAGS, message.getTags());
+                AnalyticService.update(INTERNAL_MESSAGE_TEMPLATE_ID, message.getId());
                 final String smsMessage = message.getMessage();
                 if (message.isEnabled()) {
                     final StandardEvaluationContext seContext = DefaultStandardExpressionContextBuilder.builder()

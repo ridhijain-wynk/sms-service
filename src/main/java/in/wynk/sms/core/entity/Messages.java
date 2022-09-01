@@ -16,5 +16,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Messages extends MongoBaseEntity<String> {
     private String message;
     private String priority;
+    private String tags;
     private boolean enabled;
 }

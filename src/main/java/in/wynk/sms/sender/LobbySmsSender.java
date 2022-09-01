@@ -5,6 +5,7 @@ import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
+import in.wynk.common.constant.BaseConstants;
 import in.wynk.sms.constants.SMSConstants;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.lobby.*;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -75,7 +77,8 @@ public class LobbySmsSender extends AbstractSMSSender {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.TEXT_XML);
             HttpEntity<String> entity = new HttpEntity<>(payload, headers);
-            smsRestTemplate.postForEntity(url, entity, String.class);
+            ResponseEntity<String> response = smsRestTemplate.postForEntity(url, entity, String.class);
+            AnalyticService.update(BaseConstants.HTTP_STATUS_CODE, response.getStatusCode().name());
         }
     }
 

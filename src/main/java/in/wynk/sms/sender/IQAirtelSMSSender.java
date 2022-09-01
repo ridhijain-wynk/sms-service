@@ -96,7 +96,9 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
             headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
             URI uri = new URI(airtelIqApiUrl);
             HttpEntity<IQSmsRequest> requestEntity = new HttpEntity<>(iqSmsRequest, headers);
-            IQSmsResponse response = smsRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, IQSmsResponse.class).getBody();
+            ResponseEntity<IQSmsResponse> responseEntity = smsRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, IQSmsResponse.class);
+            IQSmsResponse response = responseEntity.getBody();
+            AnalyticService.update(HTTP_STATUS_CODE, responseEntity.getStatusCode().name());
             AnalyticService.update(response);
         } catch (HttpStatusCodeException ex) {
             try {

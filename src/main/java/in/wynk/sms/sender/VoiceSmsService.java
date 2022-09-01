@@ -4,16 +4,14 @@ import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
+import in.wynk.common.constant.BaseConstants;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.constants.SMSBeanConstant;
 import in.wynk.sms.dto.request.*;
 import in.wynk.sms.dto.response.VoiceSmsResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -95,7 +93,9 @@ public class VoiceSmsService extends AbstractSMSSender {
                             .textToSpeech_1(TextToSpeech.builder().text(updateTextMsg(request.getText())).textType(textTypeOption.orElse(TEXT_TYPE)).build()).build()).build();
             final HttpHeaders headers = getHeaders(tokenOption);
             final HttpEntity<VoiceSmsRequest> requestEntity = new HttpEntity<>(voiceSmsRequest, headers);
-            smsRestTemplate.exchange(urlOption.orElse(URL), HttpMethod.POST, requestEntity, VoiceSmsResponse.class).getBody();
+            ResponseEntity<VoiceSmsResponse> response = smsRestTemplate.exchange(urlOption.orElse(URL), HttpMethod.POST, requestEntity, VoiceSmsResponse.class);
+            AnalyticService.update(response.getBody());
+            AnalyticService.update(BaseConstants.HTTP_STATUS_CODE, response.getStatusCode().name());
         } catch (Exception ex) {
             throw new WynkRuntimeException("failed to send voice sms", ex);
         }
