@@ -15,6 +15,8 @@ public class SMSFactory {
 
     public static SmsRequest getSmsRequest(SmsNotificationMessage message) {
         switch (message.getPriority()) {
+            case HIGHEST:
+                return HighestPriorityMessage.from(message);
             case HIGH:
                 return HighPriorityMessage.from(message);
             case MEDIUM:
