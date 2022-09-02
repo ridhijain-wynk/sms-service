@@ -54,10 +54,8 @@ public class MessageService implements IMessageService {
 
     private Map<Integer, String> getVarMapIfTemplateMatchesSmsText(String template, String filledTemplate) {
         Map<Integer, String> templateTranslation = new LinkedHashMap<>();
-        String regexTemplate = template;
-        if(template.contains(PLACE_HOLDER_PATTERN)){
-            regexTemplate = template.replaceAll(PLACE_HOLDER_PATTERN, REPLACE_PATTERN);
-        } else if(template.contains(SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionPrefix())
+        String regexTemplate;
+        if(template.contains(SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionPrefix())
                 && template.contains(SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionSuffix())){
             Pattern pattern = Pattern.compile(Pattern.quote(SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionPrefix())
                     + SPRING_EXP_REPLACE_PATTERN + Pattern.quote(SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionSuffix()));
@@ -66,6 +64,8 @@ public class MessageService implements IMessageService {
                 template = template.replace(SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionPrefix() + matcher.group(1) + SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionSuffix(), REPLACE_PATTERN);
             }
             regexTemplate = template;
+        } else {
+            regexTemplate = template.replaceAll(PLACE_HOLDER_PATTERN, REPLACE_PATTERN);
         }
         Pattern pattern = Pattern.compile(regexTemplate);
         Matcher templateMatcher = pattern.matcher(template);
