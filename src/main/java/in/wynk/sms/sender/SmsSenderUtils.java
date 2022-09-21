@@ -37,8 +37,7 @@ public class SmsSenderUtils implements ISmsSenderUtils {
     @Override
     public Map<String, IMessageSender<SmsRequest>> fetchSmsSender(SmsRequest request) {
         Map<String, IMessageSender<SmsRequest>> senderMap = new HashMap<>();
-        senderMap.put(PRIMARY, BeanLocatorFactory.getBean(LOBBY_MESSAGE_STRATEGY, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
-        }));
+        addSender(senderMap, PRIMARY, LOBBY_MESSAGE_STRATEGY);
         try {
             Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
             if (Objects.isNull(client)) {
@@ -50,23 +49,33 @@ public class SmsSenderUtils implements ISmsSenderUtils {
                     Map<CommunicationType, SenderDetails> senderDetailsMap = senderConfigurations.getDetails().get(request.getPriority());
                     if(!CollectionUtils.isEmpty(senderDetailsMap) && senderDetailsMap.containsKey(request.getCommunicationType()) && senderDetailsMap.get(request.getCommunicationType()).isPrimaryPresent()){
                         final String primarySenderId = senderDetailsMap.get(request.getCommunicationType()).getPrimary();
-                        senderMap.put(PRIMARY, BeanLocatorFactory.getBean(sendersCachingService.getSenderById(primarySenderId).getName(), new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
-                        }));
+                        addSender(senderMap, PRIMARY, sendersCachingService.getSenderById(primarySenderId).getName());
                         if(senderDetailsMap.get(request.getCommunicationType()).isSecondaryPresent()){
                             final String secondarySenderId = senderDetailsMap.get(request.getCommunicationType()).getSecondary();
-                            senderMap.put(SECONDARY, BeanLocatorFactory.getBean(sendersCachingService.getSenderById(secondarySenderId).getName(), new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
-                            }));
+                            addSender(senderMap, SECONDARY, sendersCachingService.getSenderById(secondarySenderId).getName());
                         }
                     }
                 }
             }
-            if (Objects.nonNull(request.getSender())) {
-                senderMap.put(PRIMARY, BeanLocatorFactory.getBean(request.getSender(), new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {}));
+            if (Objects.nonNull(request.getSender()) &&
+                    !senderMap.get(PRIMARY).equals(BeanLocatorFactory.getBean(request.getSender(),
+                            new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {}))){
+                senderMap.put(SECONDARY, senderMap.get(PRIMARY));
+                addSender(senderMap, PRIMARY, request.getSender());
             }
         } catch (Exception ex) {
             logger.error(SMS_SEND_BEAN_ERROR, "error while initializing message bean for msisdn - " + request.getMsisdn(), ex);
             throw ex;
         }
         return senderMap;
+    }
+
+    private void addSender(Map<String, IMessageSender<SmsRequest>> senderMap, String beanType, String beanName) {
+        try {
+            senderMap.put(beanType, BeanLocatorFactory.getBean(beanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
+            }));
+        } catch(Exception e){
+            logger.error(SMS_SEND_BEAN_ERROR, "error while adding " + beanName + " bean for - " + beanType);
+        }
     }
 }
