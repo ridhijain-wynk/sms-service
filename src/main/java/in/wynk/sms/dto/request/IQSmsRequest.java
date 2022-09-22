@@ -33,7 +33,7 @@ public class IQSmsRequest {
                     .destinationAddress(Arrays.asList(smsRequest.getMsisdn()))
                     .sourceAddress(messageTemplateDTO.getLinkedHeader())
                     .message(smsRequest.getText())
-                    .messageType(CommunicationType.PROMOTIONAL.getType())
+                    .messageType(messageTemplateDTO.getMessageType().getType())
                     .dltTemplateId(messageTemplateDTO.getMessageTemplateId())
                     .entityId(entityId);
         }

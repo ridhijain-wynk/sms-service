@@ -40,7 +40,7 @@ public class MessageService implements IMessageService {
         if (message.isVariablesPresent()) {
             Map<Integer, String> variablesMap = getVarMapIfTemplateMatchesSmsText(message.getMessage(), messageText);
             if (MapUtils.isNotEmpty(variablesMap)) {
-                messageTemplateDTO = MessageTemplateDTO.builder().messageTemplateId(message.getTemplateId()).linkedHeader(message.getLinkedHeader()).vars(new ArrayList<>(variablesMap.values())).build();
+                messageTemplateDTO = MessageTemplateDTO.builder().messageTemplateId(message.getTemplateId()).linkedHeader(message.getLinkedHeader()).vars(new ArrayList<>(variablesMap.values())).messageType(message.getCommunicationType()).build();
             }
         } else {
             messageTemplateDTO = fetchTemplateByStringComparison(message, messageText);
@@ -49,7 +49,7 @@ public class MessageService implements IMessageService {
     }
 
     private MessageTemplateDTO fetchTemplateByStringComparison(Messages message, String messageText) {
-        return message.getMessage().equals(messageText) ? MessageTemplateDTO.builder().linkedHeader(message.getLinkedHeader()).messageTemplateId(message.getTemplateId()).build() : null;
+        return message.getMessage().equals(messageText) ? MessageTemplateDTO.builder().linkedHeader(message.getLinkedHeader()).messageTemplateId(message.getTemplateId()).messageType(message.getCommunicationType()).build() : null;
     }
 
     private Map<Integer, String> getVarMapIfTemplateMatchesSmsText(String template, String filledTemplate) {
@@ -65,7 +65,7 @@ public class MessageService implements IMessageService {
             }
             regexTemplate = template;
         } else {
-            regexTemplate = template.replaceAll(PLACE_HOLDER_PATTERN, REPLACE_PATTERN);
+            regexTemplate = template.replaceAll("\\)","").replaceAll("\\(","").replaceAll(PLACE_HOLDER_PATTERN, REPLACE_PATTERN);
         }
         Pattern pattern = Pattern.compile(regexTemplate);
         Matcher templateMatcher = pattern.matcher(template);
