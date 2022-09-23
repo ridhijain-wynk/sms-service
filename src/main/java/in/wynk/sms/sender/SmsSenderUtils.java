@@ -69,7 +69,7 @@ public class SmsSenderUtils implements ISmsSenderUtils {
                             sendersCachingService.getSenderById(template.getSender()).getName(),
                             new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {}))){
                 senderMap.put(SECONDARY, senderMap.get(PRIMARY));
-                addSender(senderMap, PRIMARY, template.getSender());
+                addSender(senderMap, PRIMARY, sendersCachingService.getSenderById(template.getSender()).getName());
             }
         } catch (Exception ex) {
             logger.error(SMS_SEND_BEAN_ERROR, "error while initializing message bean for msisdn - " + request.getMsisdn(), ex);
