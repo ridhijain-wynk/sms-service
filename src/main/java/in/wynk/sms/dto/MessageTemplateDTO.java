@@ -13,4 +13,5 @@ public class MessageTemplateDTO {
     private String messageTemplateId;
     private String linkedHeader;
     private CommunicationType messageType;
+    private String sender;
 }

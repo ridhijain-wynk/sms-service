@@ -5,8 +5,10 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BeanLocatorFactory;
 import in.wynk.sms.core.entity.SenderConfigurations;
 import in.wynk.sms.core.entity.SenderDetails;
+import in.wynk.sms.core.service.MessageService;
 import in.wynk.sms.core.service.SenderConfigurationsCachingService;
 import in.wynk.sms.core.service.SendersCachingService;
+import in.wynk.sms.dto.MessageTemplateDTO;
 import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import org.slf4j.Logger;
@@ -34,6 +36,9 @@ public class SmsSenderUtils implements ISmsSenderUtils {
     @Autowired
     private SendersCachingService sendersCachingService;
 
+    @Autowired
+    private MessageService messageService;
+
     @Override
     public Map<String, IMessageSender<SmsRequest>> fetchSmsSender(SmsRequest request) {
         Map<String, IMessageSender<SmsRequest>> senderMap = new HashMap<>();
@@ -57,11 +62,13 @@ public class SmsSenderUtils implements ISmsSenderUtils {
                     }
                 }
             }
-            if (Objects.nonNull(request.getSender()) &&
-                    !senderMap.get(PRIMARY).equals(BeanLocatorFactory.getBean(request.getSender(),
+            MessageTemplateDTO template = messageService.findMessagesFromSmsText(request.getText());
+            if (Objects.nonNull(template) &&
+                    Objects.nonNull(template.getSender()) &&
+                    !senderMap.get(PRIMARY).equals(BeanLocatorFactory.getBean(template.getSender(),
                             new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {}))){
                 senderMap.put(SECONDARY, senderMap.get(PRIMARY));
-                addSender(senderMap, PRIMARY, request.getSender());
+                addSender(senderMap, PRIMARY, template.getSender());
             }
         } catch (Exception ex) {
             logger.error(SMS_SEND_BEAN_ERROR, "error while initializing message bean for msisdn - " + request.getMsisdn(), ex);

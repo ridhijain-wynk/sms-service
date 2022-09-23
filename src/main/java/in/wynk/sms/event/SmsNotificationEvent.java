@@ -26,6 +26,4 @@ public class SmsNotificationEvent {
     @Analysed
     private String messageId;
     private Map<String, Object> contextMap;
-    @Analysed
-    private String sender;
 }

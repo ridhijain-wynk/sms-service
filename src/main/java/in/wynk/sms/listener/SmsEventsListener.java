@@ -47,7 +47,6 @@ public class SmsEventsListener {
                         .msisdn(event.getMsisdn())
                         .service(event.getService())
                         .priority(event.getPriority())
-                        .sender(event.getSender())
                         .build());
                 AnalyticService.update(smsRequest);
                 sqsManagerService.publishSQSMessage(smsRequest);
@@ -72,7 +71,6 @@ public class SmsEventsListener {
                             .msisdn(event.getMsisdn())
                             .service(event.getService())
                             .priority(message.getPriority())
-                            .sender(event.getSender())
                             .build());
                     AnalyticService.update(smsRequest);
                     sqsManagerService.publishSQSMessage(smsRequest);

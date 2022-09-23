@@ -40,7 +40,7 @@ public class MessageService implements IMessageService {
         if (message.isVariablesPresent()) {
             Map<Integer, String> variablesMap = getVarMapIfTemplateMatchesSmsText(message.getMessage(), messageText);
             if (MapUtils.isNotEmpty(variablesMap)) {
-                messageTemplateDTO = MessageTemplateDTO.builder().messageTemplateId(message.getTemplateId()).linkedHeader(message.getLinkedHeader()).vars(new ArrayList<>(variablesMap.values())).messageType(message.getCommunicationType()).build();
+                messageTemplateDTO = MessageTemplateDTO.builder().messageTemplateId(message.getTemplateId()).linkedHeader(message.getLinkedHeader()).vars(new ArrayList<>(variablesMap.values())).messageType(message.getCommunicationType()).sender(message.getSender()).build();
             }
         } else {
             messageTemplateDTO = fetchTemplateByStringComparison(message, messageText);
@@ -49,7 +49,7 @@ public class MessageService implements IMessageService {
     }
 
     private MessageTemplateDTO fetchTemplateByStringComparison(Messages message, String messageText) {
-        return message.getMessage().equals(messageText) ? MessageTemplateDTO.builder().linkedHeader(message.getLinkedHeader()).messageTemplateId(message.getTemplateId()).messageType(message.getCommunicationType()).build() : null;
+        return message.getMessage().equals(messageText) ? MessageTemplateDTO.builder().linkedHeader(message.getLinkedHeader()).messageTemplateId(message.getTemplateId()).messageType(message.getCommunicationType()).sender(message.getSender()).build() : null;
     }
 
     private Map<Integer, String> getVarMapIfTemplateMatchesSmsText(String template, String filledTemplate) {
