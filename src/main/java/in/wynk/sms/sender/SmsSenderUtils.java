@@ -63,8 +63,8 @@ public class SmsSenderUtils implements ISmsSenderUtils {
                 }
             }
             if(Objects.nonNull(request.getTemplateId())){
-                Messages message = messageCachingService.getMessageByTemplateId(request.getTemplateId());
-                if (Objects.nonNull(message.getSender()) &&
+                Messages message = messageCachingService.get(request.getTemplateId());
+                if (Objects.nonNull(message) && Objects.nonNull(message.getSender()) &&
                         !senderMap.get(PRIMARY).equals(BeanLocatorFactory.getBean(
                                 sendersCachingService.getSenderById(message.getSender()).getName(),
                                 new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {}))){
