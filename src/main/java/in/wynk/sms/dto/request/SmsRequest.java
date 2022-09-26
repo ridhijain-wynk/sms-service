@@ -53,6 +53,8 @@ public abstract class SmsRequest {
     private String messageId;
     @Analysed
     private String templateId;
+    @Analysed
+    private String sender;
 
     @Setter
     @Builder.Default
