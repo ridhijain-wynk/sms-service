@@ -3,8 +3,10 @@ package in.wynk.sms.sender;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BeanLocatorFactory;
+import in.wynk.sms.core.entity.Messages;
 import in.wynk.sms.core.entity.SenderConfigurations;
 import in.wynk.sms.core.entity.SenderDetails;
+import in.wynk.sms.core.service.MessageCachingService;
 import in.wynk.sms.core.service.SenderConfigurationsCachingService;
 import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.request.CommunicationType;
@@ -34,6 +36,9 @@ public class SmsSenderUtils implements ISmsSenderUtils {
     @Autowired
     private SendersCachingService sendersCachingService;
 
+    @Autowired
+    private MessageCachingService messageCachingService;
+
     @Override
     public Map<String, IMessageSender<SmsRequest>> fetchSmsSender(SmsRequest request) {
         Map<String, IMessageSender<SmsRequest>> senderMap = new HashMap<>();
@@ -57,12 +62,15 @@ public class SmsSenderUtils implements ISmsSenderUtils {
                     }
                 }
             }
-            if (Objects.nonNull(request.getSender()) &&
-                    !senderMap.get(PRIMARY).equals(BeanLocatorFactory.getBean(
-                            sendersCachingService.getSenderById(request.getSender()).getName(),
-                            new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {}))){
-                senderMap.put(SECONDARY, senderMap.get(PRIMARY));
-                addSender(senderMap, PRIMARY, sendersCachingService.getSenderById(request.getSender()).getName());
+            if(Objects.nonNull(request.getTemplateId())){
+                Messages message = messageCachingService.getMessageByTemplateId(request.getTemplateId());
+                if (Objects.nonNull(message.getSender()) &&
+                        !senderMap.get(PRIMARY).equals(BeanLocatorFactory.getBean(
+                                sendersCachingService.getSenderById(message.getSender()).getName(),
+                                new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {}))){
+                    senderMap.put(SECONDARY, senderMap.get(PRIMARY));
+                    addSender(senderMap, PRIMARY, sendersCachingService.getSenderById(message.getSender()).getName());
+                }
             }
         } catch (Exception ex) {
             logger.error(SMS_SEND_BEAN_ERROR, "error while initializing message bean for msisdn - " + request.getMsisdn(), ex);

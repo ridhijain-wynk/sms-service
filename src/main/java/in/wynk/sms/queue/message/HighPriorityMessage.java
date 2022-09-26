@@ -31,7 +31,6 @@ public class HighPriorityMessage extends SmsRequest implements IObjectMapper {
                 .msisdn(smsNotificationMessage.getMsisdn())
                 .text(smsNotificationMessage.getMessage())
                 .templateId(smsNotificationMessage.getMessageId())
-                .sender(smsNotificationMessage.getSender())
                 .build();
     }
 
