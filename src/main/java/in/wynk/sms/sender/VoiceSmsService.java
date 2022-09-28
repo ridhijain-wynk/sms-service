@@ -80,15 +80,15 @@ public class VoiceSmsService extends AbstractSMSSender {
             Optional<String> urlOption = Optional.empty();
 
             Senders senders = sendersCachingService.getSenderByNameAndClient(SMSBeanConstant.AIRTEL_VOICE_MESSAGE_SENDER, client.getAlias());
-            if (Objects.nonNull(senders) && senders.isUrlPresent()) {
+            if (Objects.nonNull(senders) && Objects.nonNull(senders.getVoice()) && senders.isUrlPresent()) {
                 urlOption = Optional.of(senders.getUrl());
-                callTypeOption = Optional.of(senders.getCallType());
-                textTypeOption = Optional.of(senders.getTextType());
-                maxRetriesOption = Optional.of(senders.getMaxRetry());
-                customerIdOption = Optional.of(senders.getCustomerId());
-                tokenOption = Optional.of(senders.getToken());
-                callerIdOption = Optional.of(senders.getCallerId());
-                callFlowIdOption = Optional.of(senders.getCallFlowId());
+                callTypeOption = Optional.of(senders.getVoice().getCallType());
+                textTypeOption = Optional.of(senders.getVoice().getTextType());
+                maxRetriesOption = Optional.of(senders.getVoice().getMaxRetry());
+                customerIdOption = Optional.of(senders.getVoice().getCustomerId());
+                tokenOption = Optional.of(senders.getVoice().getToken());
+                callerIdOption = Optional.of(senders.getVoice().getCallerId());
+                callFlowIdOption = Optional.of(senders.getVoice().getCallFlowId());
             }
 
 

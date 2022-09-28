@@ -17,7 +17,7 @@ public class SMSUtils {
         if(priorityMap.containsKey(priority)){
             SenderDetails senderDetails = priorityMap.get(priority).get(CommunicationType.SMS);
             if(Objects.nonNull(senderDetails)){
-                shortCode = senderDetails.getShortCode();
+                shortCode = (Objects.nonNull(senderDetails.getShortCode())) ? senderDetails.getShortCode() : shortCode;
                 if(Objects.nonNull(templateId)){
                     Messages messages = BeanLocatorFactory.getBean(MessageCachingService.class).get(templateId);
                     shortCode = (Objects.nonNull(messages.getLinkedHeader())) ? messages.getLinkedHeader() : shortCode;

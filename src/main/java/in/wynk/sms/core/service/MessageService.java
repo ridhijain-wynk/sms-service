@@ -24,7 +24,7 @@ public class MessageService implements IMessageService {
     public MessageTemplateDTO findMessagesFromSmsText(String messageText) {
         final String convertedMessageText = replaceUniCodesInMessageText(messageText);
         return messageCachingService.getAll()
-                .parallelStream()
+                .stream()
                 .map(message -> checkIfTemplateMatchesSmsText(message, convertedMessageText))
                 .filter(messageTemplateDTO -> Objects.nonNull(messageTemplateDTO))
                 .findFirst()
