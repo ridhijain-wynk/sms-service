@@ -87,7 +87,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
             MessageTemplateDTO messageTemplateDTO = messageService.findMessagesFromSmsText(request.getText());
             if (Objects.isNull(messageTemplateDTO)) {
                 log.error(NO_TEMPLATE_FOUND, "No template found for message: {}", request.getText());
-                return;
+                throw new WynkRuntimeException(IQSMS001, "No template found for message: "+ request.getText());
             }
             sendSmsThroughAirtelIQ(request, messageTemplateDTO);
         } catch (WynkRuntimeException ex) {
