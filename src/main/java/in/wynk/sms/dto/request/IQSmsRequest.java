@@ -30,8 +30,8 @@ public class IQSmsRequest {
 
     public static IQSmsRequest from(MessageTemplateDTO messageTemplateDTO, SmsRequest smsRequest, String clientAlias, Senders senders, String customerId, String entityId) {
         IQSmsRequestBuilder builder = IQSmsRequest.builder();
-        String shortCode = SMSUtils.getShortCode(messageTemplateDTO.getMessageTemplateId(), smsRequest.getPriority(), clientAlias, senders.getShortCode());
         if(Objects.nonNull(messageTemplateDTO) && Objects.nonNull(smsRequest)) {
+            final String shortCode = SMSUtils.getShortCode(messageTemplateDTO.getMessageTemplateId(), smsRequest.getPriority(), clientAlias, senders.getShortCode());
             builder.customerId(customerId)
                     .destinationAddress(Arrays.asList(smsRequest.getMsisdn()))
                     .sourceAddress(shortCode.contains("-")?shortCode.split("-")[1]:shortCode)

@@ -9,7 +9,8 @@ public enum SmsErrorType implements IWynkErrorType {
     IQSMS001("SMS Failure", "No Template matched with given message", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.NO_TEMPLATE_FOUND),
     IQSMS002("SMS Failure", "Sms Delivery failed", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.SMS_ERROR),
     IQSMS003("SMS Failure", "Unable to fetch response from airtel IQ", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.REST_TEMPLATE_SMS_ERROR),
-    IQSMS004("SMS Failure", "No Sender found for the client", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.PRIMARY_SENDER_ERROR)
+    SMS001("SMS Failure", "No Sender found for the client", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.PRIMARY_SENDER_ERROR),
+    SMS002("SMS Failure", "Template ID or Header not found for the message", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.NO_TEMPLATE_FOUND)
     ;
 
     private final String errorTitle;

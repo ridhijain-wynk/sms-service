@@ -24,7 +24,7 @@ public class MessageSenderHandler implements ISenderHandler<MessageDetails> {
     public void handle (MessageDetails messageDetails) throws Exception {
         Map<String, IMessageSender<SmsRequest>> senderMap = messageDetails.getSenderMap();
         if(Objects.isNull(senderMap) || !senderMap.containsKey(PRIMARY)){
-            throw new WynkRuntimeException(SmsErrorType.IQSMS004);
+            throw new WynkRuntimeException(SmsErrorType.SMS001);
         }
         try{
             senderMap.get(PRIMARY).sendMessage(messageDetails.getMessage());

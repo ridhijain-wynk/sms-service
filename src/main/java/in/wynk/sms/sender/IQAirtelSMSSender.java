@@ -15,6 +15,7 @@ import in.wynk.sms.dto.MessageTemplateDTO;
 import in.wynk.sms.dto.request.IQSmsRequest;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.IQSmsResponse;
+import in.wynk.sms.enums.SmsErrorType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +108,9 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
             if(Objects.nonNull(senders) && senders.isUrlPresent()){
                 IQSmsRequest iqSmsRequest = IQSmsRequest.from(messageTemplateDTO, request, client.getAlias(), senders, Optional.of(senders.getAccountName()).orElse(customerId), Optional.of(senders.getEntityId()).orElse(entityId));
                 AnalyticService.update(iqSmsRequest);
+                if(Objects.isNull(iqSmsRequest.getDltTemplateId()) || Objects.isNull(iqSmsRequest.getSourceAddress())){
+                    throw new WynkRuntimeException(SmsErrorType.SMS002);
+                }
                 try {
                     HttpHeaders headers = new HttpHeaders();
                     String token = Base64.getEncoder().encodeToString((Optional.of(senders.getUsername(messageTemplateDTO.getMessageType())).orElse(this.airtelIqApiUsername) + ":" + Optional.of(senders.getPassword(messageTemplateDTO.getMessageType())).orElse(this.airtelIqApiPassword)).getBytes());
@@ -114,7 +118,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
                     headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
                     URI uri = new URI(Optional.of(senders.getUrl(messageTemplateDTO.getMessageType())).orElse(this.airtelIqApiUrl));
                     HttpEntity<IQSmsRequest> requestEntity = new HttpEntity<>(iqSmsRequest, headers);
-                    AnalyticService.update(uri);
+                    AnalyticService.update(uri.toString());
                     IQSmsResponse response = smsRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, IQSmsResponse.class).getBody();
                     AnalyticService.update(response);
                 } catch (HttpStatusCodeException ex) {
