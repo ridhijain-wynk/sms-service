@@ -105,7 +105,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
         if(Objects.nonNull(client)){
             Senders senders = sendersCachingService.getSenderByNameAndClient(AIRTEL_IQ_SMS_SENDER_BEAN, client.getAlias());
             if(Objects.nonNull(senders) && senders.isUrlPresent()){
-                IQSmsRequest iqSmsRequest = IQSmsRequest.from(messageTemplateDTO, request, Optional.of(senders.getAccountName()).orElse(customerId), Optional.of(senders.getEntityId()).orElse(entityId));
+                IQSmsRequest iqSmsRequest = IQSmsRequest.from(messageTemplateDTO, request, client.getAlias(), senders, Optional.of(senders.getAccountName()).orElse(customerId), Optional.of(senders.getEntityId()).orElse(entityId));
                 AnalyticService.update(iqSmsRequest);
                 try {
                     HttpHeaders headers = new HttpHeaders();
@@ -114,6 +114,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
                     headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
                     URI uri = new URI(Optional.of(senders.getUrl(messageTemplateDTO.getMessageType())).orElse(this.airtelIqApiUrl));
                     HttpEntity<IQSmsRequest> requestEntity = new HttpEntity<>(iqSmsRequest, headers);
+                    AnalyticService.update(uri);
                     IQSmsResponse response = smsRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, IQSmsResponse.class).getBody();
                     AnalyticService.update(response);
                 } catch (HttpStatusCodeException ex) {
