@@ -104,7 +104,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
             client = clientDetailsCachingService.getClientByService(request.getService());
         }
         if(Objects.nonNull(client)){
-            Senders senders = sendersCachingService.getSenderByNameAndClient(AIRTEL_IQ_SMS_SENDER_BEAN, client.getAlias());
+            Senders senders = sendersCachingService.getSenderByNameAndClient(AIRTEL_IQ_SMS_SENDER_BEAN, client.getAlias(), request.getPriority());
             if(Objects.nonNull(senders) && senders.isUrlPresent()){
                 IQSmsRequest iqSmsRequest = IQSmsRequest.from(messageTemplateDTO, request, client.getAlias(), senders, Optional.of(senders.getAccountName()).orElse(customerId), Optional.of(senders.getEntityId()).orElse(entityId));
                 AnalyticService.update(iqSmsRequest);

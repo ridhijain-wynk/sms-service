@@ -40,7 +40,7 @@ public class SmppSender extends AbstractSMSSender {
         if (Objects.isNull(client)) {
             client = clientDetailsCachingService.getClientByService(request.getService());
         }
-        String shortCode = sendersCachingService.getSenderByNameAndClient(SMSBeanConstant.SMPP_SENDER_WRAPPER, client.getAlias()).getShortCode();
+        String shortCode = sendersCachingService.getSenderByNameAndClient(SMSBeanConstant.SMPP_SENDER_WRAPPER, client.getAlias(), request.getPriority()).getShortCode();
         shortCode = SMSUtils.getShortCode(request.getTemplateId(), request.getPriority(), client.getAlias(), shortCode);
         final SenderManager senderManager = BeanLocatorFactory.getBean(client.getAlias() + SMSBeanConstant.SMPP_SENDER_MANAGER_BEAN, SenderManager.class);
         final MessageResponse response = senderManager.send(Message.simple(request.getText()).messageId(request.getMessageId()).from(shortCode).to(request.getMsisdn()).build());

@@ -135,7 +135,7 @@ public class AirtelSMSSender extends AbstractSMSSender {
         if (Objects.isNull(client)) {
             client = clientDetailsCachingService.getClientByService(smsRequest.getService());
         }
-        Senders senders = sendersCachingService.getSenderByNameAndClient(AIRTEL_SMS_SENDER, client.getAlias());
+        Senders senders = sendersCachingService.getSenderByNameAndClient(AIRTEL_SMS_SENDER, client.getAlias(), smsRequest.getPriority());
         if (Objects.nonNull(senders) && senders.isUrlPresent()){
             String url = senders.getUrl();
             String userName = senders.getUsername();

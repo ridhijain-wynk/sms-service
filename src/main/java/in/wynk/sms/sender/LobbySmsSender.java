@@ -49,7 +49,7 @@ public class LobbySmsSender extends AbstractSMSSender {
         if (Objects.isNull(client)) {
             client = clientDetailsCachingService.getClientByService(request.getService());
         }
-        Senders senders = sendersCachingService.getSenderByNameAndClient(LOBBY_MESSAGE_STRATEGY, client.getAlias());
+        Senders senders = sendersCachingService.getSenderByNameAndClient(LOBBY_MESSAGE_STRATEGY, client.getAlias(), request.getPriority());
         if(Objects.nonNull(senders) && senders.isUrlPresent()){
             String url = senders.getUrl();
             String userName = senders.getUsername();

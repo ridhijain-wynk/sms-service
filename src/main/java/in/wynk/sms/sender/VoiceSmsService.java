@@ -79,7 +79,7 @@ public class VoiceSmsService extends AbstractSMSSender {
             Optional<String> callTypeOption = Optional.empty();
             Optional<String> urlOption = Optional.empty();
 
-            Senders senders = sendersCachingService.getSenderByNameAndClient(SMSBeanConstant.AIRTEL_VOICE_MESSAGE_SENDER, client.getAlias());
+            Senders senders = sendersCachingService.getSenderByNameAndClient(SMSBeanConstant.AIRTEL_VOICE_MESSAGE_SENDER, client.getAlias(), request.getPriority());
             if (Objects.nonNull(senders) && Objects.nonNull(senders.getVoice()) && senders.isUrlPresent()) {
                 urlOption = Optional.of(senders.getUrl());
                 callTypeOption = Optional.of(senders.getVoice().getCallType());

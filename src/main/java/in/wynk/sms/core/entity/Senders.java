@@ -2,6 +2,7 @@ package in.wynk.sms.core.entity;
 
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.data.entity.MongoBaseEntity;
+import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.enums.CommunicationType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -35,6 +36,7 @@ public class Senders extends MongoBaseEntity<String> {
     private String mClass;
     @Field("client_alias")
     private String clientAlias;
+    private SMSPriority priority;
 
     //voice sender properties
     private VoiceProperties voice;

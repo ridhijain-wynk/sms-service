@@ -4,6 +4,7 @@ import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.data.dto.IEntityCacheService;
 import in.wynk.data.enums.State;
+import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.constants.SmsLoggingMarkers;
 import in.wynk.sms.core.entity.Senders;
 import in.wynk.sms.core.repository.SendersRepository;
@@ -15,11 +16,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import static in.wynk.common.constant.BaseConstants.IN_MEMORY_CACHE_CRON;
 import static in.wynk.data.enums.State.ACTIVE;
@@ -65,8 +69,15 @@ public class SendersCachingService implements IEntityCacheService<Senders, Strin
         return StringUtils.isNotEmpty(id) ? SENDER_BY_IDS_CACHE.get(id) : null;
     }
 
-    public Senders getSenderByNameAndClient(String name, String clientAlias) {
-        return SENDER_BY_IDS_CACHE.values().stream().filter(senders -> senders.getClientAlias().equalsIgnoreCase(clientAlias) && senders.getName().equalsIgnoreCase(name)).findAny().orElse(null);
+    public Senders getSenderByNameAndClient(String name, String clientAlias, SMSPriority priority) {
+        List<Senders> list =  SENDER_BY_IDS_CACHE.values().stream().filter(senders -> senders.getClientAlias().equalsIgnoreCase(clientAlias)
+                && senders.getName().equalsIgnoreCase(name)).collect(Collectors.toList());
+        for(Senders sender : list){
+            if(Objects.nonNull(sender.getPriority()) && sender.getPriority().equals(priority)){
+                return sender;
+            }
+        }
+        return (!list.isEmpty())? list.get(0) : null;
     }
 
     @Override
