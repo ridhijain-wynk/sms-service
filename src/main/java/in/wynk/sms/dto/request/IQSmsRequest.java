@@ -2,8 +2,10 @@ package in.wynk.sms.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
+import in.wynk.sms.core.entity.Senders;
 import in.wynk.sms.dto.MessageTemplateDTO;
 import in.wynk.sms.enums.CommunicationType;
+import in.wynk.sms.utils.SMSUtils;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -26,14 +28,15 @@ public class IQSmsRequest {
     String dltTemplateId;
     String entityId;
 
-    public static IQSmsRequest from(MessageTemplateDTO messageTemplateDTO, SmsRequest smsRequest,String customerId,String entityId) {
+    public static IQSmsRequest from(MessageTemplateDTO messageTemplateDTO, SmsRequest smsRequest, String clientAlias, Senders senders, String customerId, String entityId) {
         IQSmsRequestBuilder builder = IQSmsRequest.builder();
         if(Objects.nonNull(messageTemplateDTO) && Objects.nonNull(smsRequest)) {
+            final String shortCode = SMSUtils.getShortCode(messageTemplateDTO.getMessageTemplateId(), smsRequest.getPriority(), clientAlias, senders.getShortCode());
             builder.customerId(customerId)
                     .destinationAddress(Arrays.asList(smsRequest.getMsisdn()))
-                    .sourceAddress(messageTemplateDTO.getLinkedHeader())
+                    .sourceAddress(shortCode.contains("-")?shortCode.split("-")[1]:shortCode)
                     .message(smsRequest.getText())
-                    .messageType(CommunicationType.PROMOTIONAL.getType())
+                    .messageType(messageTemplateDTO.getMessageType().getType())
                     .dltTemplateId(messageTemplateDTO.getMessageTemplateId())
                     .entityId(entityId);
         }
