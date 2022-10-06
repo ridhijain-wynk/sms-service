@@ -39,12 +39,13 @@ public class SmsEventsListener {
     public void onSmsNotificationEvent(SmsNotificationEvent event) {
         if (StringUtils.isNotEmpty(event.getMsisdn())) {
             if (StringUtils.isNotEmpty(event.getMessage())) {
-                log.info(OLD_MESSAGE_PATTERN, "Resolved message present for ", event.getMsisdn());
+                log.info(OLD_MESSAGE_PATTERN, "Resolved message present for {}", event.getMsisdn());
                 SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
                         .message(event.getMessage())
                         .msisdn(event.getMsisdn())
                         .service(event.getService())
                         .priority(event.getPriority())
+                        .messageId(event.getMessageId())
                         .build());
                 AnalyticService.update(smsRequest);
                 sqsManagerService.publishSQSMessage(smsRequest);
@@ -72,6 +73,7 @@ public class SmsEventsListener {
                             .msisdn(event.getMsisdn())
                             .service(event.getService())
                             .priority(message.getPriority())
+                            .messageId(message.getId())
                             .build());
                     AnalyticService.update(smsRequest);
                     sqsManagerService.publishSQSMessage(smsRequest);

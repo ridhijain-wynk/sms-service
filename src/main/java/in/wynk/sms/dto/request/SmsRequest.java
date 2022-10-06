@@ -51,6 +51,8 @@ public abstract class SmsRequest {
     private String shortCode;
     @Analysed
     private String messageId;
+    @Analysed
+    private String templateId;
 
     @Setter
     @Builder.Default

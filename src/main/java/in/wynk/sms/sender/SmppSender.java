@@ -9,6 +9,8 @@ import in.wynk.smpp.core.dto.Message;
 import in.wynk.smpp.core.dto.MessageResponse;
 import in.wynk.smpp.core.sender.manager.SenderManager;
 import in.wynk.sms.constants.SMSBeanConstant;
+import in.wynk.sms.core.service.SendersCachingService;
+import in.wynk.sms.utils.SMSUtils;
 import in.wynk.sms.dto.request.SmsRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import java.util.Objects;
 public class SmppSender extends AbstractSMSSender {
 
     private final ClientDetailsCachingService clientDetailsCachingService;
+    private final SendersCachingService sendersCachingService;
 
     @Override
     @AnalyseTransaction(name = "sendSmsSmsc")
@@ -37,7 +40,8 @@ public class SmppSender extends AbstractSMSSender {
         if (Objects.isNull(client)) {
             client = clientDetailsCachingService.getClientByService(request.getService());
         }
-        final String shortCode = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_SHORT_CODE").get();
+        String shortCode = sendersCachingService.getSenderByNameAndClient(SMSBeanConstant.SMPP_SENDER_WRAPPER, client.getAlias(), request.getPriority()).getShortCode();
+        shortCode = SMSUtils.getShortCode(request.getTemplateId(), request.getPriority(), client.getAlias(), shortCode);
         final SenderManager senderManager = BeanLocatorFactory.getBean(client.getAlias() + SMSBeanConstant.SMPP_SENDER_MANAGER_BEAN, SenderManager.class);
         final MessageResponse response = senderManager.send(Message.simple(request.getText()).messageId(request.getMessageId()).from(shortCode).to(request.getMsisdn()).build());
         AnalyticService.update(response);
