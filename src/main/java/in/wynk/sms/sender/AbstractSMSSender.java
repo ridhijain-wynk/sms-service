@@ -29,7 +29,6 @@ public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
             if (Objects.isNull(client)) {
                 client = clientCache.getClientByService(request.getService());
             }
-
             SenderConfigurations senderConfigurations = BeanLocatorFactory.getBean(SenderConfigurationsCachingService.class).getSenderConfigurationsByAlias(client.getAlias());
             boolean shouldScrubbed = Objects.nonNull(senderConfigurations) && (senderConfigurations.getDetails().containsKey(request.getPriority())) && (senderConfigurations.isScrubbingEnabled() || senderConfigurations.getDetails().get(request.getPriority()).get(request.getCommunicationType()).isScrubbingEnabled());
             AnalyticService.update(SMSConstants.SCRUBBING_ENABLED, shouldScrubbed);

@@ -20,7 +20,6 @@ public class MessageScrubEngineImpl implements IScrubEngine {
 
     @Override
     public void scrub(String message) {
-
         final MessageTemplateDTO templateDTO = templateService.findMessagesFromSmsText(message);
         if (Objects.isNull(templateDTO)) {
             AnalyticService.update(SMSConstants.IS_MESSAGE_SCRUBBED, true);
@@ -28,7 +27,6 @@ public class MessageScrubEngineImpl implements IScrubEngine {
         }
         AnalyticService.update(SMSConstants.IS_MESSAGE_SCRUBBED, false);
         AnalyticService.update(SMSConstants.SCRUBBING_TEMPLATE_ID, templateDTO.getMessageTemplateId());
-
     }
 
 }
