@@ -20,6 +20,7 @@ public class SMSUtils {
                 shortCode = (Objects.nonNull(senderDetails.getShortCode())) ? senderDetails.getShortCode() : shortCode;
                 if(Objects.nonNull(templateId)){
                     Messages messages = BeanLocatorFactory.getBean(MessageCachingService.class).get(templateId);
+                    messages = (Objects.isNull(messages))? BeanLocatorFactory.getBean(MessageCachingService.class).getMessageByTemplateId(templateId) : messages;
                     shortCode = (Objects.nonNull(messages.getLinkedHeader())) ? messages.getLinkedHeader() : shortCode;
                 }
             }
