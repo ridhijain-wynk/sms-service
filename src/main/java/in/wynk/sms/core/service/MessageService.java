@@ -61,9 +61,9 @@ public class MessageService implements IMessageService {
                     + SPRING_EXP_REPLACE_PATTERN + Pattern.quote(SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionSuffix()));
             Matcher matcher = pattern.matcher(template);
             while (matcher.find()) {
-                template = template.replace(SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionPrefix() + matcher.group(1) + SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionSuffix(), REPLACE_PATTERN);
+                template = template.replace(SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionPrefix() + matcher.group(1) + SMS_MESSAGE_TEMPLATE_CONTEXT.getExpressionSuffix(), StringEscapeUtils.unescapeJava(PLACE_HOLDER_PATTERN));
             }
-            regexTemplate = template;
+            regexTemplate = template.replaceAll("\\+",REPLACE_PATTERN).replaceAll(PLACE_HOLDER_PATTERN, REPLACE_PATTERN);
         } else {
             regexTemplate = template.replaceAll("\\)","").replaceAll("\\(","").replaceAll(PLACE_HOLDER_PATTERN, REPLACE_PATTERN);
         }
