@@ -21,6 +21,17 @@ public class MessageService implements IMessageService {
     private final MessageCachingService messageCachingService;
 
     @Override
+    public MessageTemplateDTO findSenderConfiguredMessageFromSmsText(String messageText) {
+        final String convertedMessageText = replaceUniCodesInMessageText(messageText);
+        return messageCachingService.getAllSenderConfiguredMessages()
+                .stream()
+                .map(message -> checkIfTemplateMatchesSmsText(message, convertedMessageText))
+                .filter(messageTemplateDTO -> Objects.nonNull(messageTemplateDTO))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
     public MessageTemplateDTO findMessagesFromSmsText(String messageText) {
         final String convertedMessageText = replaceUniCodesInMessageText(messageText);
         return messageCachingService.getAll()

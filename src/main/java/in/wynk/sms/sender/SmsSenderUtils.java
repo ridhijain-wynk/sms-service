@@ -62,7 +62,7 @@ public class SmsSenderUtils implements ISmsSenderUtils {
                     }
                 }
             }
-            MessageTemplateDTO template = messageService.findMessagesFromSmsText(request.getText());
+            MessageTemplateDTO template = messageService.findSenderConfiguredMessageFromSmsText(request.getText());
             if (Objects.nonNull(template) && Objects.nonNull(template.getSender()) &&
                     !senderMap.get(PRIMARY).equals(BeanLocatorFactory.getBean(
                             sendersCachingService.getSenderById(template.getSender()).getName(),
