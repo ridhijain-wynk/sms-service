@@ -33,6 +33,7 @@ public class MessageCachingService implements IEntityCacheService<Messages, Stri
 
     private final Map<String, Messages> MESSAGES_BY_IDS_CACHE = new ConcurrentHashMap<>();
     private final Map<String, Messages> MESSAGES_BY_TEMPLATE_IDS_CACHE = new ConcurrentHashMap<>();
+    private final Map<String, Messages> SENDER_IN_MESSAGES_CACHE = new ConcurrentHashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final Lock writeLock = lock.writeLock();
     private final MessagesRepository messagesRepository;
@@ -53,10 +54,13 @@ public class MessageCachingService implements IEntityCacheService<Messages, Stri
             try {
                 Map<String, Messages> idMap = allMessages.stream().collect(Collectors.toMap(Messages::getId, Function.identity()));
                 Map<String, Messages> templateIdMap = allMessages.stream().filter(m -> Objects.nonNull(m.getTemplateId())).collect(Collectors.toMap(Messages::getTemplateId, Function.identity()));
+                Map<String, Messages> sendersMap = allMessages.stream().filter(m -> Objects.nonNull(m.getSender())).collect(Collectors.toMap(Messages::getId, Function.identity()));
                 MESSAGES_BY_IDS_CACHE.clear();
                 MESSAGES_BY_TEMPLATE_IDS_CACHE.clear();
+                SENDER_IN_MESSAGES_CACHE.clear();
                 MESSAGES_BY_IDS_CACHE.putAll(idMap);
                 MESSAGES_BY_TEMPLATE_IDS_CACHE.putAll(templateIdMap);
+                SENDER_IN_MESSAGES_CACHE.putAll(sendersMap);
             } catch (Throwable th) {
                 log.error(APPLICATION_ERROR, "Exception occurred while refreshing messages cache. Exception: {}", th.getMessage(), th);
                 throw th;
@@ -83,6 +87,10 @@ public class MessageCachingService implements IEntityCacheService<Messages, Stri
     @Override
     public Collection<Messages> getAll() {
         return MESSAGES_BY_IDS_CACHE.values();
+    }
+
+    public Collection<Messages> getAllSenderConfiguredMessages() {
+        return SENDER_IN_MESSAGES_CACHE.values();
     }
 
     @Override
