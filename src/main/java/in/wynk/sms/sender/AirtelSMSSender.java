@@ -7,10 +7,7 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.common.constant.SMSSource;
-import in.wynk.sms.core.entity.Senders;
-import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.request.SmsRequest;
-import in.wynk.sms.utils.SMSUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +43,6 @@ public class AirtelSMSSender extends AbstractSMSSender {
     private final RestTemplate smsRestTemplate;
     @Autowired
     private ClientDetailsCachingService clientDetailsCachingService;
-    @Autowired
-    private SendersCachingService sendersCachingService;
 
     public AirtelSMSSender(RestTemplate smsRestTemplate) {
         this.smsRestTemplate = smsRestTemplate;
@@ -73,7 +68,6 @@ public class AirtelSMSSender extends AbstractSMSSender {
     private void sendSms(SmsRequest smsRequest) throws Exception {
         if (!postSMS(smsRequest)) {
             String shortCode = SMSSource.getShortCode(smsRequest.getService(), smsRequest.getPriority());
-            shortCode = SMSUtils.getShortCode(smsRequest.getTemplateId(), smsRequest.getPriority(), smsRequest.getClientAlias(), shortCode);
             String mtRequestXML = createMTRequestXML(shortCode, smsRequest);
             postCoreJava(mtRequestXML, smsRequest.getMsisdn(), smsRequest.getPriority());
         }
@@ -134,13 +128,11 @@ public class AirtelSMSSender extends AbstractSMSSender {
         if (Objects.isNull(client)) {
             client = clientDetailsCachingService.getClientByService(smsRequest.getService());
         }
-        Senders senders = sendersCachingService.getSenderByNameAndClient(AIRTEL_SMS_SENDER, client.getAlias(), smsRequest.getPriority());
-        if (Objects.nonNull(senders) && senders.isUrlPresent()){
-            String url = senders.getUrl();
-            String userName = senders.getUsername();
-            String password = senders.getPassword();
-            String shortCode = senders.getShortCode();
-            shortCode = SMSUtils.getShortCode(smsRequest.getTemplateId(), smsRequest.getPriority(), smsRequest.getClientAlias(), shortCode);
+        if (Objects.nonNull(client) && client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_URL").isPresent()) {
+            String url = (String) client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_URL").get();
+            String userName = (String) client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_USERNAME").get();
+            String password = (String) client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_PASSWORD").get();
+            String shortCode = (String) client.getMeta(smsRequest.getPriority().name() + "_PRIORITY_SMS_SHORT_CODE").get();
             HttpHeaders headers = new HttpHeaders();
             if (StringUtils.isNoneBlank(url, shortCode)) {
                 if (StringUtils.isNoneBlank(userName, password)) {

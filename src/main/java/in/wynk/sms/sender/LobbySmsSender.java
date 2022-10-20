@@ -7,13 +7,8 @@ import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.sms.constants.SMSConstants;
-import in.wynk.sms.core.entity.Senders;
-import in.wynk.sms.core.service.MessageCachingService;
-import in.wynk.sms.core.service.SenderConfigurationsCachingService;
-import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.lobby.*;
-import in.wynk.sms.utils.SMSUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -26,17 +21,14 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
 
-import static in.wynk.sms.constants.SMSConstants.LOBBY_MESSAGE_STRATEGY;
-
 @Slf4j
 @RequiredArgsConstructor
-@Service(LOBBY_MESSAGE_STRATEGY)
+@Service(SMSConstants.LOBBY_MESSAGE_STRATEGY)
 public class LobbySmsSender extends AbstractSMSSender {
 
     private final XmlMapper mapper = new XmlMapper();
     private final RestTemplate smsRestTemplate;
     private final ClientDetailsCachingService clientDetailsCachingService;
-    private final SendersCachingService sendersCachingService;
 
     @Override
     @AnalyseTransaction(name = "sendSmsLobby")
@@ -52,15 +44,15 @@ public class LobbySmsSender extends AbstractSMSSender {
         if (Objects.isNull(client)) {
             client = clientDetailsCachingService.getClientByService(request.getService());
         }
-        Senders senders = sendersCachingService.getSenderByNameAndClient(LOBBY_MESSAGE_STRATEGY, client.getAlias(), request.getPriority());
-        if(Objects.nonNull(senders) && senders.isUrlPresent()){
-            String url = senders.getUrl();
-            String userName = senders.getUsername();
-            String accountName = Objects.nonNull(senders.getAccountName()) ? senders.getAccountName() : "Testnorth";
-            String password = senders.getPassword();
-            String shortCode = SMSUtils.getShortCode(request.getTemplateId(), request.getPriority(), client.getAlias(), senders.getShortCode());
-            int mClass = request.isEnglish() ? 1: Objects.nonNull(senders.getMClass()) ? Integer.parseInt(senders.getMClass()) : 2;
-            int coding = Objects.nonNull(senders.getCoding()) ? senders.getCoding() : 0;
+
+        if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_URL").isPresent()) {
+            String url = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_URL").get();
+            String userName = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_USERNAME").get();
+            String accountName = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_ACCOUNT_NAME").orElse("Testnorth");
+            String password = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_PASSWORD").get();
+            String shortCode = (String) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_SHORT_CODE").get();
+            int mclass = request.isEnglish() ? 1: (Integer) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_MCLASS").orElse(2);
+            int coding = (Integer) client.getMeta(request.getPriority().name() + "_PRIORITY_SMS_CODING").orElse(0);
             final Body body = new Body();
             final Form form = new Form();
             final Contact contact = new Contact();
@@ -75,7 +67,7 @@ public class LobbySmsSender extends AbstractSMSSender {
             form.setTo(accountName);
             sender.setNumber(shortCode);
             form.setDa(contact);
-            comm.setMclass(mClass);
+            comm.setMclass(mclass);
             comm.setCoding(coding);
             form.setDcs(comm);
             form.setOa(sender);

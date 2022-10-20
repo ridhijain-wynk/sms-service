@@ -30,7 +30,6 @@ public class LowPriorityMessage extends SmsRequest implements IObjectMapper {
                 .service(smsNotificationMessage.getService())
                 .msisdn(smsNotificationMessage.getMsisdn())
                 .text(smsNotificationMessage.getMessage())
-                .templateId(smsNotificationMessage.getMessageId())
                 .build();
     }
 
