@@ -5,17 +5,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
-import in.wynk.auth.dao.entity.Client;
-import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.exception.WynkRuntimeException;
-import in.wynk.sms.core.entity.Senders;
-import in.wynk.sms.core.service.IMessageService;
-import in.wynk.sms.core.service.SendersCachingService;
+import in.wynk.sms.core.service.IMessageTemplateService;
 import in.wynk.sms.dto.MessageTemplateDTO;
 import in.wynk.sms.dto.request.IQSmsRequest;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.IQSmsResponse;
-import in.wynk.sms.enums.SmsErrorType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +25,6 @@ import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static in.wynk.logging.BaseLoggingMarkers.APPLICATION_ERROR;
 import static in.wynk.sms.constants.SMSConstants.*;
@@ -60,13 +54,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
     private String airtelIqApiPassword;
 
     @Autowired
-    private IMessageService messageService;
-
-    @Autowired
-    private SendersCachingService sendersCachingService;
-
-    @Autowired
-    private ClientDetailsCachingService clientDetailsCachingService;
+    private IMessageTemplateService messageTemplateService;
 
     @Autowired
     private RestTemplate smsRestTemplate;
@@ -84,10 +72,10 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
     public void send(SmsRequest request) {
         try {
             AnalyticService.update(MESSAGE_TEXT, request.getText());
-            MessageTemplateDTO messageTemplateDTO = messageService.findMessagesFromSmsText(request.getText());
+            MessageTemplateDTO messageTemplateDTO = messageTemplateService.findMessageTemplateFromSmsText(request.getText());
             if (Objects.isNull(messageTemplateDTO)) {
                 log.error(NO_TEMPLATE_FOUND, "No template found for message: {}", request.getText());
-                throw new WynkRuntimeException(IQSMS001, "No template found for message: "+ request.getText());
+                return;
             }
             sendSmsThroughAirtelIQ(request, messageTemplateDTO);
         } catch (WynkRuntimeException ex) {
@@ -99,49 +87,38 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
     }
 
     private void sendSmsThroughAirtelIQ(SmsRequest request, MessageTemplateDTO messageTemplateDTO) throws URISyntaxException {
-        Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
-        if (Objects.isNull(client)) {
-            client = clientDetailsCachingService.getClientByService(request.getService());
-        }
-        if(Objects.nonNull(client)){
-            Senders senders = sendersCachingService.getSenderByNameAndClient(AIRTEL_IQ_SMS_SENDER_BEAN, client.getAlias(), request.getPriority());
-            if(Objects.nonNull(senders) && senders.isUrlPresent()){
-                IQSmsRequest iqSmsRequest = IQSmsRequest.from(messageTemplateDTO, request, client.getAlias(), senders, Optional.of(senders.getAccountName()).orElse(customerId), Optional.of(senders.getEntityId()).orElse(entityId));
-                AnalyticService.update(iqSmsRequest);
-                if(Objects.isNull(iqSmsRequest.getDltTemplateId()) || Objects.isNull(iqSmsRequest.getSourceAddress())){
-                    throw new WynkRuntimeException(SmsErrorType.SMS002);
-                }
-                try {
-                    HttpHeaders headers = new HttpHeaders();
-                    String token = Base64.getEncoder().encodeToString((Optional.of(senders.getUsername(messageTemplateDTO.getMessageType())).orElse(this.airtelIqApiUsername) + ":" + Optional.of(senders.getPassword(messageTemplateDTO.getMessageType())).orElse(this.airtelIqApiPassword)).getBytes());
-                    headers.add(AUTHORIZATION, "Basic " + token);
-                    headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                    URI uri = new URI(Optional.of(senders.getUrl(messageTemplateDTO.getMessageType())).orElse(this.airtelIqApiUrl));
-                    HttpEntity<IQSmsRequest> requestEntity = new HttpEntity<>(iqSmsRequest, headers);
-                    AnalyticService.update("senderUrl", uri.toString());
-                    ResponseEntity<IQSmsResponse> responseEntity = smsRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, IQSmsResponse.class);
-                    IQSmsResponse response = responseEntity.getBody();
-                    AnalyticService.update(HTTP_STATUS_CODE, responseEntity.getStatusCode().name());
-                    AnalyticService.update(response);
-                } catch (HttpStatusCodeException ex) {
-                    try {
-                        if (ex.getStatusCode() == HttpStatus.BAD_REQUEST && Objects.nonNull(ex.getResponseBodyAsString())) {
-                            final Map<String, String> failureResponse = mapper.readValue(ex.getResponseBodyAsString(), new TypeReference<Map<String, String>>() {
-                            });
-                            if (MapUtils.isNotEmpty(failureResponse) && failureResponse.containsKey(FAILURE_CODE) && failureResponse.get(FAILURE_CODE).equalsIgnoreCase(TIME_NOT_VALID_FOR_MESSAGE_TYPE)) {
-                                AnalyticService.update(FAILURE_CODE, TIME_NOT_VALID_FOR_MESSAGE_TYPE);
-                                return;
-                            }
-                        }
-                        throw new WynkRuntimeException(IQSMS003, ex);
-                    } catch (JsonProcessingException jpe) {
-                        log.error(APPLICATION_ERROR, "unable to parse failure response due to {}", jpe.getMessage(), jpe);
+        IQSmsRequest iqSmsRequest = IQSmsRequest.from(messageTemplateDTO, request, customerId, entityId);
+        AnalyticService.update(iqSmsRequest);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            String token = Base64.getEncoder().encodeToString((airtelIqApiUsername + ":" + airtelIqApiPassword).getBytes());
+            headers.add(AUTHORIZATION, "Basic " + token);
+            headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            URI uri = new URI(airtelIqApiUrl);
+            HttpEntity<IQSmsRequest> requestEntity = new HttpEntity<>(iqSmsRequest, headers);
+            ResponseEntity<IQSmsResponse> responseEntity = smsRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, IQSmsResponse.class);
+            IQSmsResponse response = responseEntity.getBody();
+            AnalyticService.update(HTTP_STATUS_CODE, responseEntity.getStatusCode().name());
+            AnalyticService.update(response);
+        } catch (HttpStatusCodeException ex) {
+            try {
+                if (ex.getStatusCode() == HttpStatus.BAD_REQUEST && Objects.nonNull(ex.getResponseBodyAsString())) {
+                    final Map<String, String> failureResponse = mapper.readValue(ex.getResponseBodyAsString(), new TypeReference<Map<String, String>>() {
+                    });
+                    if (MapUtils.isNotEmpty(failureResponse) && failureResponse.containsKey(FAILURE_CODE) && failureResponse.get(FAILURE_CODE).equalsIgnoreCase(TIME_NOT_VALID_FOR_MESSAGE_TYPE)) {
+                        AnalyticService.update(FAILURE_CODE, TIME_NOT_VALID_FOR_MESSAGE_TYPE);
+                        return;
                     }
-                } catch (Exception ex) {
-                    log.error("External service failure due to {}", ex.getMessage(), ex);
-                    throw new WynkRuntimeException(IQSMS003, ex);
                 }
+                throw new WynkRuntimeException(IQSMS003, ex);
+            } catch (JsonProcessingException jpe) {
+                log.error(APPLICATION_ERROR, "unable to parse failure response due to {}", jpe.getMessage(), jpe);
             }
+        } catch (Exception ex) {
+            log.error("External service failure due to {}", ex.getMessage(), ex);
+            throw new WynkRuntimeException(IQSMS003, ex);
         }
     }
+
+
 }

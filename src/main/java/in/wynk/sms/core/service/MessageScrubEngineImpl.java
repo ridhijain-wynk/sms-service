@@ -16,11 +16,11 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class MessageScrubEngineImpl implements IScrubEngine {
 
-    private final IMessageService templateService;
+    private final IMessageTemplateService templateService;
 
     @Override
     public void scrub(String message) {
-        final MessageTemplateDTO templateDTO = templateService.findMessagesFromSmsText(message);
+        final MessageTemplateDTO templateDTO = templateService.findMessageTemplateFromSmsText(message);
         if (Objects.isNull(templateDTO)) {
             AnalyticService.update(SMSConstants.IS_MESSAGE_SCRUBBED, true);
             throw new WynkRuntimeException(SmsErrorType.IQSMS001, "Template is not register, Hence Scrubbing message");
