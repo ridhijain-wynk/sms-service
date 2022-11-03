@@ -8,7 +8,11 @@ import org.springframework.http.HttpStatus;
 public enum SmsErrorType implements IWynkErrorType {
     IQSMS001("SMS Failure", "No Template matched with given message", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.NO_TEMPLATE_FOUND),
     IQSMS002("SMS Failure", "Sms Delivery failed", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.SMS_ERROR),
-    IQSMS003("SMS Failure", "Unable to fetch response from airtel IQ", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.REST_TEMPLATE_SMS_ERROR)
+    IQSMS003("SMS Failure", "Unable to fetch response from airtel IQ", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.REST_TEMPLATE_SMS_ERROR),
+    SMS001("SMS Failure", "No Sender found for the client", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.SENDER_NOT_FOUND),
+    SMS002("SMS Failure", "Template ID or Header not found for the message", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.NO_TEMPLATE_FOUND),
+    SMS003("SMS Failure", "Message type sending not enabled for the client", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.MESSAGE_TYPE_SENDING_NOT_ENABLED),
+    PPSMS001("SMS Failure", "Unable to send the message via Pinpoint", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.PINPOINT_SMS_ERROR)
     ;
 
     private final String errorTitle;

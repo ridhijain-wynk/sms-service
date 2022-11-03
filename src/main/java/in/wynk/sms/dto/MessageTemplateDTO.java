@@ -1,5 +1,6 @@
 package in.wynk.sms.dto;
 
+import in.wynk.sms.enums.MessageType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -11,4 +12,6 @@ public class MessageTemplateDTO {
     private List<String> vars;
     private String messageTemplateId;
     private String linkedHeader;
+    private MessageType messageType;
+    private String sender;
 }

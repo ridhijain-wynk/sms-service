@@ -2,7 +2,6 @@ package in.wynk.sms.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
-import in.wynk.sms.enums.CommunicationType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @AnalysedEntity
 @RequiredArgsConstructor
-public enum CommunicationType {
+public enum MessageType {
     PROMOTIONAL("PROMOTIONAL"), TRANSACTIONAL("TRANSACTIONAL"), SERVICE_IMPLICIT("SERVICE_IMPLICIT"), SERVICE_EXPLICIT("SERVICE_EXPLICIT"),UNKNOWN("UNKNOWN");
 
     @Analysed

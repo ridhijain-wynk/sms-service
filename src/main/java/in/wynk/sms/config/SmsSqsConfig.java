@@ -3,8 +3,10 @@ package in.wynk.sms.config;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.wynk.queue.constant.BeanConstant;
+import in.wynk.sms.kinesis.PinpointConsumerService;
 import in.wynk.sms.queue.consumer.*;
 import in.wynk.sms.queue.extractor.SmsMessageExtractor;
+import in.wynk.stream.consumer.KinesisRecordProcessorFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -112,4 +114,20 @@ public class SmsSqsConfig {
         return Executors.newScheduledThreadPool(schedulerPoolSize);
     }
 
+    @Bean
+    public PinpointConsumerService kinesisConsumerService(@Value("${sms.kinesis.pinpoint.enabled}") boolean enabled,
+                                                          @Value("${sms.kinesis.pinpoint.application.name}") String applicationName,
+                                                          @Value("${sms.kinesis.pinpoint.stream.name}") String streamName,
+                                                          @Value("${sms.kinesis.pinpoint.thread.pool.size}") int threadPoolSize,
+                                                          ObjectMapper objectMapper) {
+        if(enabled){
+            return new PinpointConsumerService(applicationName,
+                    streamName,
+                    objectMapper,
+                    new KinesisRecordProcessorFactory(),
+                    scheduledThreadPoolExecutor(threadPoolSize)
+            );
+        }
+        return null;
+    }
 }
