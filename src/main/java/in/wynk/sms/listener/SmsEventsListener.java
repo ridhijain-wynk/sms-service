@@ -2,28 +2,46 @@ package in.wynk.sms.listener;
 
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.auth.dao.entity.Client;
+import in.wynk.client.service.ClientDetailsCachingService;
+import in.wynk.common.constant.BaseConstants;
+import in.wynk.common.utils.BeanLocatorFactory;
 import in.wynk.queue.service.ISqsManagerService;
+import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.common.message.SmsNotificationMessage;
 import in.wynk.sms.constants.SMSConstants;
 import in.wynk.sms.core.entity.Messages;
+import in.wynk.sms.core.entity.SenderConfigurations;
+import in.wynk.sms.core.entity.SenderDetails;
+import in.wynk.sms.core.service.IRedisCacheService;
 import in.wynk.sms.core.service.MessageCachingService;
+import in.wynk.sms.core.service.SenderConfigurationsCachingService;
 import in.wynk.sms.dto.SMSFactory;
+import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
+import in.wynk.sms.enums.PinpointRecordStatus;
+import in.wynk.sms.event.PinpointStreamEvent;
 import in.wynk.sms.event.SmsNotificationEvent;
+import in.wynk.sms.sender.IMessageSender;
+import in.wynk.sms.sender.ISmsSenderUtils;
 import in.wynk.spel.IRuleEvaluator;
 import in.wynk.spel.builder.DefaultStandardExpressionContextBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.EnumSet;
+import java.util.Map;
 import java.util.Objects;
 
 import static in.wynk.common.constant.BaseConstants.*;
-import static in.wynk.sms.constants.SmsLoggingMarkers.MESSAGE_NOT_FOUND;
-import static in.wynk.sms.constants.SmsLoggingMarkers.OLD_MESSAGE_PATTERN;
+import static in.wynk.sms.constants.SMSConstants.PINPOINT_SENDER_BEAN;
+import static in.wynk.sms.constants.SmsLoggingMarkers.*;
 
 @Slf4j
 @Service
@@ -33,18 +51,22 @@ public class SmsEventsListener {
     private final IRuleEvaluator ruleEvaluator;
     private final ISqsManagerService sqsManagerService;
     private final MessageCachingService messageCachingService;
+    private final ClientDetailsCachingService clientDetailsCachingService;
+    private final SenderConfigurationsCachingService senderConfigCachingService;
+    private final IRedisCacheService redisDataService;
 
     @EventListener
     @AnalyseTransaction(name = "smsNotificationEvent")
     public void onSmsNotificationEvent(SmsNotificationEvent event) {
         if (StringUtils.isNotEmpty(event.getMsisdn())) {
             if (StringUtils.isNotEmpty(event.getMessage())) {
-                log.info(OLD_MESSAGE_PATTERN, "Resolved message present for ", event.getMsisdn());
+                log.info(OLD_MESSAGE_PATTERN, "Resolved message present for {}", event.getMsisdn());
                 SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
                         .message(event.getMessage())
                         .msisdn(event.getMsisdn())
                         .service(event.getService())
                         .priority(event.getPriority())
+                        .messageId(event.getMessageId())
                         .build());
                 AnalyticService.update(smsRequest);
                 sqsManagerService.publishSQSMessage(smsRequest);
@@ -72,11 +94,75 @@ public class SmsEventsListener {
                             .msisdn(event.getMsisdn())
                             .service(event.getService())
                             .priority(message.getPriority())
+                            .messageId(message.getId())
                             .build());
                     AnalyticService.update(smsRequest);
                     sqsManagerService.publishSQSMessage(smsRequest);
                 }
             }
+        }
+    }
+
+    @EventListener
+    @AnalyseTransaction(name = "pinpointStreamEvent")
+    public void onPinpointSMSEvent(PinpointStreamEvent event) {
+        AnalyticService.update(event);
+        if(StringUtils.equalsIgnoreCase(event.getEvent_type(), "_SMS.FAILURE")){
+            if(event.getAttributes().containsKey("record_status")){
+                String recordStatus = event.getAttributes().get("record_status");
+                /*if(EnumSet.of(PinpointRecordStatus.UNREACHABLE,
+                        PinpointRecordStatus.UNKNOWN,
+                        PinpointRecordStatus.CARRIER_UNREACHABLE,
+                        PinpointRecordStatus.CARRIER_BLOCKED,
+                        PinpointRecordStatus.NO_QUOTA_LEFT,
+                        PinpointRecordStatus.MAX_PRICE_EXCEEDED,
+                        PinpointRecordStatus.TTL_EXPIRED).contains(PinpointRecordStatus.valueOf(recordStatus))){*/
+                    log.error(PINPOINT_SMS_ERROR, "Unable to send the message via Pinpoint for {}", event.getAttributes().get("destination_phone_number"));
+                    SmsRequest request = redisDataService.get(event.getAttributes().get("message_id"));
+                    sendThroughFallback(request);
+                //}
+                log.info("Response from Pinpoint for {}",event.getAttributes().get("destination_phone_number"));
+            }
+        }
+    }
+
+    private void sendThroughFallback (SmsRequest request) {
+        try {
+            Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
+            if (Objects.isNull(client)) {
+                client = clientDetailsCachingService.getClientByService(request.getService());
+            }
+            if (Objects.nonNull(client)){
+                final String countryCode = StringUtils.isNotEmpty(request.getCountryCode()) ? Country.getCountryIdByCountryCode(request.getCountryCode()) : BaseConstants.DEFAULT_COUNTRY_CODE;
+                SenderConfigurations senderConfigurations = senderConfigCachingService.getSenderConfigurationsByAliasAndCountry(client.getAlias(), countryCode);
+                if(Objects.nonNull(senderConfigurations)){
+                    Map<CommunicationType, SenderDetails> senderDetailsMap = senderConfigurations.getDetails().get(request.getPriority());
+                    if(!CollectionUtils.isEmpty(senderDetailsMap) && senderDetailsMap.containsKey(request.getCommunicationType()) && senderDetailsMap.get(request.getCommunicationType()).isPrimaryPresent()){
+                        final String primarySenderId = senderDetailsMap.get(request.getCommunicationType()).getPrimary();
+                        if(senderDetailsMap.get(request.getCommunicationType()).isSecondaryPresent()){
+                            final String secondarySenderId = senderDetailsMap.get(request.getCommunicationType()).getSecondary();
+                            if(StringUtils.equalsIgnoreCase(primarySenderId, PINPOINT_SENDER_BEAN)){
+                                findSenderBean(request, secondarySenderId);
+                            } else if(StringUtils.equalsIgnoreCase(secondarySenderId, PINPOINT_SENDER_BEAN)){
+                                log.info("No fallback configured after secondary sender.");
+                            } else {
+                                findSenderBean(request, primarySenderId);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(PINPOINT_SMS_ERROR, e.getMessage(), e);
+        }
+    }
+
+    private void findSenderBean (SmsRequest request, String primarySenderId) throws Exception {
+        try {
+            BeanLocatorFactory.getBean(primarySenderId, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
+            }).sendMessage(request);
+        } catch(Exception e){
+            log.error(SMS_SEND_BEAN_ERROR, "error while adding " + primarySenderId + " bean.");
         }
     }
 

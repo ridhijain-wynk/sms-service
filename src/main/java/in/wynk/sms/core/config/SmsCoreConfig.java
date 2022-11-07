@@ -1,5 +1,8 @@
 package in.wynk.sms.core.config;
 
+import com.amazonaws.services.pinpoint.AmazonPinpoint;
+import com.amazonaws.services.pinpoint.AmazonPinpointClientBuilder;
+import in.wynk.aws.common.properties.AmazonSdkProperties;
 import in.wynk.data.config.WynkMongoDbFactoryBuilder;
 import in.wynk.data.config.properties.MongoProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +24,11 @@ public class SmsCoreConfig {
     @Primary
     public MongoTemplate smsMongoTemplate(MongoProperties mongoProperties) {
         return new MongoTemplate(smsDbFactory(mongoProperties));
+    }
+
+    @Bean
+    public AmazonPinpoint amazonPinpoint(AmazonSdkProperties sdkProperties) {
+        return AmazonPinpointClientBuilder.standard().withRegion(sdkProperties.getSdk().getRegions()).build();
     }
 
 }

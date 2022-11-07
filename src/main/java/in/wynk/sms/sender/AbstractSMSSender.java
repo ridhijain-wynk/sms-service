@@ -3,13 +3,18 @@ package in.wynk.sms.sender;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
+import in.wynk.common.constant.BaseConstants;
 import in.wynk.common.utils.BeanLocatorFactory;
 import in.wynk.exception.WynkRuntimeException;
+import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.constants.SMSConstants;
 import in.wynk.sms.constants.SmsLoggingMarkers;
+import in.wynk.sms.core.entity.SenderConfigurations;
 import in.wynk.sms.core.service.IScrubEngine;
+import in.wynk.sms.core.service.SenderConfigurationsCachingService;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.enums.SmsErrorType;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +32,9 @@ public abstract class AbstractSMSSender implements IMessageSender<SmsRequest> {
             if (Objects.isNull(client)) {
                 client = clientCache.getClientByService(request.getService());
             }
-            boolean shouldScrubbed = (client.<Boolean>getMeta(SMSConstants.MESSAGE_SCRUBBING_ENABLED).orElse(false) || client.<Boolean>getMeta(request.getPriority().getSmsPriority() + "_PRIORITY_" + request.getCommunicationType() + "_SCRUBBING_ENABLED").orElse(false));
+            final String countryCode = StringUtils.isNotEmpty(request.getCountryCode()) ? Country.getCountryIdByCountryCode(request.getCountryCode()) : BaseConstants.DEFAULT_COUNTRY_CODE;
+            SenderConfigurations senderConfigurations = BeanLocatorFactory.getBean(SenderConfigurationsCachingService.class).getSenderConfigurationsByAliasAndCountry(client.getAlias(), countryCode);
+            boolean shouldScrubbed = Objects.nonNull(senderConfigurations) && (senderConfigurations.getDetails().containsKey(request.getPriority())) && (senderConfigurations.isScrubbingEnabled() || senderConfigurations.getDetails().get(request.getPriority()).get(request.getCommunicationType()).isScrubbingEnabled());
             AnalyticService.update(SMSConstants.SCRUBBING_ENABLED, shouldScrubbed);
             if (shouldScrubbed)
                 validate(request);

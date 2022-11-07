@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
+import java.io.Serializable;
 
 @ToString
 @SuperBuilder
@@ -29,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 @AnalysedEntity
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class SmsRequest {
+public abstract class SmsRequest implements Serializable {
 
     private String message;
     private String text;
@@ -52,6 +53,8 @@ public abstract class SmsRequest {
     private String shortCode;
     @Analysed
     private String messageId;
+    @Analysed
+    private String templateId;
 
     @Setter
     @Builder.Default
