@@ -13,12 +13,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.util.concurrent.Executor;
 
 @Slf4j
-public class PinpointConsumerService extends AbstractKinesisEventConsumer implements IKinesisEventHandler<PinpointStreamEvent> {
+public class MusicPinpointConsumerService extends AbstractKinesisEventConsumer implements IKinesisEventHandler<PinpointStreamEvent> {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    public PinpointConsumerService(String applicationName,
+    public MusicPinpointConsumerService(String applicationName,
                                    String streamName,
                                    ObjectMapper objectMapper,
                                    KinesisRecordProcessorFactory recordProcessorFactory,
@@ -30,7 +30,7 @@ public class PinpointConsumerService extends AbstractKinesisEventConsumer implem
     @Override
     public void consume(PinpointStreamEvent event) {
         eventPublisher.publishEvent(ClientPinpointStreamEvent.builder()
-                .clientAlias("enterr10")
+                .clientAlias("music")
                 .pinpointEvent(event)
                 .build());
     }

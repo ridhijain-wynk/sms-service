@@ -3,6 +3,7 @@ package in.wynk.sms.config;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.wynk.queue.constant.BeanConstant;
+import in.wynk.sms.kinesis.MusicPinpointConsumerService;
 import in.wynk.sms.kinesis.PinpointConsumerService;
 import in.wynk.sms.queue.consumer.*;
 import in.wynk.sms.queue.extractor.SmsMessageExtractor;
@@ -115,13 +116,30 @@ public class SmsSqsConfig {
     }
 
     @Bean
-    public PinpointConsumerService kinesisConsumerService(@Value("${sms.kinesis.pinpoint.enabled}") boolean enabled,
-                                                          @Value("${sms.kinesis.pinpoint.application.name}") String applicationName,
-                                                          @Value("${sms.kinesis.pinpoint.stream.name}") String streamName,
-                                                          @Value("${sms.kinesis.pinpoint.thread.pool.size}") int threadPoolSize,
+    public PinpointConsumerService kinesisConsumerService(@Value("${sms.enterr10.kinesis.pinpoint.enabled}") boolean enabled,
+                                                          @Value("${sms.enterr10.kinesis.pinpoint.application.name}") String applicationName,
+                                                          @Value("${sms.enterr10.kinesis.pinpoint.stream.name}") String streamName,
+                                                          @Value("${sms.enterr10.kinesis.pinpoint.thread.pool.size}") int threadPoolSize,
                                                           ObjectMapper objectMapper) {
         if(enabled){
             return new PinpointConsumerService(applicationName,
+                    streamName,
+                    objectMapper,
+                    new KinesisRecordProcessorFactory(),
+                    scheduledThreadPoolExecutor(threadPoolSize)
+            );
+        }
+        return null;
+    }
+
+    @Bean
+    public MusicPinpointConsumerService musicKinesisConsumerService(@Value("${sms.music.kinesis.pinpoint.enabled}") boolean enabled,
+                                                                    @Value("${sms.music.kinesis.pinpoint.application.name}") String applicationName,
+                                                                    @Value("${sms.music.kinesis.pinpoint.stream.name}") String streamName,
+                                                                    @Value("${sms.music.kinesis.pinpoint.thread.pool.size}") int threadPoolSize,
+                                                                    ObjectMapper objectMapper) {
+        if(enabled){
+            return new MusicPinpointConsumerService(applicationName,
                     streamName,
                     objectMapper,
                     new KinesisRecordProcessorFactory(),
