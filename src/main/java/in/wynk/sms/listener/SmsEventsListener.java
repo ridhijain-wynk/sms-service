@@ -99,13 +99,14 @@ public class SmsEventsListener {
                             .build());
                     AnalyticService.update(smsRequest);
                     sqsManagerService.publishSQSMessage(smsRequest);
+                    log.info("Message pushed for request for "+ smsRequest.getMessageId()+ "- " + smsRequest.getMsisdn());
                 }
             }
         }
     }
 
     @EventListener
-    @AnalyseTransaction(name = "clientPinpointStreamEvent")
+    @AnalyseTransaction(name = "pinpointStreamEvent")
     public void onPinpointSMSEvent(ClientPinpointStreamEvent event) {
         AnalyticService.update(event);
         if(StringUtils.equalsIgnoreCase(event.getPinpointEvent().getEvent_type(), "_SMS.FAILURE")){

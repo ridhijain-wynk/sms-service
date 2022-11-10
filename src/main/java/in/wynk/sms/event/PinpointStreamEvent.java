@@ -12,7 +12,6 @@ import java.util.Map;
 
 @Getter
 @Builder
-@AnalysedEntity
 @NoArgsConstructor
 @AllArgsConstructor
 public class PinpointStreamEvent {

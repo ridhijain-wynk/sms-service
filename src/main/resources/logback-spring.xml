@@ -93,7 +93,7 @@
         <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
-    <logger name="clientPinpointStreamEvent" additivity="false">
+    <logger name="pinpointStreamEvent" additivity="false">
         <level value="info"/>
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
