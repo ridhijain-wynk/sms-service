@@ -105,7 +105,7 @@ public class SmsEventsListener {
     }
 
     @EventListener
-    @AnalyseTransaction(name = "pinpointStreamEvent")
+    @AnalyseTransaction(name = "clientPinpointStreamEvent")
     public void onPinpointSMSEvent(ClientPinpointStreamEvent event) {
         AnalyticService.update(event);
         if(StringUtils.equalsIgnoreCase(event.getPinpointEvent().getEvent_type(), "_SMS.FAILURE")){
