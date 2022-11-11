@@ -54,7 +54,9 @@ public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue
     @Override
     public void consume(HighPriorityMessage message) {
         try {
+            log.info("Message consumed for request for "+ message.getMessageId()+ "- " + message.getMsisdn());
             Map<String, IMessageSender<SmsRequest>> senderMap = smsSenderUtils.fetchSmsSender(message);
+            log.info("Senders fetched for request for "+ message.getMessageId()+ "- " + message.getMsisdn());
             senderHandler.handle(MessageDetails.builder().senderMap(senderMap).message(message).build());
         } catch (Exception e) {
             log.error(HIGH_PRIORITY_SMS_ERROR, e.getMessage(), e);

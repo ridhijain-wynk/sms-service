@@ -20,6 +20,7 @@ import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.enums.PinpointRecordStatus;
+import in.wynk.sms.event.ClientPinpointStreamEvent;
 import in.wynk.sms.event.PinpointStreamEvent;
 import in.wynk.sms.event.SmsNotificationEvent;
 import in.wynk.sms.sender.IMessageSender;
@@ -98,6 +99,7 @@ public class SmsEventsListener {
                             .build());
                     AnalyticService.update(smsRequest);
                     sqsManagerService.publishSQSMessage(smsRequest);
+                    log.info("Message pushed for request for "+ smsRequest.getMessageId()+ "- " + smsRequest.getMsisdn());
                 }
             }
         }
@@ -105,11 +107,11 @@ public class SmsEventsListener {
 
     @EventListener
     @AnalyseTransaction(name = "pinpointStreamEvent")
-    public void onPinpointSMSEvent(PinpointStreamEvent event) {
+    public void onPinpointSMSEvent(ClientPinpointStreamEvent event) {
         AnalyticService.update(event);
-        if(StringUtils.equalsIgnoreCase(event.getEvent_type(), "_SMS.FAILURE")){
-            if(event.getAttributes().containsKey("record_status")){
-                String recordStatus = event.getAttributes().get("record_status");
+        if(StringUtils.equalsIgnoreCase(event.getPinpointEvent().getEvent_type(), "_SMS.FAILURE")){
+            if(event.getPinpointEvent().getAttributes().containsKey("record_status")){
+                String recordStatus = event.getPinpointEvent().getAttributes().get("record_status");
                 /*if(EnumSet.of(PinpointRecordStatus.UNREACHABLE,
                         PinpointRecordStatus.UNKNOWN,
                         PinpointRecordStatus.CARRIER_UNREACHABLE,
@@ -117,11 +119,11 @@ public class SmsEventsListener {
                         PinpointRecordStatus.NO_QUOTA_LEFT,
                         PinpointRecordStatus.MAX_PRICE_EXCEEDED,
                         PinpointRecordStatus.TTL_EXPIRED).contains(PinpointRecordStatus.valueOf(recordStatus))){*/
-                    log.error(PINPOINT_SMS_ERROR, "Unable to send the message via Pinpoint for {}", event.getAttributes().get("destination_phone_number"));
-                    SmsRequest request = redisDataService.get(event.getAttributes().get("message_id"));
+                    log.error(PINPOINT_SMS_ERROR, "Unable to send the message via Pinpoint for {}", event.getPinpointEvent().getAttributes().get("destination_phone_number"));
+                    SmsRequest request = redisDataService.get(event.getPinpointEvent().getAttributes().get("message_id"));
                     sendThroughFallback(request);
                 //}
-                log.info("Response from Pinpoint for {}",event.getAttributes().get("destination_phone_number"));
+                log.info("Response from Pinpoint for {}",event.getPinpointEvent().getAttributes().get("destination_phone_number"));
             }
         }
     }
