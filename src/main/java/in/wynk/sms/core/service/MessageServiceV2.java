@@ -1,5 +1,6 @@
 package in.wynk.sms.core.service;
 
+import in.wynk.advice.TimeIt;
 import in.wynk.data.enums.State;
 import in.wynk.sms.core.entity.Messages;
 import in.wynk.sms.core.repository.MessagesRepository;
@@ -94,6 +95,7 @@ public class MessageServiceV2 implements IMessageService{
         }
     }
 
+    @TimeIt
     private List<String> getMessagesListFromWindow (String window){
         final List<String> outputList = new ArrayList<>();
         try {
@@ -113,6 +115,7 @@ public class MessageServiceV2 implements IMessageService{
         return outputList;
     }
 
+    @TimeIt
     private List<String> findMessage(String window, String textToFind, String[] textToFindArr, int iteration, int start) {
         try {
             List<String> matchFoundList = getMessagesListFromWindow(window);
@@ -143,6 +146,7 @@ public class MessageServiceV2 implements IMessageService{
     }
 
     @Override
+    @TimeIt
     public MessageTemplateDTO findMessagesFromSmsText(String textToFind) {
 
         long startTime = System.currentTimeMillis();
@@ -173,6 +177,7 @@ public class MessageServiceV2 implements IMessageService{
         return StringEscapeUtils.unescapeJava(text);
     }
 
+    @TimeIt
     private MessageTemplateDTO checkIfTemplateMatchesSmsText(Messages message, String messageText) {
         MessageTemplateDTO messageTemplateDTO = null;
         if (message.isVariablesPresent()) {
@@ -190,6 +195,7 @@ public class MessageServiceV2 implements IMessageService{
         return message.getMessage().equals(messageText) ? MessageTemplateDTO.builder().linkedHeader(message.getLinkedHeader()).messageTemplateId(message.getTemplateId()).messageType(message.getMessageType()).sender(message.getSender()).build() : null;
     }
 
+    @TimeIt
     private Map<Integer, String> getVarMapIfTemplateMatchesSmsText(String template, String filledTemplate) {
         Map<Integer, String> templateTranslation = new LinkedHashMap<>();
         String regexTemplate;

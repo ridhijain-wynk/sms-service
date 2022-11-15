@@ -1,5 +1,6 @@
 package in.wynk.sms.core.service;
 
+import in.wynk.advice.TimeIt;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.dto.MessageDetails;
 import in.wynk.sms.dto.request.SmsRequest;
@@ -21,6 +22,7 @@ import static in.wynk.sms.constants.SmsLoggingMarkers.SECONDARY_SENDER_ERROR;
 public class MessageSenderHandler implements ISenderHandler<MessageDetails> {
 
     @Override
+    @TimeIt
     public void handle (MessageDetails messageDetails) throws Exception {
         Map<String, IMessageSender<SmsRequest>> senderMap = messageDetails.getSenderMap();
         if(Objects.isNull(senderMap) || !senderMap.containsKey(PRIMARY)){

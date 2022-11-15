@@ -2,6 +2,7 @@ package in.wynk.sms.queue.consumer;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import in.wynk.advice.TimeIt;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
 import in.wynk.sms.dto.MessageDetails;
@@ -52,6 +53,7 @@ public class HighestPriorityConsumer extends AbstractSQSMessageConsumerPollingQu
     private ISenderHandler senderHandler;
 
     @Override
+    @TimeIt
     public void consume(HighestPriorityMessage message) {
         try {
             Map<String, IMessageSender<SmsRequest>> senderMap = smsSenderUtils.fetchSmsSender(message);

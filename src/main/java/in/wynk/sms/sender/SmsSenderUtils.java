@@ -1,5 +1,6 @@
 package in.wynk.sms.sender;
 
+import in.wynk.advice.TimeIt;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
@@ -43,6 +44,7 @@ public class SmsSenderUtils implements ISmsSenderUtils {
     private MessageServiceV2 messageServiceV2;
 
     @Override
+    @TimeIt
     public Map<String, IMessageSender<SmsRequest>> fetchSmsSender(SmsRequest request) {
         Map<String, IMessageSender<SmsRequest>> senderMap = new HashMap<>();
         addSender(senderMap, PRIMARY, LOBBY_MESSAGE_STRATEGY);
@@ -81,6 +83,7 @@ public class SmsSenderUtils implements ISmsSenderUtils {
         return senderMap;
     }
 
+    @TimeIt
     private void addSender(Map<String, IMessageSender<SmsRequest>> senderMap, String beanType, String beanName) {
         try {
             senderMap.put(beanType, BeanLocatorFactory.getBean(beanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
