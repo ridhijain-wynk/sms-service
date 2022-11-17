@@ -234,7 +234,7 @@ public class MessageServiceV2 implements IMessageService{
         List<DiffMatchPatch.Diff> insertList = diff.stream().filter(diff1 -> diff1.getOperation().equals(DiffMatchPatch.Operation.INSERT)).collect(Collectors.toList());
         List<DiffMatchPatch.Diff> deleteList = diff.stream().filter(diff1 -> diff1.getOperation().equals(DiffMatchPatch.Operation.DELETE)).collect(Collectors.toList());
         if(Objects.equals(insertList.size(), deleteList.size())){
-            Optional<DiffMatchPatch.Diff> diffOptional = deleteList.stream().filter(diff1 -> diff1.getOperation().equals(DiffMatchPatch.Operation.DELETE) && !diff1.getText().contains("{#var#}")).findAny();
+            Optional<DiffMatchPatch.Diff> diffOptional = deleteList.stream().filter(diff1 -> !diff1.getText().contains("{#var#}")).findAny();
             if(!diffOptional.isPresent()){
                 int count = 1;
                 for(DiffMatchPatch.Diff d : insertList){
