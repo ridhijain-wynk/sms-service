@@ -2,6 +2,7 @@ package in.wynk.sms.queue.consumer;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import in.wynk.advice.TimeIt;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
@@ -54,6 +55,7 @@ public class HighPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue
 
     @Override
     @TimeIt
+    @AnalyseTransaction(name="highConsumer")
     public void consume(HighPriorityMessage message) {
         try {
             log.info("Message consumed for request for "+ message.getMessageId()+ "- " + message.getMsisdn());

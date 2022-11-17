@@ -83,7 +83,6 @@ public class SmsSenderUtils implements ISmsSenderUtils {
         return senderMap;
     }
 
-    @TimeIt
     private void addSender(Map<String, IMessageSender<SmsRequest>> senderMap, String beanType, String beanName) {
         try {
             senderMap.put(beanType, BeanLocatorFactory.getBean(beanName, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
