@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.advice.TimeIt;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
@@ -79,11 +80,13 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
 
     @Override
     @AnalyseTransaction(name = "sendSmsAirtelIQ")
+    @TimeIt
     public void sendMessage(SmsRequest request) throws Exception {
         super.sendMessage(request);
     }
 
     @Override
+    @TimeIt
     public void send(SmsRequest request) {
         try {
             AnalyticService.update(MESSAGE_TEXT, request.getText());
@@ -101,6 +104,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
         }
     }
 
+    @TimeIt
     private void sendSmsThroughAirtelIQ(SmsRequest request, MessageTemplateDTO messageTemplateDTO) throws URISyntaxException {
         Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
         if (Objects.isNull(client)) {

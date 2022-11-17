@@ -2,6 +2,8 @@ package in.wynk.sms.queue.consumer;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
+import in.wynk.advice.TimeIt;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
 import in.wynk.sms.dto.MessageDetails;
@@ -52,6 +54,8 @@ public class LowPriorityConsumer extends AbstractSQSMessageConsumerPollingQueue<
     }
 
     @Override
+    @AnalyseTransaction(name="lowConsumer")
+    @TimeIt
     public void consume(LowPriorityMessage message) {
         try {
             Map<String, IMessageSender<SmsRequest>> senderMap = smsSenderUtils.fetchSmsSender(message);

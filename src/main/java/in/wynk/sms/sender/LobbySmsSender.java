@@ -3,6 +3,7 @@ package in.wynk.sms.sender;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.advice.TimeIt;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
@@ -39,12 +40,14 @@ public class LobbySmsSender extends AbstractSMSSender {
 
     @Override
     @AnalyseTransaction(name = "sendSmsLobby")
+    @TimeIt
     public void sendMessage(SmsRequest request) throws Exception {
         super.sendMessage(request);
     }
 
     @SneakyThrows
     @Override
+    @TimeIt
     public void send(SmsRequest request) {
         AnalyticService.update(request);
         Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
