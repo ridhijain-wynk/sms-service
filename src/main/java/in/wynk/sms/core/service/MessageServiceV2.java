@@ -4,6 +4,7 @@ import in.wynk.data.enums.State;
 import in.wynk.sms.core.entity.Messages;
 import in.wynk.sms.core.repository.MessagesRepository;
 import in.wynk.sms.dto.MessageTemplateDTO;
+import in.wynk.sms.utils.DiffMatchPatch;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,7 @@ public class MessageServiceV2 implements IMessageService{
     private final StandardAnalyzer analyzer = new StandardAnalyzer();
     private final Directory index = new RAMDirectory();
     private static final int LUCENE_HITS_PER_PAGE = 30;
-    private static final int LUCENE_WINDOW_SIZE = 3;
+    private static final int LUCENE_WINDOW_SIZE = 5;
     private static final int LUCENE_OUTPUT_WINDOW = 5;
 
     @PostConstruct
@@ -132,6 +133,9 @@ public class MessageServiceV2 implements IMessageService{
             } else {
                 //either variable encountered in the text or template not found in DB
                 iteration++;
+                if(LUCENE_WINDOW_SIZE + iteration >= textToFindArr.length){
+                    return matchFoundList;
+                }
                 window = StringUtils.substringBetween(textToFind, textToFindArr[start], textToFindArr[LUCENE_WINDOW_SIZE + iteration]);
                 start++;
                 return findMessage(window, textToFind, textToFindArr, iteration, start);
@@ -203,7 +207,12 @@ public class MessageServiceV2 implements IMessageService{
         } else {
             regexTemplate = template.replaceAll("\\)","").replaceAll("\\(","").replaceAll(PLACE_HOLDER_PATTERN, REPLACE_PATTERN);
         }
-        Pattern pattern = Pattern.compile(regexTemplate);
+        getVariablesMap(filledTemplate, templateTranslation, regexTemplate);
+        return templateTranslation;
+    }
+
+    private void getVariablesMap (String filledTemplate, Map<Integer, String> templateTranslation, String regexTemplate) {
+        /*Pattern pattern = Pattern.compile(regexTemplate);
         Matcher templateMatcher = pattern.matcher(template);
         Matcher filledTemplateMatcher = pattern.matcher(filledTemplate);
         while (templateMatcher.find() && filledTemplateMatcher.find()) {
@@ -212,7 +221,19 @@ public class MessageServiceV2 implements IMessageService{
                     templateTranslation.put(i, filledTemplateMatcher.group(i));
                 }
             }
+        }*/
+        DiffMatchPatch diffMatchPatch = new DiffMatchPatch();
+        LinkedList<DiffMatchPatch.Diff> diff = diffMatchPatch.getDiffLinkedList(regexTemplate, filledTemplate);
+        List<DiffMatchPatch.Diff> insertList = diff.stream().filter(diff1 -> diff1.getOperation().equals(DiffMatchPatch.Operation.INSERT)).collect(Collectors.toList());
+        List<DiffMatchPatch.Diff> deleteList = diff.stream().filter(diff1 -> diff1.getOperation().equals(DiffMatchPatch.Operation.DELETE)).collect(Collectors.toList());
+        if(Objects.equals(insertList.size(), deleteList.size())){
+            Optional<DiffMatchPatch.Diff> diffOptional = deleteList.stream().filter(diff1 -> !diff1.getText().contains(REPLACE_PATTERN)).findAny();
+            if(!diffOptional.isPresent()){
+                int count = 1;
+                for(DiffMatchPatch.Diff d : insertList){
+                    templateTranslation.put(count++, d.getText());
+                }
+            }
         }
-        return templateTranslation;
     }
 }
