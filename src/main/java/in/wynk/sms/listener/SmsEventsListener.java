@@ -2,7 +2,6 @@ package in.wynk.sms.listener;
 
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
-import in.wynk.advice.TimeIt;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
@@ -59,7 +58,6 @@ public class SmsEventsListener {
 
     @EventListener
     @AnalyseTransaction(name = "smsNotificationEvent")
-    @TimeIt
     public void onSmsNotificationEvent(SmsNotificationEvent event) {
         if (StringUtils.isNotEmpty(event.getMsisdn())) {
             if (StringUtils.isNotEmpty(event.getMessage())) {

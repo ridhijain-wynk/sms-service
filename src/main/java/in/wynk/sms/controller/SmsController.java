@@ -2,7 +2,6 @@ package in.wynk.sms.controller;
 
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
-import in.wynk.advice.TimeIt;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BCEncryptor;
@@ -45,7 +44,6 @@ public class SmsController {
 
     @PostMapping("/v1/sms/send")
     @AnalyseTransaction(name = "sendSms")
-    @TimeIt
     public SmsResponse sendSms(Principal principal, @RequestBody SmsRequest smsRequest) {
         Client client = clientDetailsCachingService.getClientById(principal.getName());
         String msisdn = smsRequest.getMsisdn();

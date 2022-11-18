@@ -1,6 +1,5 @@
 package in.wynk.sms.core.service;
 
-import in.wynk.advice.TimeIt;
 import in.wynk.data.enums.State;
 import in.wynk.sms.core.entity.Messages;
 import in.wynk.sms.core.repository.MessagesRepository;
@@ -96,7 +95,6 @@ public class MessageServiceV2 implements IMessageService{
         }
     }
 
-    @TimeIt
     private List<String> getMessagesListFromWindow (String window){
         final List<String> outputList = new ArrayList<>();
         try {
@@ -116,7 +114,6 @@ public class MessageServiceV2 implements IMessageService{
         return outputList;
     }
 
-    @TimeIt
     private List<String> findMessage(String window, String textToFind, String[] textToFindArr, int iteration, int start) {
         try {
             List<String> matchFoundList = getMessagesListFromWindow(window);
@@ -150,7 +147,6 @@ public class MessageServiceV2 implements IMessageService{
     }
 
     @Override
-    @TimeIt
     public MessageTemplateDTO findMessagesFromSmsText(String textToFind) {
 
         long startTime = System.currentTimeMillis();
@@ -181,7 +177,6 @@ public class MessageServiceV2 implements IMessageService{
         return StringEscapeUtils.unescapeJava(text);
     }
 
-    @TimeIt
     private MessageTemplateDTO checkIfTemplateMatchesSmsText(Messages message, String messageText) {
         MessageTemplateDTO messageTemplateDTO = null;
         if (message.isVariablesPresent()) {
@@ -199,7 +194,6 @@ public class MessageServiceV2 implements IMessageService{
         return message.getMessage().equals(messageText) ? MessageTemplateDTO.builder().linkedHeader(message.getLinkedHeader()).messageTemplateId(message.getTemplateId()).messageType(message.getMessageType()).sender(message.getSender()).build() : null;
     }
 
-    @TimeIt
     private Map<Integer, String> getVarMapIfTemplateMatchesSmsText(String template, String filledTemplate) {
         Map<Integer, String> templateTranslation = new LinkedHashMap<>();
         String regexTemplate;
@@ -213,12 +207,11 @@ public class MessageServiceV2 implements IMessageService{
         } else {
             regexTemplate = template.replaceAll("\\)","").replaceAll("\\(","").replaceAll(PLACE_HOLDER_PATTERN, REPLACE_PATTERN);
         }
-        getVariablesMap(template, filledTemplate, templateTranslation, regexTemplate);
+        getVariablesMap(filledTemplate, templateTranslation, regexTemplate);
         return templateTranslation;
     }
 
-    @TimeIt
-    private void getVariablesMap (String template, String filledTemplate, Map<Integer, String> templateTranslation, String regexTemplate) {
+    private void getVariablesMap (String filledTemplate, Map<Integer, String> templateTranslation, String regexTemplate) {
         /*Pattern pattern = Pattern.compile(regexTemplate);
         Matcher templateMatcher = pattern.matcher(template);
         Matcher filledTemplateMatcher = pattern.matcher(filledTemplate);
@@ -230,11 +223,11 @@ public class MessageServiceV2 implements IMessageService{
             }
         }*/
         DiffMatchPatch diffMatchPatch = new DiffMatchPatch();
-        LinkedList<DiffMatchPatch.Diff> diff = diffMatchPatch.getDiffLinkedList(template, filledTemplate);
+        LinkedList<DiffMatchPatch.Diff> diff = diffMatchPatch.getDiffLinkedList(regexTemplate, filledTemplate);
         List<DiffMatchPatch.Diff> insertList = diff.stream().filter(diff1 -> diff1.getOperation().equals(DiffMatchPatch.Operation.INSERT)).collect(Collectors.toList());
         List<DiffMatchPatch.Diff> deleteList = diff.stream().filter(diff1 -> diff1.getOperation().equals(DiffMatchPatch.Operation.DELETE)).collect(Collectors.toList());
         if(Objects.equals(insertList.size(), deleteList.size())){
-            Optional<DiffMatchPatch.Diff> diffOptional = deleteList.stream().filter(diff1 -> !diff1.getText().contains("{#var#}")).findAny();
+            Optional<DiffMatchPatch.Diff> diffOptional = deleteList.stream().filter(diff1 -> !diff1.getText().contains(REPLACE_PATTERN)).findAny();
             if(!diffOptional.isPresent()){
                 int count = 1;
                 for(DiffMatchPatch.Diff d : insertList){
