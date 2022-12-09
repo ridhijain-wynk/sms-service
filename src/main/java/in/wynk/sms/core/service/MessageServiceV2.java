@@ -98,7 +98,7 @@ public class MessageServiceV2 implements IMessageService{
     private List<String> getMessagesListFromWindow (String window){
         final List<String> outputList = new ArrayList<>();
         try {
-            final Query query = new QueryParser(MESSAGE_TEXT, analyzer).parse("\"" + window + "\"");
+            final Query query = new QueryParser(MESSAGE_TEXT, analyzer).parse("\"" + window.replaceAll("\"","") + "\"");
             final IndexReader reader = DirectoryReader.open(index);
             final IndexSearcher searcher = new IndexSearcher(reader);
             final TopDocs docs = searcher.search(query, LUCENE_HITS_PER_PAGE);
