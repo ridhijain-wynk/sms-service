@@ -6,10 +6,14 @@ import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.exception.WynkRuntimeException;
+import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.constants.SMSBeanConstant;
+import in.wynk.sms.core.entity.Senders;
+import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.request.*;
 import in.wynk.sms.dto.response.VoiceSmsResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -43,10 +47,12 @@ public class VoiceSmsService extends AbstractSMSSender {
 
     private final RestTemplate smsRestTemplate;
     private final ClientDetailsCachingService clientDetailsCachingService;
+    private final SendersCachingService sendersCachingService;
 
-    public VoiceSmsService(RestTemplate smsRestTemplate, ClientDetailsCachingService clientDetailsCachingService) {
+    public VoiceSmsService(RestTemplate smsRestTemplate, ClientDetailsCachingService clientDetailsCachingService, SendersCachingService sendersCachingService) {
         this.smsRestTemplate = smsRestTemplate;
         this.clientDetailsCachingService = clientDetailsCachingService;
+        this.sendersCachingService = sendersCachingService;
     }
 
     @Override
@@ -73,15 +79,17 @@ public class VoiceSmsService extends AbstractSMSSender {
             Optional<String> callTypeOption = Optional.empty();
             Optional<String> urlOption = Optional.empty();
 
-            if (Objects.nonNull(client) && client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_URL").isPresent()) {
-                urlOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_URL");
-                callTypeOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_CALL_TYPE");
-                textTypeOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_TEXT_TYPE");
-                maxRetriesOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_MAX_RETRY");
-                customerIdOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_CUSTOMER_ID");
-                tokenOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_TOKEN");
-                callerIdOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_CALLER_ID");
-                callFlowIdOption = client.getMeta(request.getPriority().name() + "_PRIORITY_" + request.getCommunicationType().name() + "_CALL_FLOW_ID");
+            final String countryCode = StringUtils.isNotEmpty(request.getCountryCode()) ? Country.getCountryIdByCountryCode(request.getCountryCode()) : BaseConstants.DEFAULT_COUNTRY_CODE;
+            Senders senders = sendersCachingService.getSenderByNameClientCountry(SMSBeanConstant.AIRTEL_VOICE_MESSAGE_SENDER, client.getAlias(), request.getPriority(), countryCode);
+            if (Objects.nonNull(senders) && Objects.nonNull(senders.getVoice()) && senders.isUrlPresent()) {
+                urlOption = Optional.of(senders.getUrl());
+                callTypeOption = Optional.of(senders.getVoice().getCallType());
+                textTypeOption = Optional.of(senders.getVoice().getTextType());
+                maxRetriesOption = Optional.of(senders.getVoice().getMaxRetry());
+                customerIdOption = Optional.of(senders.getVoice().getCustomerId());
+                tokenOption = Optional.of(senders.getVoice().getToken());
+                callerIdOption = Optional.of(senders.getVoice().getCallerId());
+                callFlowIdOption = Optional.of(senders.getVoice().getCallFlowId());
             }
 
 
