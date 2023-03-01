@@ -2,6 +2,11 @@
   <configuration default="false" name="SMS" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="in.wynk.sms.SMSApplication" />
     <module name="wynk-sms" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
     <method v="2">
       <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="clean install -P sms -Denv=local -DSkipTests=true" />
     </method>
