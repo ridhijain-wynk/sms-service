@@ -55,6 +55,8 @@ public abstract class SmsRequest implements Serializable {
     private String messageId;
     @Analysed
     private String templateId;
+    @Analysed
+    private Integer retryCount;
 
     @Setter
     @Builder.Default

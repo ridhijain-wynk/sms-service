@@ -35,19 +35,19 @@ public class SMSFactory {
             case HIGHEST:
                 return HighestPriorityMessage.builder().countryCode(request.getCountryCode())
                         .msisdn(request.getMsisdn()).clientAlias(alias).service(request.getService()).text(request.getMessage())
-                        .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
+                        .messageId(request.getMsisdn() + System.currentTimeMillis()).retryCount(request.getRetryCount()).build();
             case HIGH:
                 return HighPriorityMessage.builder().countryCode(request.getCountryCode())
                         .msisdn(request.getMsisdn()).clientAlias(alias).service(request.getService()).text(request.getMessage())
-                        .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
+                        .messageId(request.getMsisdn() + System.currentTimeMillis()).retryCount(request.getRetryCount()).build();
             case MEDIUM:
                 return MediumPriorityMessage.builder().countryCode(request.getCountryCode())
                         .msisdn(request.getMsisdn()).clientAlias(alias).service(request.getService()).text(request.getMessage())
-                        .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
+                        .messageId(request.getMsisdn() + System.currentTimeMillis()).retryCount(request.getRetryCount()).build();
             case LOW:
                 return LowPriorityMessage.builder().countryCode(request.getCountryCode())
                         .msisdn(request.getMsisdn()).clientAlias(alias).service(request.getService()).text(request.getMessage())
-                        .messageId(request.getMsisdn() + System.currentTimeMillis()).build();
+                        .messageId(request.getMsisdn() + System.currentTimeMillis()).retryCount(request.getRetryCount()).build();
         }
         throw new IllegalArgumentException("Invalid message");
     }
