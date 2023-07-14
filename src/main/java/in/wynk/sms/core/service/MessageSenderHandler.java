@@ -26,6 +26,7 @@ public class MessageSenderHandler implements ISenderHandler<MessageDetails> {
         if(Objects.isNull(senderMap) || !senderMap.containsKey(PRIMARY)){
             throw new WynkRuntimeException(SmsErrorType.SMS001);
         }
+        switchToSecondaryOnRetry(messageDetails, senderMap);
         try{
             senderMap.get(PRIMARY).sendMessage(messageDetails.getMessage());
         } catch (Exception e) {
@@ -40,6 +41,17 @@ public class MessageSenderHandler implements ISenderHandler<MessageDetails> {
                 log.error(SECONDARY_SENDER_ERROR, "Error in secondary sender {}", ex.getMessage(), e);
                 throw ex;
             }
+        }
+    }
+
+    private static void switchToSecondaryOnRetry (MessageDetails messageDetails, Map<String, IMessageSender<SmsRequest>> senderMap) throws Exception {
+        try{
+            if(messageDetails.getMessage().getRetryCount() > 0){
+                senderMap.get(SECONDARY).sendMessage(messageDetails.getMessage());
+            }
+        } catch (Exception ex){
+            log.error(SECONDARY_SENDER_ERROR, "Error in secondary sender {}", ex.getMessage(), ex);
+            throw ex;
         }
     }
 }
