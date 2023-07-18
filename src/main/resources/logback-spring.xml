@@ -120,6 +120,9 @@
     <logger name="sendSmsPinpoint" additivity="false" level="info">
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
+    <logger name="IQSMSCallback" additivity="false" level="info">
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
     <springProfile name="local">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
