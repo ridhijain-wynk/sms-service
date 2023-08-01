@@ -45,15 +45,18 @@ public class MessageSenderHandler implements ISenderHandler<MessageDetails> {
     }
 
     private static boolean switchToSecondaryOnRetry (MessageDetails messageDetails, Map<String, IMessageSender<SmsRequest>> senderMap) throws Exception {
-        boolean retryUsingSecondary = messageDetails.getMessage().getRetryCount() > 0;
-        try{
-            if(retryUsingSecondary){
-                senderMap.get(SECONDARY).sendMessage(messageDetails.getMessage());
+        if(Objects.nonNull(messageDetails.getMessage().getRetryCount())){
+            boolean retryUsingSecondary = messageDetails.getMessage().getRetryCount() > 0;
+            try{
+                if(retryUsingSecondary){
+                    senderMap.get(SECONDARY).sendMessage(messageDetails.getMessage());
+                }
+            } catch (Exception ex){
+                log.error(SECONDARY_SENDER_ERROR, "Error in secondary sender {}", ex.getMessage(), ex);
+                throw ex;
             }
-        } catch (Exception ex){
-            log.error(SECONDARY_SENDER_ERROR, "Error in secondary sender {}", ex.getMessage(), ex);
-            throw ex;
+            return retryUsingSecondary;
         }
-        return retryUsingSecondary;
+        return false;
     }
 }
