@@ -111,7 +111,7 @@ public class PinpointSender extends AbstractSMSSender {
                     .withOriginationNumber(messageTypeSpecificDetails.getPinpointOriginationNumber())
                     .withSenderId(messageTypeSpecificDetails.getPinpointSenderID())
                     .withKeyword(messageTypeSpecificDetails.getPinpointKeyword());
-            String destinationNumber = (request.getMsisdn().contains(request.getCountryCode()))? request.getMsisdn() : request.getCountryCode().concat(request.getMsisdn());
+            String destinationNumber = (request.getMsisdn().contains("+91"))? request.getMsisdn() : "+91".concat(request.getMsisdn());
             final MessageResult messageResult = invokeSendMessagesAPI(messageTypeSpecificDetails.getPinpointAppId(), smsMessage, destinationNumber);
             AnalyticService.update(messageResult);
             redisDataService.save(messageResult.getMessageId(), request);
