@@ -10,8 +10,10 @@ import in.wynk.sms.dto.request.SmsRequest;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+@ToString
 @SuperBuilder
 @Getter
 @NoArgsConstructor
