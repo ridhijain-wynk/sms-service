@@ -30,7 +30,7 @@ public class MusicPinpointConsumerService extends AbstractKinesisEventConsumer i
     @Override
     public void consume(PinpointStreamEvent event) {
         eventPublisher.publishEvent(ClientPinpointStreamEvent.builder()
-                .clientAlias("music")
+                /*.clientAlias("music")*/
                 .pinpointEvent(event)
                 .build());
     }

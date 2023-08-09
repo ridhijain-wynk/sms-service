@@ -30,7 +30,7 @@ public class PinpointConsumerService extends AbstractKinesisEventConsumer implem
     @Override
     public void consume(PinpointStreamEvent event) {
         eventPublisher.publishEvent(ClientPinpointStreamEvent.builder()
-                .clientAlias("enterr10")
+                /*.clientAlias("enterr10")*/
                 .pinpointEvent(event)
                 .build());
     }
