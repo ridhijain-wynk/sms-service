@@ -18,7 +18,7 @@ public interface SMSConstants extends BaseConstants {
     String MESSAGE_STRATEGY_IQ = "airtelIQ";
     String LOBBY_MESSAGE_STRATEGY = "lobby";
     String PLACE_HOLDER_PATTERN = "\\{#var#\\}";
-    String REPLACE_PATTERN = "(.+)";
+    String REPLACE_PATTERN = "{.+}";
     String SPRING_EXP_REPLACE_PATTERN = "(.*?)";
     String MESSAGE_TEXT = "messageText";
     String CONVERTED_MESSAGE_TEXT = "convertedMessageText";
