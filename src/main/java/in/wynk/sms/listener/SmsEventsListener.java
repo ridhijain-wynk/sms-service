@@ -21,6 +21,7 @@ import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.enums.PinpointRecordStatus;
 import in.wynk.sms.event.ClientPinpointStreamEvent;
+import in.wynk.sms.event.IQDeliveryReportEvent;
 import in.wynk.sms.event.PinpointStreamEvent;
 import in.wynk.sms.event.SmsNotificationEvent;
 import in.wynk.sms.sender.IMessageSender;
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static in.wynk.common.constant.BaseConstants.*;
+import static in.wynk.sms.constants.SMSConstants.AIRTEL_IQ_SMS_SENDER_BEAN;
 import static in.wynk.sms.constants.SMSConstants.PINPOINT_SENDER_BEAN;
 import static in.wynk.sms.constants.SmsLoggingMarkers.*;
 
@@ -106,6 +108,15 @@ public class SmsEventsListener {
     }
 
     @EventListener
+    @AnalyseTransaction(name = "IQDeliveryReportEvent")
+    public void onIQDeliveryReportEvent(IQDeliveryReportEvent event) {
+        AnalyticService.update(event);
+        final SmsRequest smsRequest = redisDataService.get(event.getMessageRequestId());
+        AnalyticService.update(smsRequest);
+        sendThroughFallback(smsRequest, AIRTEL_IQ_SMS_SENDER_BEAN);
+    }
+
+    @EventListener
     @AnalyseTransaction(name = "pinpointStreamEvent")
     public void onPinpointSMSEvent(ClientPinpointStreamEvent event) {
         AnalyticService.update(event);
@@ -121,14 +132,14 @@ public class SmsEventsListener {
                         PinpointRecordStatus.TTL_EXPIRED).contains(PinpointRecordStatus.valueOf(recordStatus))){*/
                     log.error(PINPOINT_SMS_ERROR, "Unable to send the message via Pinpoint for {}", event.getPinpointEvent().getAttributes().get("destination_phone_number"));
                     SmsRequest request = redisDataService.get(event.getPinpointEvent().getAttributes().get("message_id"));
-                    sendThroughFallback(request);
+                    sendThroughFallback(request, PINPOINT_SENDER_BEAN);
                 //}
                 log.info("Response from Pinpoint for {}",event.getPinpointEvent().getAttributes().get("destination_phone_number"));
             }
         }
     }
 
-    private void sendThroughFallback (SmsRequest request) {
+    private void sendThroughFallback (SmsRequest request, String beanName) {
         try {
             Client client = clientDetailsCachingService.getClientByAlias(request.getClientAlias());
             if (Objects.isNull(client)) {
@@ -136,16 +147,16 @@ public class SmsEventsListener {
             }
             if (Objects.nonNull(client)){
                 final String countryCode = StringUtils.isNotEmpty(request.getCountryCode()) ? Country.getCountryIdByCountryCode(request.getCountryCode()) : BaseConstants.DEFAULT_COUNTRY_CODE;
-                SenderConfigurations senderConfigurations = senderConfigCachingService.getSenderConfigurationsByAliasAndCountry(client.getAlias(), countryCode);
+                final SenderConfigurations senderConfigurations = senderConfigCachingService.getSenderConfigurationsByAliasAndCountry(client.getAlias(), countryCode);
                 if(Objects.nonNull(senderConfigurations)){
                     Map<CommunicationType, SenderDetails> senderDetailsMap = senderConfigurations.getDetails().get(request.getPriority());
                     if(!CollectionUtils.isEmpty(senderDetailsMap) && senderDetailsMap.containsKey(request.getCommunicationType()) && senderDetailsMap.get(request.getCommunicationType()).isPrimaryPresent()){
                         final String primarySenderId = senderDetailsMap.get(request.getCommunicationType()).getPrimary();
                         if(senderDetailsMap.get(request.getCommunicationType()).isSecondaryPresent()){
                             final String secondarySenderId = senderDetailsMap.get(request.getCommunicationType()).getSecondary();
-                            if(StringUtils.equalsIgnoreCase(primarySenderId, PINPOINT_SENDER_BEAN)){
+                            if(StringUtils.equalsIgnoreCase(primarySenderId, beanName)){
                                 findSenderBean(request, secondarySenderId);
-                            } else if(StringUtils.equalsIgnoreCase(secondarySenderId, PINPOINT_SENDER_BEAN)){
+                            } else if(StringUtils.equalsIgnoreCase(secondarySenderId, beanName)){
                                 log.info("No fallback configured after secondary sender.");
                             } else {
                                 findSenderBean(request, primarySenderId);
