@@ -29,4 +29,5 @@ public interface SmsLoggingMarkers extends BaseLoggingMarkers {
     Marker SENDER_CONFIGURATIONS_CACHING_FAILURE = MarkerFactory.getMarker("SENDER_CONFIGURATIONS_CACHING_FAILURE");
     Marker SENDERS_CACHING_FAILURE = MarkerFactory.getMarker("SENDERS_CACHING_FAILURE");
     Marker PINPOINT_SMS_ERROR = MarkerFactory.getMarker("PINPOINT_SMS_ERROR");
+    Marker SEND_THROUGH_FALLBACK_ERROR = MarkerFactory.getMarker("SEND_THROUGH_FALLBACK_ERROR");
 }

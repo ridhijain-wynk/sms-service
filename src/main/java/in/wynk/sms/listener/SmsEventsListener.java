@@ -112,8 +112,12 @@ public class SmsEventsListener {
     public void onIQDeliveryReportEvent(IQDeliveryReportEvent event) {
         AnalyticService.update(event);
         final SmsRequest smsRequest = redisDataService.get(event.getMessageRequestId());
-        AnalyticService.update(smsRequest);
-        sendThroughFallback(smsRequest, AIRTEL_IQ_SMS_SENDER_BEAN);
+        if(Objects.nonNull(smsRequest)){
+            AnalyticService.update(smsRequest);
+            sendThroughFallback(smsRequest, AIRTEL_IQ_SMS_SENDER_BEAN);
+        } else {
+            log.info("Message request not found in redis.");
+        }
     }
 
     @EventListener
@@ -132,7 +136,11 @@ public class SmsEventsListener {
                         PinpointRecordStatus.TTL_EXPIRED).contains(PinpointRecordStatus.valueOf(recordStatus))){*/
                     log.error(PINPOINT_SMS_ERROR, "Unable to send the message via Pinpoint for {}", event.getPinpointEvent().getAttributes().get("destination_phone_number"));
                     SmsRequest request = redisDataService.get(event.getPinpointEvent().getAttributes().get("message_id"));
-                    sendThroughFallback(request, PINPOINT_SENDER_BEAN);
+                    if(Objects.nonNull(request)){
+                        sendThroughFallback(request, PINPOINT_SENDER_BEAN);
+                    } else {
+                        log.info("Message request not found in redis.");
+                    }
                 //}
                 log.info("Response from Pinpoint for {}",event.getPinpointEvent().getAttributes().get("destination_phone_number"));
             }
@@ -166,7 +174,7 @@ public class SmsEventsListener {
                 }
             }
         } catch (Exception e) {
-            log.error(PINPOINT_SMS_ERROR, e.getMessage(), e);
+            log.error(SEND_THROUGH_FALLBACK_ERROR, e.getMessage(), e);
         }
     }
 
