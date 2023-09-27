@@ -12,7 +12,9 @@ public enum SmsErrorType implements IWynkErrorType {
     SMS001("SMS Failure", "No Sender found for the client", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.SENDER_NOT_FOUND),
     SMS002("SMS Failure", "Template ID or Header not found for the message", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.NO_TEMPLATE_FOUND),
     SMS003("SMS Failure", "Message type sending not enabled for the client", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.MESSAGE_TYPE_SENDING_NOT_ENABLED),
-    PPSMS001("SMS Failure", "Unable to send the message via Pinpoint", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.PINPOINT_SMS_ERROR)
+    PPSMS001("SMS Failure", "Unable to send the message via Pinpoint", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.PINPOINT_SMS_ERROR),
+    WHSMS001("Invalid Whatsapp Message Received", "Whatsapp Send Message received is not correct", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.INVALID_WHATSAPP_MESSAGE_RECEIVED),
+    WHSMS002("Sending Whatsapp Message Failed", "Unable to send the whatsapp message", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.SEND_WHATSAPP_MESSAGE_FAILED)
     ;
 
     private final String errorTitle;
