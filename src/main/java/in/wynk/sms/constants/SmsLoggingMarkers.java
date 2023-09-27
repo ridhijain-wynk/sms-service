@@ -29,4 +29,6 @@ public interface SmsLoggingMarkers extends BaseLoggingMarkers {
     Marker SENDER_CONFIGURATIONS_CACHING_FAILURE = MarkerFactory.getMarker("SENDER_CONFIGURATIONS_CACHING_FAILURE");
     Marker SENDERS_CACHING_FAILURE = MarkerFactory.getMarker("SENDERS_CACHING_FAILURE");
     Marker PINPOINT_SMS_ERROR = MarkerFactory.getMarker("PINPOINT_SMS_ERROR");
+    Marker INVALID_WHATSAPP_MESSAGE_RECEIVED = MarkerFactory.getMarker("INVALID_WHATSAPP_MESSAGE_RECEIVED");
+    Marker SEND_WHATSAPP_MESSAGE_FAILED = MarkerFactory.getMarker("SEND_WHATSAPP_MESSAGE_FAILED");
 }
