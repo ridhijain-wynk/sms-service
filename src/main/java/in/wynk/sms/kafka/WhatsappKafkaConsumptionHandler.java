@@ -3,10 +3,7 @@ package in.wynk.sms.kafka;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.constants.SmsLoggingMarkers;
-import in.wynk.sms.dto.request.whatsapp.TextMessageRequest;
-import in.wynk.sms.dto.request.whatsapp.WhatsappMessageRequest;
-import in.wynk.sms.dto.request.whatsapp.WhatsappSendMessage;
-import in.wynk.sms.dto.response.WhatsappMessageResponse;
+import in.wynk.sms.common.dto.whatsapp.WhatsappMessageRequest;
 import in.wynk.sms.enums.SmsErrorType;
 import in.wynk.sms.service.WhatsappManagerService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +14,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
-public class WhatsappKafkaConsumptionHandler implements IWhatsappKafkaHandler<WhatsappSendMessage> {
+public class WhatsappKafkaConsumptionHandler implements IWhatsappKafkaHandler<WhatsappMessageRequest> {
 
     private final WhatsappManagerService whatsappManager;
 
@@ -26,14 +23,13 @@ public class WhatsappKafkaConsumptionHandler implements IWhatsappKafkaHandler<Wh
     }
 
     @Override
-    public void sendMessage(WhatsappSendMessage message) {
+    public void sendMessage(WhatsappMessageRequest request) {
         try {
-            AnalyticService.update(message);
-            if (ObjectUtils.isEmpty(message) || Objects.isNull(message.getMessageType()) || Objects.isNull(message.getMessageRequest())) {
+            AnalyticService.update(request);
+            if (ObjectUtils.isEmpty(request) || Objects.isNull(request.getClientAlias()) || Objects.isNull(request.getMessage())) {
                 throw new WynkRuntimeException(SmsErrorType.WHSMS001);
             }
-            //todo :  transform whatsapp request from message
-            whatsappManager.send(TextMessageRequest.builder().build());
+            whatsappManager.send(request);
         } catch (Exception ex) {
             log.error(SmsLoggingMarkers.SEND_WHATSAPP_MESSAGE_FAILED, ex.getMessage(), ex);
         }

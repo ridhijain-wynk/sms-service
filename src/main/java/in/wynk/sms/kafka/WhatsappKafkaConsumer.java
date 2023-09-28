@@ -2,7 +2,7 @@ package in.wynk.sms.kafka;
 
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import in.wynk.exception.WynkRuntimeException;
-import in.wynk.sms.dto.request.whatsapp.WhatsappSendMessage;
+import in.wynk.sms.common.dto.whatsapp.WhatsappMessageRequest;
 import in.wynk.stream.constant.StreamMarker;
 import in.wynk.stream.consumer.impl.AbstractKafkaEventConsumer;
 import lombok.extern.slf4j.Slf4j;
@@ -16,30 +16,29 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @DependsOn("kafkaConsumerConfig")
-public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, WhatsappSendMessage> {
+public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, WhatsappMessageRequest> {
 
-    private final IWhatsappKafkaHandler<WhatsappSendMessage> whatsappKafkaHandler;
+    private final IWhatsappKafkaHandler<WhatsappMessageRequest> whatsappKafkaHandler;
 
     @Value("${wynk.kafka.consumers.enabled}")
     private boolean enabled;
 
     private final KafkaListenerEndpointRegistry endpointRegistry;
 
-    public WhatsappKafkaConsumer (IWhatsappKafkaHandler<WhatsappSendMessage> whatsappKafkaHandler, KafkaListenerEndpointRegistry endpointRegistry) {
+    public WhatsappKafkaConsumer (IWhatsappKafkaHandler<WhatsappMessageRequest> whatsappKafkaHandler, KafkaListenerEndpointRegistry endpointRegistry) {
         super();
         this.whatsappKafkaHandler = whatsappKafkaHandler;
         this.endpointRegistry = endpointRegistry;
     }
 
     @Override
-    public void consume(WhatsappSendMessage message) throws WynkRuntimeException {
+    public void consume(WhatsappMessageRequest message) throws WynkRuntimeException {
         whatsappKafkaHandler.sendMessage(message);
     }
 
-    //@Retryable
     @KafkaListener(id = "whatsappSendMessageListener", topics = "${wynk.kafka.consumers.listenerFactory.whatsapp[0].factoryDetails.topic}", containerFactory = "${wynk.kafka.consumers.listenerFactory.whatsapp[0].name}")
     @AnalyseTransaction(name = "whatsappSendMessage")
-    protected void listenGenerateInvoice(ConsumerRecord<String, WhatsappSendMessage> consumerRecord) {
+    protected void listenGenerateInvoice(ConsumerRecord<String, WhatsappMessageRequest> consumerRecord) {
         try {
             log.debug("Kafka consume record result {} for event {}", consumerRecord, consumerRecord.value().toString());
             consume(consumerRecord.value());
