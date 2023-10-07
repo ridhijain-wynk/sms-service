@@ -1,17 +1,25 @@
 package in.wynk.sms.controller;
 
+import com.datastax.driver.core.utils.UUIDs;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.common.dto.WynkResponseEntity;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import in.wynk.data.dto.IEntityCacheService;
+import in.wynk.logging.constants.LoggingConstants;
 import in.wynk.stream.producer.IKafkaEventPublisher;
+import in.wynk.wynkservice.core.dao.entity.WynkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.internals.RecordHeader;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -25,23 +33,39 @@ public class NotificationController {
     @Value("${wynk.kafka.producers.whatsapp.iq.message.status.topic}")
     private String whatsappMessageStatusTopic;
 
+    private final IEntityCacheService<WynkService, String> serviceCache;
+
     private final IKafkaEventPublisher<String, String> kafkaEventPublisher;
 
     @AnalyseTransaction(name = "inboundNotification")
-    @PostMapping(path = "/v1/notifications/inbound/{clientAlias}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public WynkResponseEntity<Void> handleNotification(@PathVariable String clientAlias, @RequestBody String payload) {
-        AnalyticService.update(BaseConstants.CLIENT_ID, clientAlias);
+    @PostMapping(path = "/v1/notifications/inbound/{serviceId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public WynkResponseEntity<Void> handleNotification(@PathVariable String serviceId, @RequestBody String payload) {
+        AnalyticService.update(BaseConstants.SERVICE, serviceId);
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
-        kafkaEventPublisher.publish(whatsappInboundTopic, payload);
+        final WynkService service = serviceCache.get(serviceId);
+        AnalyticService.update(payload);
+        final List<Header> headers = new ArrayList() {{
+            add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
+            add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
+            add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
+        }};
+        kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
         return WynkResponseEntity.<Void>builder().build();
     }
 
     @AnalyseTransaction(name = "messageStatusCallback")
-    @PostMapping(path = "/v1/callback/message-status/{clientAlias}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public WynkResponseEntity<Void> handleCallback(@PathVariable String clientAlias, @RequestBody String payload) {
-        AnalyticService.update(BaseConstants.CLIENT_ID, clientAlias);
+    @PostMapping(path = "/v1/callback/message-status/{serviceId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public WynkResponseEntity<Void> handleCallback(@PathVariable String serviceId, @RequestBody String payload) {
+        AnalyticService.update(BaseConstants.SERVICE, serviceId);
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
-        kafkaEventPublisher.publish(whatsappMessageStatusTopic, payload);
+        final WynkService service = serviceCache.get(serviceId);
+        AnalyticService.update(payload);
+        final List<Header> headers = new ArrayList() {{
+            add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
+            add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
+            add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
+        }};
+        kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
         return WynkResponseEntity.<Void>builder().build();
     }
 
