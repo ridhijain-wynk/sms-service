@@ -64,6 +64,12 @@
             <artifactId>client-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>in.wynk</groupId>
+            <artifactId>wynk-service-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>in.wynk</groupId>
             <artifactId>lib-rate-limiter</artifactId>
