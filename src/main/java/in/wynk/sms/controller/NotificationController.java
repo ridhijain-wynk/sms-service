@@ -19,7 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -37,12 +39,17 @@ public class NotificationController {
 
     private final IKafkaEventPublisher<String, String> kafkaEventPublisher;
 
+    private final Map<String, String> migerationServiceMap = new HashMap() {{
+        put("airtelxstream", "airteltv");
+    }};
+
     @AnalyseTransaction(name = "inboundNotification")
     @PostMapping(path = "/v1/notifications/inbound/{serviceId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public WynkResponseEntity<Void> handleNotification(@PathVariable String serviceId, @RequestBody String payload) {
-        AnalyticService.update(BaseConstants.SERVICE, serviceId);
+        final String serviceID = migerationServiceMap.getOrDefault(serviceId, serviceId);
+        AnalyticService.update(BaseConstants.SERVICE, serviceID);
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
-        final WynkService service = serviceCache.get(serviceId);
+        final WynkService service = serviceCache.get(serviceID);
         AnalyticService.update(payload);
         final List<Header> headers = new ArrayList() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
