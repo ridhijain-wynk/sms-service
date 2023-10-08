@@ -2,19 +2,24 @@ package in.wynk.sms.service;
 
 import com.google.gson.Gson;
 import in.wynk.exception.WynkRuntimeException;
-import in.wynk.sms.common.constant.MessageType;
-import in.wynk.sms.common.dto.whatsapp.*;
+import in.wynk.sms.common.dto.wa.outbound.WhatsappMessageRequest;
+import in.wynk.sms.common.dto.wa.outbound.constant.MessageType;
+import in.wynk.sms.common.dto.wa.outbound.session.*;
+import in.wynk.sms.common.dto.wa.outbound.template.BulkTemplateMultiRecipientMessage;
+import in.wynk.sms.common.dto.wa.outbound.template.BulkTemplateSingleRecipientMessage;
 import in.wynk.sms.constants.SMSBeanConstant;
-import in.wynk.sms.common.dto.whatsapp.BulkTemplateOutboundMessage;
-import in.wynk.sms.common.dto.whatsapp.SingleTemplateOutboundMessage;
 import in.wynk.sms.dto.response.WhatsappMessageResponse;
 import in.wynk.sms.enums.SmsErrorType;
+import in.wynk.sms.event.WhatsappOrderDetailsEvent;
 import in.wynk.sms.kafka.IWhatsappSenderHandler;
 import in.wynk.sms.utils.WhatsappUtils;
+import in.wynk.stream.producer.IKafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,7 +31,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import static in.wynk.sms.common.constant.MessageType.*;
+import static in.wynk.sms.common.dto.wa.outbound.constant.MessageType.*;
 
 @Slf4j
 @Service(SMSBeanConstant.WHATSAPP_MANAGER)
@@ -37,13 +42,13 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
     private Gson gson;
     @Autowired
     private Map<String, RestTemplate> clientRestTemplates;
-    @Value("${iq.whatsapp.session.url}")
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+    @Value("${iq.whatsapp.url}")
     private String iqWhatsappUrl;
-    @Value("#{${iq.whatsapp.session.endpoints}}")
-    private Map<String, String> sessionEndpoints;
-    @Value("#{${iq.whatsapp.template.endpoints}}")
-    private Map<String, String> templateEndpoints;
-    @Value("#{${iq.whatsapp.session.credentials}}")
+    @Value("#{${iq.whatsapp.endpoints}}")
+    private Map<String, String> endpoints;
+    @Value("#{${iq.whatsapp.credentials}}")
     private Map<String, String> credentials;
     private final Map<MessageType, IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest>> delegate = new HashMap<>();
 
@@ -59,179 +64,146 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         delegate.put(CONTACTS, new ContactsMessageHandler());
         delegate.put(ORDER_DETAILS, new OrderDetailsMessageHandler());
         delegate.put(ORDER_STATUS, new OrderStatusMessageHandler());
-        delegate.put(TEMPLATE, new SingleTemplateMessageHandler());
-        delegate.put(BULK_TEMPLATE, new BulkTemplateMessageHandler());
+        delegate.put(SINGLE_TEMPLATE, new SingleTemplateMessageHandler());
+        delegate.put(MULTI_TEMPLATE, new SingleTemplateMessageHandler());
+        delegate.put(BULK_SINGLE_TEMPLATE, new BulkTemplateSingleRecipientMessageHandler());
+        delegate.put(BULK_MULTI_TEMPLATE, new BulkTemplateMultiRecipientMessageHandler());
     }
 
     @Override
     public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-        final AbstractWhatsappOutboundMessage message = (AbstractWhatsappOutboundMessage) request.getMessage();
-        return delegate.get(message.getMessageType()).send(request);
+        if(clientRestTemplates.containsKey(request.getClientAlias())){
+            throw new WynkRuntimeException(SmsErrorType.WHSMS003);
+        }
+        return delegate.get(request.getMessage().getMessageType()).send(request);
     }
 
     private class TextMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send(WhatsappMessageRequest request) {
-            try {
-                final TextSessionMessage message = (TextSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(TEXT.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final TextSessionMessage message = (TextSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(TEXT.getType());
+            return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
 
     private class MediaMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-            try {
-                final MediaSessionMessage message = (MediaSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(MEDIA.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final MediaSessionMessage message = (MediaSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(MEDIA.getType());
+            return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
 
     private class ButtonMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-            try {
-                final ButtonSessionMessage message = (ButtonSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(BUTTON.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final ButtonSessionMessage message = (ButtonSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(BUTTON.getType());
+            return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
 
     private class ListMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-            try {
-                final ListSessionMessage message = (ListSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(LIST.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final ListSessionMessage message = (ListSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(LIST.getType());
+            return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
 
     private class LocationMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-            try {
-                final LocationSessionMessage message = (LocationSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(LOCATION.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final LocationSessionMessage message = (LocationSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(LOCATION.getType());
+            return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
 
     private class SingleProductMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-            try {
-                final SingleProductSessionMessage message = (SingleProductSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(SINGLE_PRODUCT.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final SingleProductSessionMessage message = (SingleProductSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(SINGLE_PRODUCT.getType());
+            return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
 
     private class MultiProductMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-            try {
-                final MultiProductSessionMessage message = (MultiProductSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(MULTI_PRODUCT.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final MultiProductSessionMessage message = (MultiProductSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(MULTI_PRODUCT.getType());
+            return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
 
     private class ContactsMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-            try {
-                final ContactsSessionMessage message = (ContactsSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(CONTACTS.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final ContactsSessionMessage message = (ContactsSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(CONTACTS.getType());
+            return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
 
     private class OrderDetailsMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-            try {
-                final OrderDetailsSessionMessage message = (OrderDetailsSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(ORDER_DETAILS.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final OrderDetailsSessionMessage message = (OrderDetailsSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(ORDER_DETAILS.getType());
+            final WhatsappMessageResponse response = post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
+            eventPublisher.publishEvent(WhatsappOrderDetailsEvent.builder().message(message).response(response).build());
+            return response;
         }
     }
 
     private class OrderStatusMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-            try {
-                final OrderStatusSessionMessage message = (OrderStatusSessionMessage) request.getMessage();
-                final String url = iqWhatsappUrl + sessionEndpoints.get(ORDER_STATUS.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final OrderStatusSessionMessage message = (OrderStatusSessionMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get(ORDER_STATUS.getType());
+            return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
 
     private class SingleTemplateMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send(WhatsappMessageRequest request) {
-            try {
-                final SingleTemplateOutboundMessage message = (SingleTemplateOutboundMessage) request.getMessage();
-                final String url = iqWhatsappUrl + templateEndpoints.get(TEMPLATE.getType());
-                return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final String url = iqWhatsappUrl + endpoints.get("TEMPLATE");
+            return post(url, request.getClientAlias(), request.getMessage(), WhatsappMessageResponse.class);
         }
     }
 
-    private class BulkTemplateMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
+    private class BulkTemplateSingleRecipientMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send(WhatsappMessageRequest request) {
-            try {
-                final BulkTemplateOutboundMessage message = (BulkTemplateOutboundMessage) request.getMessage();
-                final String url = iqWhatsappUrl + templateEndpoints.get(BULK_TEMPLATE.getType());
-                return post(url, request.getClientAlias(), message.getData(), WhatsappMessageResponse.class);
-            } catch (Exception ex) {
-                throw new WynkRuntimeException(SmsErrorType.WHSMS002, ex);
-            }
+            final BulkTemplateSingleRecipientMessage message = (BulkTemplateSingleRecipientMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get("BULK_TEMPLATE");
+            return post(url, request.getClientAlias(), message.getData(), WhatsappMessageResponse.class);
         }
     }
 
-    public <T> T post(String url, String clientAlias, Object requestBody, Class<T> clazz) throws Exception {
+    private class BulkTemplateMultiRecipientMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
+        @Override
+        public WhatsappMessageResponse send(WhatsappMessageRequest request) {
+            final BulkTemplateMultiRecipientMessage message = (BulkTemplateMultiRecipientMessage) request.getMessage();
+            final String url = iqWhatsappUrl + endpoints.get("BULK_TEMPLATE");
+            return post(url, request.getClientAlias(), message.getData(), WhatsappMessageResponse.class);
+        }
+    }
+
+    @SneakyThrows
+    public <T> T post(String url, String clientAlias, Object requestBody, Class<T> clazz) {
         long currentTime = System.currentTimeMillis();
         final URI uri = new URI(url);
-        final HttpHeaders headers = WhatsappUtils.getHMACAuthHeaders(credentials.get("username"), credentials.get("password"));
+        final HttpHeaders headers = WhatsappUtils.getBasicAuthHeaders(credentials.get("username"), credentials.get("password"));
         final HttpEntity<?> entity = new HttpEntity<>(requestBody, headers);
         log.info("IQ Whatsapp Request url : [{}]", uri.getPath());
-        String responseStr = clientRestTemplates.get(clientAlias).exchange(uri.toString(), HttpMethod.POST, entity, String.class).getBody();
+        final String responseStr = clientRestTemplates.get(clientAlias).exchange(uri.toString(), HttpMethod.POST, entity, String.class).getBody();
         final T response = gson.fromJson(responseStr, clazz);
         log.info("Time taken : [{}]", System.currentTimeMillis() - currentTime);
         return response;

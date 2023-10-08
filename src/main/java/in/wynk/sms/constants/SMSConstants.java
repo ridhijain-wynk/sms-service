@@ -14,6 +14,7 @@ public interface SMSConstants extends BaseConstants {
     String SMS_ENCRYPTION_TOKEN = "SMS_ENCRYPTION_TOKEN";
     String AIRTEL_IQ_SMS_SENDER_BEAN = "airtelIQSmsSender";
     String PINPOINT_SENDER_BEAN = "pinpoint";
+    String WHATSAPP_SENDER_BEAN = "whatsappSender";
     String AIRTEL_SMS_SENDER = "smsSender";
     String MESSAGE_STRATEGY_IQ = "airtelIQ";
     String LOBBY_MESSAGE_STRATEGY = "lobby";
@@ -26,5 +27,8 @@ public interface SMSConstants extends BaseConstants {
     String FAILURE_CODE = "errorCode";
     String PRIMARY = "PRIMARY";
     String SECONDARY = "SECONDARY";
+    String ORG_ID = "x-org-id";
+    String KAFKA_RETRY_COUNT = "retry-count";
+    String ORDER_DETAILS_RESP_EVENT = "ORDER_DETAILS_RESP_EVENT";
 
 }

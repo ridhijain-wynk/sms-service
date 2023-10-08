@@ -113,6 +113,9 @@
     <logger name="smppDeliveryReport" additivity="false" level="info">
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
+    <logger name="whatsappOrderDetailsEvent" additivity="false" level="info">
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
 
     <logger name="sendSmsSmsc" additivity="false" level="info">
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
