@@ -27,7 +27,6 @@ public interface SMSConstants extends BaseConstants {
     String FAILURE_CODE = "errorCode";
     String PRIMARY = "PRIMARY";
     String SECONDARY = "SECONDARY";
-    String ORG_ID = "x-org-id";
     String KAFKA_RETRY_COUNT = "retry-count";
     String ORDER_DETAILS_RESP_EVENT = "ORDER_DETAILS_RESP_EVENT";
 
