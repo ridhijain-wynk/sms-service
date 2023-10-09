@@ -65,7 +65,7 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
     public void consume(WhatsappMessageRequest request) {
         String timeInterval = RateLimiterConstant.DEFAULT_TIME_INTERVAL;
         String maxCalls = RateLimiterConstant.DEFAULT_MAX_CALLS;
-        final Senders senders = sendersCachingService.getSenderByNameClientCountry(SMSConstants.WHATSAPP_SENDER_BEAN, request.getService(), HIGHEST, SMSConstants.DEFAULT_COUNTRY_CODE);
+        final Senders senders = sendersCachingService.getSenderByNameClientCountry(SMSConstants.WHATSAPP_SENDER_BEAN, request.getClientAlias(), HIGHEST, SMSConstants.DEFAULT_COUNTRY_CODE);
         if(Objects.nonNull(senders) && Objects.nonNull(senders.getRateLimit()) &&
                 Objects.nonNull(senders.getRateLimit().getTimeWindowInSeconds()) &&
                 Objects.nonNull(senders.getRateLimit().getMaxCalls())){
@@ -75,7 +75,7 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
         sendMessage(request, timeInterval, maxCalls);
     }
 
-    @RateLimiter(key = "#request.getService()", value = "#request.getMessage().getTo()", interval = "#timeInterval", maxCalls = "#maxCalls")
+    @RateLimiter(key = "#request.getClientAlias()", value = "#request.getMessage().getTo()", interval = "#timeInterval", maxCalls = "#maxCalls")
     private void sendMessage(WhatsappMessageRequest request, String timeInterval, String maxCalls){
         whatsappKafkaHandler.sendMessage(request);
     }
@@ -95,11 +95,11 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
         try {
             final WhatsappMessageRequest request = WhatsappMessageRequest.builder()
                     .message(consumerRecord.value())
-                    .service(service)
+                    .clientAlias(service)
                     .build();
             consume(request);
         } catch (Exception e) {
-            if(e.getClass().isAssignableFrom(WynkRuntimeException.class) || e.getClass().isAssignableFrom(WynkRateLimitException.class)){
+            if(WynkRuntimeException.class.isAssignableFrom(e.getClass()) || WynkRateLimitException.class.isAssignableFrom(e.getClass())){
                 log.info(SmsLoggingMarkers.SEND_WHATSAPP_MESSAGE_FAILED_NO_RETRY, "Rate limit exceeded in polling kafka event, no retry", e);
                 return;
             }
@@ -128,7 +128,7 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
                 if(retryAttempt < 3){
                     final WhatsappMessageRequest request = WhatsappMessageRequest.builder()
                             .message(consumerRecord.value())
-                            .service(service)
+                            .clientAlias(service)
                             .build();
                     consume(request);
                 } else {
