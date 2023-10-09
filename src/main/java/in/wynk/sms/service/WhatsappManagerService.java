@@ -71,7 +71,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
 
     @Override
     public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-        if(serviceRestTemplates.containsKey(request.getClientAlias())){
+        if(!serviceRestTemplates.containsKey(request.getClientAlias())){
             throw new WynkRuntimeException(SmsErrorType.WHSMS003);
         }
         return delegate.get(request.getMessage().getMessageType()).send(request);
