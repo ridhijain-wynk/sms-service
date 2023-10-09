@@ -31,11 +31,11 @@ public class WhatsappKafkaConsumptionHandler implements IWhatsappKafkaHandler<Wh
     public void sendMessage(WhatsappMessageRequest request) {
         try {
             AnalyticService.update(request);
-            if (ObjectUtils.isEmpty(request) || Objects.isNull(request.getService()) || Objects.isNull(request.getMessage()) ||
+            if (ObjectUtils.isEmpty(request) || Objects.isNull(request.getClientAlias()) || Objects.isNull(request.getMessage()) ||
                     Objects.isNull(request.getMessage().getMessageType())) {
                 throw new WynkRuntimeException(SmsErrorType.WHSMS001);
             }
-            final Client client = clientDetailsCachingService.getClientByService(request.getService());
+            final Client client = clientDetailsCachingService.getClientByService(request.getClientAlias());
             if(Objects.isNull(client)){
                 throw new WynkRuntimeException(ClientErrorType.CLIENT001);
             }
