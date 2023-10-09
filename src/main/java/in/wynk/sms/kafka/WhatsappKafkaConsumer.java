@@ -3,7 +3,6 @@ package in.wynk.sms.kafka;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
-import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.rate.limiter.advice.RateLimiter;
@@ -73,12 +72,10 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
             timeInterval = senders.getRateLimit().getTimeWindowInSeconds();
             maxCalls = senders.getRateLimit().getMaxCalls();
         }
-        AnalyticService.update("TIME_INTERVAL", timeInterval);
-        AnalyticService.update("MAX_CALLS", maxCalls);
         sendMessage(request, timeInterval, maxCalls);
     }
 
-    @RateLimiter(key = "#request.getClientAlias()", interval = "#timeInterval", maxCalls = "#maxCalls")
+    //@RateLimiter(key = "#request.getClientAlias()", value = "#request.getMessage().getTo()", interval = "#timeInterval", maxCalls = "#maxCalls")
     private void sendMessage(WhatsappMessageRequest request, String timeInterval, String maxCalls){
         whatsappKafkaHandler.sendMessage(request);
     }
