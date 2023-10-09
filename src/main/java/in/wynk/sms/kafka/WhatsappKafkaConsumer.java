@@ -3,6 +3,8 @@ package in.wynk.sms.kafka;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
+import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.rate.limiter.advice.RateLimiter;
@@ -41,7 +43,7 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
     private final KafkaListenerEndpointRegistry endpointRegistry;
     private final SendersCachingService sendersCachingService;
     private final IKafkaEventPublisher<String, String> kafkaEventPublisher;
-
+    private final ClientDetailsCachingService clientDetailsCachingService;
     private final ObjectMapper objectMapper;
 
     @Value("${wynk.kafka.consumers.enabled}")
@@ -52,12 +54,13 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
     private String kafkaDLTTopic;
 
     public WhatsappKafkaConsumer (IWhatsappKafkaHandler<WhatsappMessageRequest> whatsappKafkaHandler, SendersCachingService sendersCachingService, KafkaListenerEndpointRegistry endpointRegistry,
-                                  IKafkaEventPublisher<String, String> kafkaEventPublisher, ObjectMapper objectMapper) {
+                                  IKafkaEventPublisher<String, String> kafkaEventPublisher, ClientDetailsCachingService clientDetailsCachingService, ObjectMapper objectMapper) {
         super();
         this.whatsappKafkaHandler = whatsappKafkaHandler;
         this.sendersCachingService = sendersCachingService;
         this.endpointRegistry = endpointRegistry;
         this.kafkaEventPublisher = kafkaEventPublisher;
+        this.clientDetailsCachingService = clientDetailsCachingService;
         this.objectMapper = objectMapper;
     }
 
@@ -77,6 +80,8 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
 
     @RateLimiter(key = "#request.getClientAlias()", value = "#request.getMessage().getTo()", interval = "#timeInterval", maxCalls = "#maxCalls")
     private void sendMessage(WhatsappMessageRequest request, String timeInterval, String maxCalls){
+        AnalyticService.update(SMSConstants.TIME_INTERVAL, timeInterval);
+        AnalyticService.update(SMSConstants.CALLS_PERMITTED, maxCalls);
         whatsappKafkaHandler.sendMessage(request);
     }
 
@@ -93,10 +98,12 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
     @AnalyseTransaction(name = "whatsappSendMessage")
     protected void listenWhatsappSendMessage(@Header(BaseConstants.SERVICE_ID) String service, ConsumerRecord<String, AbstractWhatsappOutboundMessage> consumerRecord) {
         try {
+            final String clientAlias = clientDetailsCachingService.getClientByService(service).getAlias();
             final WhatsappMessageRequest request = WhatsappMessageRequest.builder()
                     .message(consumerRecord.value())
-                    .clientAlias(service)
+                    .clientAlias(clientAlias)
                     .build();
+            AnalyticService.update(request);
             consume(request);
         } catch (Exception e) {
             if(WynkRuntimeException.class.isAssignableFrom(e.getClass()) || WynkRateLimitException.class.isAssignableFrom(e.getClass())){

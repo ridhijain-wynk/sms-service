@@ -1,5 +1,6 @@
 package in.wynk.sms.service;
 
+import com.github.annotation.analytic.core.service.AnalyticService;
 import com.google.gson.Gson;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.common.dto.wa.outbound.WhatsappMessageRequest;
@@ -40,7 +41,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
     @Autowired
     private Gson gson;
     @Autowired
-    private Map<String, RestTemplate> serviceRestTemplates;
+    private Map<String, RestTemplate> clientRestTemplates;
     @Autowired
     private ApplicationEventPublisher eventPublisher;
     @Value("${iq.whatsapp.url}")
@@ -71,7 +72,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
 
     @Override
     public WhatsappMessageResponse send (WhatsappMessageRequest request) {
-        if(!serviceRestTemplates.containsKey(request.getClientAlias())){
+        if(!clientRestTemplates.containsKey(request.getClientAlias())){
             throw new WynkRuntimeException(SmsErrorType.WHSMS003);
         }
         return delegate.get(request.getMessage().getMessageType()).send(request);
@@ -199,12 +200,13 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
     public <T> T post(String url, String service, Object requestBody, Class<T> clazz) {
         long currentTime = System.currentTimeMillis();
         final URI uri = new URI(url);
+        AnalyticService.update("IQ_WHATSAPP_URL", uri.getPath());
         final HttpHeaders headers = WhatsappUtils.getBasicAuthHeaders(credentials.get("username"), credentials.get("password"));
         final HttpEntity<?> entity = new HttpEntity<>(requestBody, headers);
-        log.info("IQ Whatsapp Request url : [{}]", uri.getPath());
-        final String responseStr = serviceRestTemplates.get(service).exchange(uri.toString(), HttpMethod.POST, entity, String.class).getBody();
+        AnalyticService.update("IQ_WHATSAPP_MESSAGE", gson.toJson(requestBody));
+        final String responseStr = clientRestTemplates.get(service).exchange(uri.toString(), HttpMethod.POST, entity, String.class).getBody();
         final T response = gson.fromJson(responseStr, clazz);
-        log.info("Time taken : [{}]", System.currentTimeMillis() - currentTime);
+        AnalyticService.update("TIME_TAKEN", System.currentTimeMillis() - currentTime);
         return response;
     }
 }

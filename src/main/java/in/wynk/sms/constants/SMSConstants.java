@@ -29,5 +29,7 @@ public interface SMSConstants extends BaseConstants {
     String SECONDARY = "SECONDARY";
     String KAFKA_RETRY_COUNT = "retry-count";
     String ORDER_DETAILS_RESP_EVENT = "ORDER_DETAILS_RESP_EVENT";
+    String TIME_INTERVAL = "TIME_INTERVAL";
+    String CALLS_PERMITTED = "CALLS_PERMITTED";
 
 }
