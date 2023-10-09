@@ -7,6 +7,7 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.common.dto.wa.outbound.WhatsappMessageRequest;
 import in.wynk.sms.constants.SmsLoggingMarkers;
+import in.wynk.sms.dto.response.WhatsappMessageResponse;
 import in.wynk.sms.enums.SmsErrorType;
 import in.wynk.sms.service.WhatsappManagerService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,26 +21,19 @@ import java.util.Objects;
 public class WhatsappKafkaConsumptionHandler implements IWhatsappKafkaHandler<WhatsappMessageRequest> {
 
     private final WhatsappManagerService whatsappManager;
-    private final ClientDetailsCachingService clientDetailsCachingService;
-
-    public WhatsappKafkaConsumptionHandler (WhatsappManagerService whatsappManager, ClientDetailsCachingService clientDetailsCachingService) {
+    public WhatsappKafkaConsumptionHandler (WhatsappManagerService whatsappManager) {
         this.whatsappManager = whatsappManager;
-        this.clientDetailsCachingService = clientDetailsCachingService;
     }
 
     @Override
     public void sendMessage(WhatsappMessageRequest request) {
         try {
-            AnalyticService.update(request);
             if (ObjectUtils.isEmpty(request) || Objects.isNull(request.getClientAlias()) || Objects.isNull(request.getMessage()) ||
                     Objects.isNull(request.getMessage().getMessageType())) {
                 throw new WynkRuntimeException(SmsErrorType.WHSMS001);
             }
-            final Client client = clientDetailsCachingService.getClientByService(request.getClientAlias());
-            if(Objects.isNull(client)){
-                throw new WynkRuntimeException(ClientErrorType.CLIENT001);
-            }
-            whatsappManager.send(request);
+            final WhatsappMessageResponse response = whatsappManager.send(request);
+            AnalyticService.update(response);
         } catch (WynkRuntimeException ex) {
             log.error(SmsLoggingMarkers.SEND_WHATSAPP_MESSAGE_FAILED_NO_RETRY, ex.getMessage(), ex);
         } catch (Exception ex) {
