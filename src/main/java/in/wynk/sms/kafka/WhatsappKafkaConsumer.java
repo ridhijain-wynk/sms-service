@@ -72,6 +72,10 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
             timeInterval = senders.getRateLimit().getTimeWindowInSeconds();
             maxCalls = senders.getRateLimit().getMaxCalls();
         }
+        log.info("key - {}", request.getClientAlias());
+        log.info("value - {}", request.getMessage());
+        log.info("timeInterval - {}", timeInterval);
+        log.info("maxCalls - {}", maxCalls);
         sendMessage(request, timeInterval, maxCalls);
     }
 
