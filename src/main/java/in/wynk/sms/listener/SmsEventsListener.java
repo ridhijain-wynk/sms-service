@@ -1,15 +1,20 @@
 package in.wynk.sms.listener;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.auth.dao.entity.Client;
 import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.common.utils.BeanLocatorFactory;
+import in.wynk.exception.WynkRuntimeException;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.common.constant.Country;
+import in.wynk.sms.common.dto.wa.inbound.OrderDetailsRespEvent;
 import in.wynk.sms.common.message.SmsNotificationMessage;
 import in.wynk.sms.constants.SMSConstants;
+import in.wynk.sms.constants.SmsLoggingMarkers;
 import in.wynk.sms.core.entity.Messages;
 import in.wynk.sms.core.entity.SenderConfigurations;
 import in.wynk.sms.core.entity.SenderDetails;
@@ -19,25 +24,25 @@ import in.wynk.sms.core.service.SenderConfigurationsCachingService;
 import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
-import in.wynk.sms.enums.PinpointRecordStatus;
+import in.wynk.sms.enums.SmsErrorType;
 import in.wynk.sms.event.ClientPinpointStreamEvent;
 import in.wynk.sms.event.IQDeliveryReportEvent;
-import in.wynk.sms.event.PinpointStreamEvent;
 import in.wynk.sms.event.SmsNotificationEvent;
+import in.wynk.sms.event.WhatsappOrderDetailsEvent;
 import in.wynk.sms.sender.IMessageSender;
-import in.wynk.sms.sender.ISmsSenderUtils;
 import in.wynk.spel.IRuleEvaluator;
 import in.wynk.spel.builder.DefaultStandardExpressionContextBuilder;
+import in.wynk.stream.producer.IKafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Objects;
 
@@ -51,12 +56,16 @@ import static in.wynk.sms.constants.SmsLoggingMarkers.*;
 @RequiredArgsConstructor
 public class SmsEventsListener {
 
+    @Value("${wynk.kafka.producers.whatsapp.iq.inbound.topic}")
+    private String whatsappInboundTopic;
+    private final ObjectMapper objectMapper;
     private final IRuleEvaluator ruleEvaluator;
     private final ISqsManagerService sqsManagerService;
     private final MessageCachingService messageCachingService;
     private final ClientDetailsCachingService clientDetailsCachingService;
     private final SenderConfigurationsCachingService senderConfigCachingService;
     private final IRedisCacheService redisDataService;
+    private final IKafkaEventPublisher<String, String> kafkaEventPublisher;
 
     @EventListener
     @AnalyseTransaction(name = "smsNotificationEvent")
@@ -134,13 +143,13 @@ public class SmsEventsListener {
                         PinpointRecordStatus.NO_QUOTA_LEFT,
                         PinpointRecordStatus.MAX_PRICE_EXCEEDED,
                         PinpointRecordStatus.TTL_EXPIRED).contains(PinpointRecordStatus.valueOf(recordStatus))){*/
-                    log.error(PINPOINT_SMS_ERROR, "Unable to send the message via Pinpoint for {}", event.getPinpointEvent().getAttributes().get("destination_phone_number"));
-                    SmsRequest request = redisDataService.get(event.getPinpointEvent().getAttributes().get("message_id"));
-                    if(Objects.nonNull(request)){
-                        sendThroughFallback(request, PINPOINT_SENDER_BEAN);
-                    } else {
-                        log.info("Message request not found in redis.");
-                    }
+                log.error(PINPOINT_SMS_ERROR, "Unable to send the message via Pinpoint for {}", event.getPinpointEvent().getAttributes().get("destination_phone_number"));
+                SmsRequest request = redisDataService.get(event.getPinpointEvent().getAttributes().get("message_id"));
+                if(Objects.nonNull(request)){
+                    sendThroughFallback(request, PINPOINT_SENDER_BEAN);
+                } else {
+                    log.info("Message request not found in redis.");
+                }
                 //}
                 log.info("Response from Pinpoint for {}",event.getPinpointEvent().getAttributes().get("destination_phone_number"));
             }
@@ -196,6 +205,30 @@ public class SmsEventsListener {
                 return messageCachingService.get(messageId);
             }
             return message;
+        }
+    }
+
+    @EventListener
+    @AnalyseTransaction(name = "whatsappOrderDetailsEvent")
+    public void onOrderDetailsRespEvent(WhatsappOrderDetailsEvent event) {
+        AnalyticService.update(event);
+        try {
+            final OrderDetailsRespEvent orderDetailsRespEvent = OrderDetailsRespEvent.builder()
+                    .sessionId(event.getMessage().getSessionId())
+                    .from(event.getMessage().getFrom())
+                    .to(event.getMessage().getTo())
+                    .message(OrderDetailsRespEvent.Message.builder()
+                            .orderId(event.getResponse().getMessageRequestId())
+                            .referenceId(event.getMessage().getOrderDetails().getReferenceId())
+                            .build())
+                    .type(event.getMessage().getType().toLowerCase())
+                    .build();
+            final String orderDetailsKafkaEventStr = objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS).writeValueAsString(orderDetailsRespEvent);
+            AnalyticService.update(SMSConstants.ORDER_DETAILS_RESP_EVENT, orderDetailsKafkaEventStr);
+            kafkaEventPublisher.publish(whatsappInboundTopic, orderDetailsKafkaEventStr);
+        } catch (Exception e){
+            log.error(SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE, "Unable to publish the order details response event in kafka due to {}", e.getMessage(), e);
+            throw new WynkRuntimeException(SmsErrorType.WHSMS004, e);
         }
     }
 }

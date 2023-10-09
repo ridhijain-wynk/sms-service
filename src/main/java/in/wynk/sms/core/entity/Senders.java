@@ -2,6 +2,7 @@ package in.wynk.sms.core.entity;
 
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.data.entity.MongoBaseEntity;
+import in.wynk.rate.limiter.dto.RateLimit;
 import in.wynk.sms.enums.MessageType;
 import in.wynk.sms.common.constant.SMSPriority;
 import lombok.*;
@@ -45,6 +46,8 @@ public class Senders extends MongoBaseEntity<String> {
     //message type specific properties
     @Field("message_type")
     private Map<MessageType, MessageTypeSpecificDetails> messageTypeDetails;
+    @Field("rate_limit")
+    private RateLimit rateLimit;
 
     public boolean isUrlPresent(){
         if(url == null){

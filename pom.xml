@@ -70,6 +70,11 @@
             <artifactId>wynk-service-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>in.wynk</groupId>
+            <artifactId>lib-rate-limiter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 
         <dependency>
@@ -241,6 +246,10 @@
                         <aspectLibrary>
                             <groupId>in.wynk</groupId>
                             <artifactId>lib-cache</artifactId>
+                        </aspectLibrary>
+                        <aspectLibrary>
+                            <groupId>in.wynk</groupId>
+                            <artifactId>lib-rate-limiter</artifactId>
                         </aspectLibrary>
                     </aspectLibraries>
                 </configuration>
