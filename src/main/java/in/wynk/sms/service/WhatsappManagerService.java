@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,6 +32,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import static in.wynk.common.constant.BaseConstants.HTTP_STATUS_CODE;
 import static in.wynk.sms.common.dto.wa.outbound.constant.MessageType.*;
 
 @Slf4j
@@ -200,13 +202,14 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
     public <T> T post(String url, String service, Object requestBody, Class<T> clazz) {
         long currentTime = System.currentTimeMillis();
         final URI uri = new URI(url);
-        AnalyticService.update("IQ_WHATSAPP_URL", uri.getPath());
+        AnalyticService.update("url", uri.toString());
         final HttpHeaders headers = WhatsappUtils.getBasicAuthHeaders(credentials.get("username"), credentials.get("password"));
         final HttpEntity<?> entity = new HttpEntity<>(requestBody, headers);
-        AnalyticService.update("IQ_WHATSAPP_MESSAGE", gson.toJson(requestBody));
-        final String responseStr = clientRestTemplates.get(service).exchange(uri.toString(), HttpMethod.POST, entity, String.class).getBody();
-        final T response = gson.fromJson(responseStr, clazz);
-        AnalyticService.update("TIME_TAKEN", System.currentTimeMillis() - currentTime);
+        AnalyticService.update("request", gson.toJson(requestBody));
+        final ResponseEntity<String> responseEntity = clientRestTemplates.get(service).exchange(uri, HttpMethod.POST, entity, String.class);
+        final T response = gson.fromJson(responseEntity.getBody(), clazz);
+        AnalyticService.update(HTTP_STATUS_CODE, responseEntity.getStatusCode().name());
+        AnalyticService.update("timeTaken", System.currentTimeMillis() - currentTime);
         return response;
     }
 }
