@@ -122,6 +122,12 @@
     <logger name="whatsappRetryMessage" additivity="false" level="info">
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
+    <logger name="inboundNotification" additivity="false" level="info">
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
+    <logger name="messageStatusCallback" additivity="false" level="info">
+        <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
+    </logger>
     <logger name="sendSmsSmsc" additivity="false" level="info">
         <appender-ref ref="ASYNC_ANALYTIC_LOG_FILE"/>
     </logger>
