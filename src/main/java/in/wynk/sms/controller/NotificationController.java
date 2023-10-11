@@ -72,7 +72,7 @@ public class NotificationController {
             add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
             add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
         }};
-        kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
+        kafkaEventPublisher.publish(whatsappMessageStatusTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
         return WynkResponseEntity.<Void>builder().build();
     }
 
