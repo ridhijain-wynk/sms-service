@@ -236,7 +236,7 @@ public class SmsEventsListener {
                 add(new RecordHeader(BaseConstants.ORG_ID, event.getOrgId().getBytes()));
                 add(new RecordHeader(BaseConstants.SERVICE_ID, event.getServiceId().getBytes()));
                 add(new RecordHeader(BaseConstants.SESSION_ID, event.getOrgId().getBytes()));
-                add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
+                add(new RecordHeader(BaseConstants.REQUEST_ID, event.getRequestId().getBytes()));
             }};
             kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
         } catch (Exception e) {
