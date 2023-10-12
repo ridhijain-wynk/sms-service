@@ -10,7 +10,6 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.common.utils.BeanLocatorFactory;
 import in.wynk.exception.WynkRuntimeException;
-import in.wynk.logging.constants.LoggingConstants;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.common.dto.wa.inbound.OrderDetailsRespEvent;
@@ -40,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
@@ -124,6 +122,7 @@ public class SmsEventsListener {
     }
 
     @EventListener
+<<<<<<< HEAD
     @AnalyseTransaction(name = "IQDeliveryReportEvent")
     public void onIQDeliveryReportEvent(IQDeliveryReportEvent event) {
         AnalyticService.update(event);
@@ -137,6 +136,8 @@ public class SmsEventsListener {
     }
 
     @EventListener
+=======
+>>>>>>> aef351d93e7e711aba50dd12ac02b402dbee9ca6
     @AnalyseTransaction(name = "pinpointStreamEvent")
     public void onPinpointSMSEvent(ClientPinpointStreamEvent event) {
         AnalyticService.update(event);
@@ -235,7 +236,7 @@ public class SmsEventsListener {
             final List<Header> headers = new ArrayList() {{
                 add(new RecordHeader(BaseConstants.ORG_ID, event.getOrgId().getBytes()));
                 add(new RecordHeader(BaseConstants.SERVICE_ID, event.getServiceId().getBytes()));
-                add(new RecordHeader(BaseConstants.SESSION_ID, event.getOrgId().getBytes()));
+                add(new RecordHeader(BaseConstants.SESSION_ID, event.getSessionId().getBytes()));
                 add(new RecordHeader(BaseConstants.REQUEST_ID, event.getRequestId().getBytes()));
             }};
             kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
@@ -244,5 +245,4 @@ public class SmsEventsListener {
             throw new WynkRuntimeException(SmsErrorType.WHSMS004, e);
         }
     }
-
 }
