@@ -167,11 +167,11 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
     }
 
     /*** CRITICAL MESSAGE CONSUMER ***/
-    @KafkaListener(id = "whatsappCriticalMessageListener", topics = "${wynk.kafka.consumers.listenerFactory.whatsapp[2].factoryDetails.topic}", containerFactory = "${wynk.kafka.consumers.listenerFactory.whatsapp[2].name}")
+    /*@KafkaListener(id = "whatsappCriticalMessageListener", topics = "${wynk.kafka.consumers.listenerFactory.whatsapp[2].factoryDetails.topic}", containerFactory = "${wynk.kafka.consumers.listenerFactory.whatsapp[2].name}")
     @AnalyseTransaction(name = "whatsappCriticalMessage")
     protected void listenWhatsappCriticalMessage(@Header(BaseConstants.SERVICE_ID) String service, @Header(SMSConstants.KAFKA_RETRY_COUNT) String retryCount, ConsumerRecord<String, AbstractWhatsappOutboundMessage> consumerRecord) {
         try {
-            /*if(Objects.nonNull(consumerRecord.value()) && !StringUtils.isEmpty(retryCount)){
+            *//*if(Objects.nonNull(consumerRecord.value()) && !StringUtils.isEmpty(retryCount)){
 
                 AbstractWhatsappOutboundMessage message = null;
                 final RecordHeaders headers = new RecordHeaders();
@@ -195,7 +195,7 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
                     publishEventInKafka(kafkaDLTTopic, service, consumerRecord, String.valueOf(Integer.parseInt(retryCount) + 1));
                     log.info(StreamMarker.KAFKA_RETRY_EXHAUSTION_ERROR, "Event from topic is dead lettered - event:" + consumerRecord.value());
                 }
-            }*/
+            }*//*
         } catch (Exception e) {
             if(e.getClass().isAssignableFrom(WynkRuntimeException.class) || e.getClass().isAssignableFrom(WynkRateLimitException.class)){
                 log.info(SmsLoggingMarkers.SEND_WHATSAPP_MESSAGE_FAILED_NO_RETRY, "Rate limit exceeded in polling kafka event, no retry", e);
@@ -204,7 +204,7 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
             log.error(StreamMarker.KAFKA_POLLING_CONSUMPTION_ERROR, "Error occurred in polling/consuming kafka event", e);
             scheduleRetry(kafkaRetryTopic, service, consumerRecord, String.valueOf(Integer.parseInt(retryCount) + 1));
         }
-    }
+    }*/
 
     @Override
     public void start() {
