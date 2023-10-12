@@ -46,6 +46,8 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
     private Map<String, RestTemplate> clientRestTemplates;
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+    @Value("${iq.whatsapp.url}")
+    private String iqWhatsappUrl;
     @Value("#{${iq.whatsapp.endpoints}}")
     private Map<String, String> endpoints;
     @Value("#{${iq.whatsapp.credentials}}")
@@ -82,7 +84,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send(WhatsappMessageRequest request) {
             final TextSessionMessage message = (TextSessionMessage) request.getMessage();
-            final String url = endpoints.get(TEXT.getType());
+            final String url = iqWhatsappUrl + endpoints.get(TEXT.getType());
             return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
@@ -91,7 +93,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
             final MediaSessionMessage message = (MediaSessionMessage) request.getMessage();
-            final String url = endpoints.get(MEDIA.getType());
+            final String url = iqWhatsappUrl + endpoints.get(MEDIA.getType());
             return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
@@ -100,7 +102,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
             final ButtonSessionMessage message = (ButtonSessionMessage) request.getMessage();
-            final String url = endpoints.get(BUTTON.getType());
+            final String url = iqWhatsappUrl + endpoints.get(BUTTON.getType());
             return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
@@ -109,7 +111,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
             final ListSessionMessage message = (ListSessionMessage) request.getMessage();
-            final String url = endpoints.get(LIST.getType());
+            final String url = iqWhatsappUrl + endpoints.get(LIST.getType());
             return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
@@ -118,7 +120,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
             final LocationSessionMessage message = (LocationSessionMessage) request.getMessage();
-            final String url = endpoints.get(LOCATION.getType());
+            final String url = iqWhatsappUrl + endpoints.get(LOCATION.getType());
             return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
@@ -127,7 +129,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
             final SingleProductSessionMessage message = (SingleProductSessionMessage) request.getMessage();
-            final String url = endpoints.get(SINGLE_PRODUCT.getType());
+            final String url = iqWhatsappUrl + endpoints.get(SINGLE_PRODUCT.getType());
             return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
@@ -136,7 +138,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
             final MultiProductSessionMessage message = (MultiProductSessionMessage) request.getMessage();
-            final String url = endpoints.get(MULTI_PRODUCT.getType());
+            final String url = iqWhatsappUrl + endpoints.get(MULTI_PRODUCT.getType());
             return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
@@ -145,7 +147,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
             final ContactsSessionMessage message = (ContactsSessionMessage) request.getMessage();
-            final String url = endpoints.get(CONTACTS.getType());
+            final String url = iqWhatsappUrl + endpoints.get(CONTACTS.getType());
             return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
@@ -154,7 +156,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
             final OrderDetailsSessionMessage message = (OrderDetailsSessionMessage) request.getMessage();
-            final String url = endpoints.get(ORDER_DETAILS.getType());
+            final String url = iqWhatsappUrl + endpoints.get(ORDER_DETAILS.getType());
             final WhatsappMessageResponse response = post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
             eventPublisher.publishEvent(WhatsappOrderDetailsEvent.builder().message(message).response(response).build());
             return response;
@@ -165,7 +167,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send (WhatsappMessageRequest request) {
             final OrderStatusSessionMessage message = (OrderStatusSessionMessage) request.getMessage();
-            final String url = endpoints.get(ORDER_STATUS.getType());
+            final String url = iqWhatsappUrl + endpoints.get(ORDER_STATUS.getType());
             return post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
         }
     }
@@ -173,7 +175,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
     private class SingleTemplateMessageHandler implements IWhatsappSenderHandler<WhatsappMessageResponse, WhatsappMessageRequest> {
         @Override
         public WhatsappMessageResponse send(WhatsappMessageRequest request) {
-            final String url = endpoints.get("TEMPLATE");
+            final String url = iqWhatsappUrl + endpoints.get("TEMPLATE");
             return post(url, request.getClientAlias(), request.getMessage(), WhatsappMessageResponse.class);
         }
     }
@@ -182,7 +184,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send(WhatsappMessageRequest request) {
             final BulkTemplateSingleRecipientMessage message = (BulkTemplateSingleRecipientMessage) request.getMessage();
-            final String url = endpoints.get("BULK_TEMPLATE");
+            final String url = iqWhatsappUrl + endpoints.get("BULK_TEMPLATE");
             return post(url, request.getClientAlias(), message.getData(), WhatsappMessageResponse.class);
         }
     }
@@ -191,7 +193,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send(WhatsappMessageRequest request) {
             final BulkTemplateMultiRecipientMessage message = (BulkTemplateMultiRecipientMessage) request.getMessage();
-            final String url = endpoints.get("BULK_TEMPLATE");
+            final String url = iqWhatsappUrl + endpoints.get("BULK_TEMPLATE");
             return post(url, request.getClientAlias(), message.getData(), WhatsappMessageResponse.class);
         }
     }
