@@ -96,13 +96,16 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)*/
     @KafkaListener(id = "whatsappSendMessageListener", topics = "${wynk.kafka.consumers.listenerFactory.whatsapp[0].factoryDetails.topic}", containerFactory = "${wynk.kafka.consumers.listenerFactory.whatsapp[0].name}")
     @AnalyseTransaction(name = "whatsappSendMessage")
-    protected void listenWhatsappSendMessage(@Header(BaseConstants.SERVICE_ID) String service, ConsumerRecord<String, AbstractWhatsappOutboundMessage> consumerRecord) {
+    protected void listenWhatsappSendMessage(@Header(BaseConstants.REQUEST_ID) String requestId, @Header(BaseConstants.ORG_ID) String orgId, @Header(BaseConstants.SERVICE_ID) String service, ConsumerRecord<String, AbstractWhatsappOutboundMessage> consumerRecord) {
         try {
             if(Objects.nonNull(consumerRecord.value())){
                 final String clientAlias = clientDetailsCachingService.getClientByService(service).getAlias();
                 final WhatsappMessageRequest request = WhatsappMessageRequest.builder()
                         .message(consumerRecord.value())
                         .clientAlias(clientAlias)
+                        .requestId(requestId)
+                        .serviceId(service)
+                        .orgId(orgId)
                         .build();
                 AnalyticService.update(request);
                 consume(request);
