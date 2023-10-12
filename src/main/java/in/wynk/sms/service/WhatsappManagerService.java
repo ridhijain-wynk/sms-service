@@ -158,7 +158,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
             final OrderDetailsSessionMessage message = (OrderDetailsSessionMessage) request.getMessage();
             final String url = iqWhatsappUrl + endpoints.get(ORDER_DETAILS.getType());
             final WhatsappMessageResponse response = post(url, request.getClientAlias(), message, WhatsappMessageResponse.class);
-            eventPublisher.publishEvent(WhatsappOrderDetailsEvent.builder().message(message).response(response).build());
+            eventPublisher.publishEvent(WhatsappOrderDetailsEvent.builder().message(message).requestId(request.getRequestId()).orgId(request.getOrgId()).serviceId(request.getServiceId()).sessionId(message.getSessionId()).response(response).build());
             return response;
         }
     }
