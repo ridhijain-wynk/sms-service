@@ -225,6 +225,7 @@ public class SmsEventsListener {
                     .message(OrderDetailsRespEvent.Message.builder()
                             .orderId(event.getResponse().getMessageRequestId())
                             .referenceId(event.getMessage().getOrderDetails().getReferenceId())
+                            .type(event.getMessage().getType().toLowerCase())
                             .build())
                     .type(event.getMessage().getType().toLowerCase())
                     .build();
