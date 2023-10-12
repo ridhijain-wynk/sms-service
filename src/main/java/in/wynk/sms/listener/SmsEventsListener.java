@@ -136,8 +136,6 @@ public class SmsEventsListener {
     }
 
     @EventListener
-=======
->>>>>>> aef351d93e7e711aba50dd12ac02b402dbee9ca6
     @AnalyseTransaction(name = "pinpointStreamEvent")
     public void onPinpointSMSEvent(ClientPinpointStreamEvent event) {
         AnalyticService.update(event);
