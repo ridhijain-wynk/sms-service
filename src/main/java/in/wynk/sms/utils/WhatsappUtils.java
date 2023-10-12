@@ -1,5 +1,6 @@
 package in.wynk.sms.utils;
 
+import com.github.annotation.analytic.core.service.AnalyticService;
 import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;
 import org.springframework.http.HttpHeaders;
@@ -10,8 +11,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class WhatsappUtils {
@@ -23,27 +22,25 @@ public class WhatsappUtils {
         final byte[] signature = new HmacUtils(HmacAlgorithms.HMAC_SHA_256, secret).hmac(signingString);
         final String signatureString = Base64.getEncoder().encodeToString(signature);
         final String authorization = "hmac username=\"" + username + "\", algorithm=\"" + algorithm + "\", headers=\"X-Date\", signature=\"" + signatureString + "\"";
-
+        final String correlationID = UUID.randomUUID().toString();
         final HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.add("X-Date", currentDate);
         requestHeaders.add("Authorization", authorization);
         requestHeaders.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        requestHeaders.add("X-Correlation-ID", UUID.randomUUID().toString());
+        requestHeaders.add("X-Correlation-ID", correlationID);
+        AnalyticService.update(correlationID);
         return requestHeaders;
-
-        /*final Map<String, String> authHeaders = new HashMap<>();
-        authHeaders.put("X-Date", currentDate);
-        authHeaders.put("Authorization", authorization);
-        return authHeaders;*/
     }
 
     public static HttpHeaders getBasicAuthHeaders(String username, String secret) {
         final String credentials = username + ":" + secret;
         final String authorization = Base64Utils.encodeToString(credentials.getBytes());
+        final String correlationID = UUID.randomUUID().toString();
         final HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.add("Authorization", "Basic " + authorization);
         requestHeaders.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        requestHeaders.add("X-Correlation-ID", UUID.randomUUID().toString());
+        requestHeaders.add("X-Correlation-ID", correlationID);
+        AnalyticService.update(correlationID);
         return requestHeaders;
     }
 }
