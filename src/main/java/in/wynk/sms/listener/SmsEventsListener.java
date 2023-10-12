@@ -122,7 +122,6 @@ public class SmsEventsListener {
     }
 
     @EventListener
-<<<<<<< HEAD
     @AnalyseTransaction(name = "IQDeliveryReportEvent")
     public void onIQDeliveryReportEvent(IQDeliveryReportEvent event) {
         AnalyticService.update(event);
