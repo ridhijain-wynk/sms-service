@@ -4,6 +4,7 @@ import in.wynk.common.constant.BaseConstants;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.common.dto.wa.outbound.AbstractWhatsappOutboundMessage;
 import in.wynk.sms.constants.SMSConstants;
+import in.wynk.sms.constants.SmsLoggingMarkers;
 import in.wynk.sms.core.entity.Senders;
 import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.WhatsappRequestWrapper;
@@ -18,13 +19,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static in.wynk.sms.common.constant.SMSPriority.HIGHEST;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class WhatsappMessageService {
+public class WhatsappService {
 
     @Value("${wynk.kafka.producers.whatsapp.iq.send.message.topic}")
     private String kafkaSendMessageTopic;
@@ -32,28 +34,35 @@ public class WhatsappMessageService {
     private final SendersCachingService sendersCachingService;
     private final IWhatsappMessageTransform<AbstractWhatsappOutboundMessage, WhatsappRequestWrapper> whatsappMessageTransform;
     private final IKafkaEventPublisher<String, AbstractWhatsappOutboundMessage> kafkaEventPublisher;
-    public void process(WhatsappRequest request, String clientAlias){
+
+    public String process(WhatsappRequest request, String clientAlias){
         final Senders senders = sendersCachingService.getSenderByNameClientCountry(SMSConstants.WHATSAPP_SENDER_BEAN, clientAlias, HIGHEST, SMSConstants.DEFAULT_COUNTRY_CODE);
         if(Objects.nonNull(senders)){
-            if(Objects.nonNull(senders.getWABANumber())){
-                AbstractWhatsappOutboundMessage whatsappOutboundMessage = whatsappMessageTransform.transform(WhatsappRequestWrapper.builder()
-                        .clientAlias(clientAlias)
-                        .WABANumber(senders.getWABANumber())
-                        .request(request).build());
-                publishEventInKafka(kafkaSendMessageTopic, request.getService(), whatsappOutboundMessage);
+            if(Objects.isNull(senders.getWABANumber())){
+                throw new WynkRuntimeException(SmsErrorType.WHSMS005);
             }
-            throw new WynkRuntimeException(SmsErrorType.WHSMS005);
+            final AbstractWhatsappOutboundMessage whatsappOutboundMessage = whatsappMessageTransform.transform(WhatsappRequestWrapper.builder()
+                    .clientAlias(clientAlias)
+                    .WABANumber(senders.getWABANumber())
+                    .request(request).build());
+            return publishEventInKafka(kafkaSendMessageTopic, request.getService(), whatsappOutboundMessage);
         }
         throw new WynkRuntimeException(SmsErrorType.WHSMS006);
     }
 
-    private void publishEventInKafka(String topic, String service, AbstractWhatsappOutboundMessage message){
+    private String publishEventInKafka(String topic, String service, AbstractWhatsappOutboundMessage message){
         try{
+            final String requestId = UUID.randomUUID().toString();
             final RecordHeaders headers = new RecordHeaders();
             headers.add(new RecordHeader(BaseConstants.SERVICE_ID, service.getBytes()));
+            headers.add(new RecordHeader(BaseConstants.REQUEST_ID, requestId.getBytes()));
             kafkaEventPublisher.publish(topic, null, null, null,
                     message,
                     headers);
-        } catch(Exception ignored){}
+            return requestId;
+        } catch(Exception e){
+            log.error(SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE, "Unable to publish the event in kafka due to {}", e.getMessage(), e);
+            throw new WynkRuntimeException(SmsErrorType.WHSMS004, e);
+        }
     }
 }

@@ -3,7 +3,6 @@ package in.wynk.sms.dto.request.whatsapp.session;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
-import in.wynk.sms.dto.request.whatsapp.WhatsappMessageRequest;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -16,7 +15,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @JsonTypeName("TEXT")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TextSessionRequest extends WhatsappMessageRequest implements Serializable {
+public class TextSessionRequest implements Serializable {
     private String sessionId;
     private String to;
     private String from;

@@ -48,7 +48,7 @@ public class Senders extends MongoBaseEntity<String> {
     private Map<MessageType, MessageTypeSpecificDetails> messageTypeDetails;
     @Field("rate_limit")
     private RateLimit rateLimit;
-    @Field("WABA_number")
+    @Field("waba_number")
     private String WABANumber;
 
     public boolean isUrlPresent(){

@@ -1,17 +1,13 @@
 package in.wynk.sms.service;
 
-import in.wynk.client.service.ClientDetailsCachingService;
-import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.common.dto.wa.outbound.AbstractWhatsappOutboundMessage;
 import in.wynk.sms.common.dto.wa.outbound.common.Message;
 import in.wynk.sms.common.dto.wa.outbound.constant.MessageType;
+import in.wynk.sms.common.dto.wa.outbound.session.ListSessionMessage;
+import in.wynk.sms.common.dto.wa.outbound.session.MediaSessionMessage;
 import in.wynk.sms.common.dto.wa.outbound.session.TextSessionMessage;
-import in.wynk.sms.constants.SMSConstants;
-import in.wynk.sms.core.entity.Senders;
-import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.WhatsappRequestWrapper;
 import in.wynk.sms.dto.request.WhatsappRequest;
-import in.wynk.sms.enums.SmsErrorType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,9 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-import static in.wynk.sms.common.constant.SMSPriority.HIGHEST;
 import static in.wynk.sms.common.dto.wa.outbound.constant.MessageType.*;
 
 @Slf4j
@@ -33,6 +27,8 @@ public class WhatsappTransformationService implements IWhatsappMessageTransform<
     @PostConstruct
     public void init() {
         delegate.put(TEXT, new TextTransformationService());
+        delegate.put(MEDIA, new MediaTransformationService());
+        delegate.put(LIST, new ListTransformationService());
     }
     @Override
     public AbstractWhatsappOutboundMessage transform (WhatsappRequestWrapper request) {
@@ -44,10 +40,41 @@ public class WhatsappTransformationService implements IWhatsappMessageTransform<
         public TextSessionMessage transform (WhatsappRequestWrapper wrapper) {
             return TextSessionMessage.builder()
                     .sessionId(wrapper.getRequest().getSessionId())
-                    .to(wrapper.getRequest().getMsisdn())
+                    .to(wrapper.getRequest().getTo())
                     .from(wrapper.getWABANumber())
                     .type(MessageType.TEXT.getType())
-                    .message(Message.builder().text(wrapper.getRequest().getMessage()).build()).build();
+                    .message(Message.builder().text(wrapper.getRequest().getText()).build()).build();
+        }
+    }
+
+    private class MediaTransformationService implements IWhatsappMessageTransform<AbstractWhatsappOutboundMessage, WhatsappRequestWrapper>{
+        @Override
+        public MediaSessionMessage transform (WhatsappRequestWrapper wrapper) {
+            final WhatsappRequest request = wrapper.getRequest();
+            return MediaSessionMessage.builder()
+                    .sessionId(request.getSessionId())
+                    .to(request.getTo())
+                    .from(wrapper.getWABANumber())
+                    .type(LIST.getType())
+                    .mediaAttachment(request.getMediaAttachment())
+                    .build();
+        }
+    }
+
+    private class ListTransformationService implements IWhatsappMessageTransform<AbstractWhatsappOutboundMessage, WhatsappRequestWrapper>{
+        @Override
+        public ListSessionMessage transform (WhatsappRequestWrapper wrapper) {
+            final WhatsappRequest request = wrapper.getRequest();
+            return ListSessionMessage.builder()
+                    .sessionId(request.getSessionId())
+                    .to(request.getTo())
+                    .from(wrapper.getWABANumber())
+                    .type(LIST.getType())
+                    .message(Message.builder()
+                            .text(request.getText())
+                            .build())
+                    .list(request.getList())
+                    .build();
         }
     }
 }
