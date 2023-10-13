@@ -32,7 +32,7 @@ public class WhatsappUtils {
         return requestHeaders;
     }
 
-    public static HttpHeaders getBasicAuthHeaders(String username, String secret) {
+    public static HttpHeaders getBasicAuthHeaders(String username, String secret, boolean addConsumerHeader, String consumerUsername) {
         final String credentials = username + ":" + secret;
         final String authorization = Base64Utils.encodeToString(credentials.getBytes());
         final String correlationID = UUID.randomUUID().toString();
@@ -40,6 +40,9 @@ public class WhatsappUtils {
         requestHeaders.add("Authorization", "Basic " + authorization);
         requestHeaders.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         requestHeaders.add("X-Correlation-ID", correlationID);
+        if(addConsumerHeader){
+            requestHeaders.add("X-Consumer-Username", consumerUsername);
+        }
         AnalyticService.update(correlationID);
         return requestHeaders;
     }
