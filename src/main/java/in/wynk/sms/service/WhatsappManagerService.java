@@ -176,7 +176,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         @Override
         public WhatsappMessageResponse send(WhatsappMessageRequest request) {
             final String url = endpoints.get("TEMPLATE");
-            return post("TEMPLATE", url, request.getClientAlias(), request.getMessage(), WhatsappMessageResponse.class);
+            return post(request.getMessage().getType(), url, request.getClientAlias(), request.getMessage(), WhatsappMessageResponse.class);
         }
     }
 
@@ -185,7 +185,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         public WhatsappMessageResponse send(WhatsappMessageRequest request) {
             final BulkTemplateSingleRecipientMessage message = (BulkTemplateSingleRecipientMessage) request.getMessage();
             final String url = endpoints.get("BULK_TEMPLATE");
-            return post("BULK_TEMPLATE", url, request.getClientAlias(), message.getData(), WhatsappMessageResponse.class);
+            return post(request.getMessage().getType(), url, request.getClientAlias(), message.getData(), WhatsappMessageResponse.class);
         }
     }
 
@@ -209,6 +209,7 @@ public class WhatsappManagerService implements IWhatsappSenderHandler<WhatsappMe
         AnalyticService.update("request", gson.toJson(requestBody));
         final ResponseEntity<String> responseEntity = clientRestTemplates.get(service).exchange(uri, HttpMethod.POST, entity, String.class);
         final T response = gson.fromJson(responseEntity.getBody(), clazz);
+        AnalyticService.update("response", gson.toJson(response));
         AnalyticService.update(HTTP_STATUS_CODE, responseEntity.getStatusCode().name());
         AnalyticService.update("timeTaken", System.currentTimeMillis() - currentTime);
         return response;
