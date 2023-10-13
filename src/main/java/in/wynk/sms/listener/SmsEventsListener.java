@@ -231,7 +231,7 @@ public class SmsEventsListener {
                     .build();
             final String payload = objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS).writeValueAsString(orderDetailsRespEvent);
             AnalyticService.update(SMSConstants.ORDER_DETAILS_RESP_EVENT, payload);
-            final List<Header> headers = new ArrayList() {{
+            final List<Header> headers = new ArrayList<Header>() {{
                 add(new RecordHeader(BaseConstants.ORG_ID, event.getOrgId().getBytes()));
                 add(new RecordHeader(BaseConstants.SERVICE_ID, event.getServiceId().getBytes()));
                 add(new RecordHeader(BaseConstants.SESSION_ID, event.getSessionId().getBytes()));
