@@ -8,6 +8,7 @@ import in.wynk.common.constant.BaseConstants;
 import in.wynk.common.dto.WynkResponseEntity;
 import in.wynk.data.dto.IEntityCacheService;
 import in.wynk.logging.constants.LoggingConstants;
+import in.wynk.sms.dto.request.whatsapp.MessageStatusCallbackRequest;
 import in.wynk.stream.producer.IKafkaEventPublisher;
 import in.wynk.wynkservice.core.dao.entity.WynkService;
 import lombok.RequiredArgsConstructor;
@@ -74,8 +75,7 @@ public class NotificationController {
         final WynkService service = serviceCache.get(serviceId);
         AnalyticService.update(payload);
         try{
-            Map<String, Object> payloadMap = objectMapper.readValue(payload, Map.class);
-            AnalyticService.update(payloadMap);
+            AnalyticService.update(objectMapper.readValue(payload, MessageStatusCallbackRequest.class));
         } catch(Exception ignored){}
         final List<Header> headers = new ArrayList<Header>() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
