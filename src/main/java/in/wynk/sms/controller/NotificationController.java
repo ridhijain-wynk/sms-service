@@ -1,6 +1,7 @@
 package in.wynk.sms.controller;
 
 import com.datastax.driver.core.utils.UUIDs;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.common.constant.BaseConstants;
@@ -38,6 +39,7 @@ public class NotificationController {
     private final IEntityCacheService<WynkService, String> serviceCache;
 
     private final IKafkaEventPublisher<String, String> kafkaEventPublisher;
+    private final ObjectMapper objectMapper;
 
     private final Map<String, String> migerationServiceMap = new HashMap() {{
         put("airtelxstream", "airteltv");
@@ -51,7 +53,10 @@ public class NotificationController {
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
         final WynkService service = serviceCache.get(serviceID);
         AnalyticService.update(payload);
-        final List<Header> headers = new ArrayList() {{
+        try{
+            AnalyticService.update(objectMapper.readValue(payload, Map.class));
+        } catch(Exception ignored){}
+        final List<Header> headers = new ArrayList<Header>() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
             add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
             add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
@@ -67,7 +72,10 @@ public class NotificationController {
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
         final WynkService service = serviceCache.get(serviceId);
         AnalyticService.update(payload);
-        final List<Header> headers = new ArrayList() {{
+        try{
+            AnalyticService.update(objectMapper.readValue(payload, Map.class));
+        } catch(Exception ignored){}
+        final List<Header> headers = new ArrayList<Header>() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
             add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
             add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
