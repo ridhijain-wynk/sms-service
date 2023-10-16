@@ -1,13 +1,14 @@
 package in.wynk.sms.controller;
 
 import com.datastax.driver.core.utils.UUIDs;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.common.dto.WynkResponseEntity;
-import in.wynk.stream.producer.IEventPublisher;
 import in.wynk.data.dto.IEntityCacheService;
 import in.wynk.logging.constants.LoggingConstants;
+import in.wynk.sms.dto.request.whatsapp.MessageStatusCallbackRequest;
 import in.wynk.stream.producer.IKafkaEventPublisher;
 import in.wynk.wynkservice.core.dao.entity.WynkService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class NotificationController {
     private final IEntityCacheService<WynkService, String> serviceCache;
 
     private final IKafkaEventPublisher<String, String> kafkaEventPublisher;
+    private final ObjectMapper objectMapper;
 
     private final Map<String, String> migerationServiceMap = new HashMap() {{
         put("airtelxstream", "airteltv");
@@ -52,7 +54,11 @@ public class NotificationController {
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
         final WynkService service = serviceCache.get(serviceID);
         AnalyticService.update(payload);
-        final List<Header> headers = new ArrayList() {{
+        try{
+            Map<String, Object> payloadMap = objectMapper.readValue(payload, Map.class);
+            AnalyticService.update(payloadMap);
+        } catch(Exception ignored){}
+        final List<Header> headers = new ArrayList<Header>() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
             add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
             add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
@@ -68,12 +74,15 @@ public class NotificationController {
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
         final WynkService service = serviceCache.get(serviceId);
         AnalyticService.update(payload);
-        final List<Header> headers = new ArrayList() {{
+        try{
+            AnalyticService.update(objectMapper.readValue(payload, MessageStatusCallbackRequest.class));
+        } catch(Exception ignored){}
+        final List<Header> headers = new ArrayList<Header>() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
             add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
             add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
         }};
-        kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
+        kafkaEventPublisher.publish(whatsappMessageStatusTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
         return WynkResponseEntity.<Void>builder().build();
     }
 }

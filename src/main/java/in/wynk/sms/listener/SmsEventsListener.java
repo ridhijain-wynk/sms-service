@@ -1,5 +1,6 @@
 package in.wynk.sms.listener;
 
+import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
@@ -35,6 +36,8 @@ import in.wynk.stream.producer.IKafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
@@ -42,6 +45,8 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -111,30 +116,6 @@ public class SmsEventsListener {
                     log.info("Message pushed for request for "+ smsRequest.getMessageId()+ "- " + smsRequest.getMsisdn());
                 }
             }
-        }
-    }
-
-    @EventListener
-    @AnalyseTransaction(name = "whatsappOrderDetailsEvent")
-    public void onOrderDetailsRespEvent(WhatsappOrderDetailsEvent event) {
-        AnalyticService.update(event);
-        try {
-            final OrderDetailsRespEvent orderDetailsRespEvent = OrderDetailsRespEvent.builder()
-                    .sessionId(event.getMessage().getSessionId())
-                    .from(event.getMessage().getFrom())
-                    .to(event.getMessage().getTo())
-                    .message(OrderDetailsRespEvent.Message.builder()
-                            .orderId(event.getResponse().getMessageRequestId())
-                            .referenceId(event.getMessage().getOrderDetails().getReferenceId())
-                            .build())
-                    .type(event.getMessage().getType().toLowerCase())
-                    .build();
-            final String orderDetailsKafkaEventStr = objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS).writeValueAsString(orderDetailsRespEvent);
-            AnalyticService.update(SMSConstants.ORDER_DETAILS_RESP_EVENT, orderDetailsKafkaEventStr);
-            kafkaEventPublisher.publish(whatsappInboundTopic, orderDetailsKafkaEventStr);
-        } catch (Exception e){
-            log.error(SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE, "Unable to publish the order details response event in kafka due to {}", e.getMessage(), e);
-            throw new WynkRuntimeException(SmsErrorType.WHSMS004, e);
         }
     }
 
@@ -210,6 +191,37 @@ public class SmsEventsListener {
                 return messageCachingService.get(messageId);
             }
             return message;
+        }
+    }
+
+    @EventListener
+    @AnalyseTransaction(name = "whatsappOrderDetailsEvent")
+    public void onOrderDetailsRespEvent(WhatsappOrderDetailsEvent event) {
+        AnalyticService.update(event);
+        try {
+            final OrderDetailsRespEvent orderDetailsRespEvent = OrderDetailsRespEvent.builder()
+                    .sessionId(event.getMessage().getSessionId())
+                    .from(event.getMessage().getFrom())
+                    .to(event.getMessage().getTo())
+                    .message(OrderDetailsRespEvent.Message.builder()
+                            .orderId(event.getResponse().getMessageRequestId())
+                            .referenceId(event.getMessage().getOrderDetails().getReferenceId())
+                            .type(event.getMessage().getType().toLowerCase())
+                            .build())
+                    .type(event.getMessage().getType().toLowerCase())
+                    .build();
+            final String payload = objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS).writeValueAsString(orderDetailsRespEvent);
+            AnalyticService.update(SMSConstants.ORDER_DETAILS_RESP_EVENT, payload);
+            final List<Header> headers = new ArrayList<Header>() {{
+                add(new RecordHeader(BaseConstants.ORG_ID, event.getOrgId().getBytes()));
+                add(new RecordHeader(BaseConstants.SERVICE_ID, event.getServiceId().getBytes()));
+                add(new RecordHeader(BaseConstants.SESSION_ID, event.getSessionId().getBytes()));
+                add(new RecordHeader(BaseConstants.REQUEST_ID, event.getRequestId().getBytes()));
+            }};
+            kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
+        } catch (Exception e) {
+            log.error(SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE, "Unable to publish the order details response event in kafka due to {}", e.getMessage(), e);
+            throw new WynkRuntimeException(SmsErrorType.WHSMS004, e);
         }
     }
 }

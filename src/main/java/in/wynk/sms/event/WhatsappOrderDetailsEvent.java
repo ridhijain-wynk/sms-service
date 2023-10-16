@@ -13,7 +13,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WhatsappOrderDetailsEvent {
-
+    @Analysed
+    private String requestId;
+    @Analysed
+    private String sessionId;
+    @Analysed
+    private String serviceId;
+    @Analysed
+    private String orgId;
     @Analysed(name = "orderDetailsResponse")
     private WhatsappMessageResponse response;
     @Analysed(name = "orderDetailsMessage")
