@@ -54,7 +54,8 @@ public class NotificationController {
         final WynkService service = serviceCache.get(serviceID);
         AnalyticService.update(payload);
         try{
-            AnalyticService.update(objectMapper.readValue(payload, Map.class));
+            Map<String, Object> payloadMap = objectMapper.readValue(payload, Map.class);
+            AnalyticService.update(payloadMap);
         } catch(Exception ignored){}
         final List<Header> headers = new ArrayList<Header>() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
@@ -73,7 +74,8 @@ public class NotificationController {
         final WynkService service = serviceCache.get(serviceId);
         AnalyticService.update(payload);
         try{
-            AnalyticService.update(objectMapper.readValue(payload, Map.class));
+            Map<String, Object> payloadMap = objectMapper.readValue(payload, Map.class);
+            AnalyticService.update(payloadMap);
         } catch(Exception ignored){}
         final List<Header> headers = new ArrayList<Header>() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
