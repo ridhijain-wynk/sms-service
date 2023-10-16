@@ -1,6 +1,8 @@
 package in.wynk.sms.service;
 
+import com.datastax.driver.core.utils.UUIDs;
 import in.wynk.common.constant.BaseConstants;
+import in.wynk.data.dto.IEntityCacheService;
 import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.common.dto.wa.outbound.AbstractWhatsappOutboundMessage;
 import in.wynk.sms.constants.SMSConstants;
@@ -11,6 +13,7 @@ import in.wynk.sms.dto.WhatsappRequestWrapper;
 import in.wynk.sms.dto.request.WhatsappRequest;
 import in.wynk.sms.enums.SmsErrorType;
 import in.wynk.stream.producer.IKafkaEventPublisher;
+import in.wynk.wynkservice.core.dao.entity.WynkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.header.internals.RecordHeader;
@@ -32,6 +35,7 @@ public class WhatsappService {
     private String kafkaSendMessageTopic;
 
     private final SendersCachingService sendersCachingService;
+    private final IEntityCacheService<WynkService, String> serviceCache;
     private final IWhatsappMessageTransform<AbstractWhatsappOutboundMessage, WhatsappRequestWrapper> whatsappMessageTransform;
     private final IKafkaEventPublisher<String, AbstractWhatsappOutboundMessage> kafkaEventPublisher;
 
@@ -53,10 +57,12 @@ public class WhatsappService {
     private String publishEventInKafka(String topic, String service, AbstractWhatsappOutboundMessage message){
         try{
             final String requestId = UUID.randomUUID().toString();
+            final WynkService wynkService = serviceCache.get(service);
             final RecordHeaders headers = new RecordHeaders();
             headers.add(new RecordHeader(BaseConstants.SERVICE_ID, service.getBytes()));
+            headers.add(new RecordHeader(BaseConstants.ORG_ID, wynkService.getLinkedClient().getBytes()));
             headers.add(new RecordHeader(BaseConstants.REQUEST_ID, requestId.getBytes()));
-            kafkaEventPublisher.publish(topic, null, null, null,
+            kafkaEventPublisher.publish(topic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(),
                     message,
                     headers);
             return requestId;
