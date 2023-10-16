@@ -48,6 +48,8 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
     private final ClientDetailsCachingService clientDetailsCachingService;
     @Value("${wynk.kafka.consumers.enabled}")
     private boolean enabled;
+    @Value("${wynk.kafka.producers.whatsapp.iq.send.message.topic}")
+    private String kafkaSendMessageTopic;
     @Value("${wynk.kafka.producers.whatsapp.iq.retry.message.topic}")
     private String kafkaRetryTopic;
     @Value("${wynk.kafka.producers.whatsapp.iq.dlt.message.topic}")
@@ -172,6 +174,46 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
             scheduleRetry(kafkaRetryTopic, service, orgId, requestId, consumerRecord, String.valueOf(Integer.parseInt(retryCount) + 1));
         }
     }
+
+    /*** CRITICAL MESSAGE CONSUMER ***/
+    /*@KafkaListener(id = "whatsappCriticalMessageListener", topics = "${wynk.kafka.consumers.listenerFactory.whatsapp[2].factoryDetails.topic}", containerFactory = "${wynk.kafka.consumers.listenerFactory.whatsapp[2].name}")
+    @AnalyseTransaction(name = "whatsappCriticalMessage")
+    protected void listenWhatsappCriticalMessage(@Header(BaseConstants.SERVICE_ID) String service, @Header(SMSConstants.KAFKA_RETRY_COUNT) String retryCount, ConsumerRecord<String, AbstractWhatsappOutboundMessage> consumerRecord) {
+        try {
+            *//*if(Objects.nonNull(consumerRecord.value()) && !StringUtils.isEmpty(retryCount)){
+
+                AbstractWhatsappOutboundMessage message = null;
+                final RecordHeaders headers = new RecordHeaders();
+                headers.add(new RecordHeader(BaseConstants.SERVICE_ID, service.getBytes()));
+                headers.add(new RecordHeader(SMSConstants.KAFKA_RETRY_COUNT, retryAttempt.getBytes()));
+
+                kafkaEventPublisher.publish(kafkaSendMessageTopic, null, null, null,
+                        message,
+                        headers);
+
+
+                final String clientAlias = clientDetailsCachingService.getClientByService(service).getAlias();
+                int retryAttempt = Integer.parseInt(retryCount);
+                if(retryAttempt < 3){
+                    final WhatsappMessageRequest request = WhatsappMessageRequest.builder()
+                            .message(consumerRecord.value())
+                            .clientAlias(clientAlias)
+                            .build();
+                    consume(request);
+                } else {
+                    publishEventInKafka(kafkaDLTTopic, service, consumerRecord, String.valueOf(Integer.parseInt(retryCount) + 1));
+                    log.info(StreamMarker.KAFKA_RETRY_EXHAUSTION_ERROR, "Event from topic is dead lettered - event:" + consumerRecord.value());
+                }
+            }*//*
+        } catch (Exception e) {
+            if(e.getClass().isAssignableFrom(WynkRuntimeException.class) || e.getClass().isAssignableFrom(WynkRateLimitException.class)){
+                log.info(SmsLoggingMarkers.SEND_WHATSAPP_MESSAGE_FAILED_NO_RETRY, "Rate limit exceeded in polling kafka event, no retry", e);
+                return;
+            }
+            log.error(StreamMarker.KAFKA_POLLING_CONSUMPTION_ERROR, "Error occurred in polling/consuming kafka event", e);
+            scheduleRetry(kafkaRetryTopic, service, consumerRecord, String.valueOf(Integer.parseInt(retryCount) + 1));
+        }
+    }*/
 
     @Override
     public void start() {

@@ -1,6 +1,7 @@
 package in.wynk.sms.enums;
 
 import in.wynk.exception.IWynkErrorType;
+import in.wynk.logging.BaseLoggingMarkers;
 import in.wynk.sms.constants.SmsLoggingMarkers;
 import org.slf4j.Marker;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,9 @@ public enum SmsErrorType implements IWynkErrorType {
     WHSMS001("Invalid Whatsapp Message Received", "Whatsapp Send Message received is not correct", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.INVALID_WHATSAPP_MESSAGE_RECEIVED),
     WHSMS002("Sending Whatsapp Message Failed", "Unable to send the whatsapp message", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.SEND_WHATSAPP_MESSAGE_FAILED_RETRY),
     WHSMS003("Whatsapp Rest Template Not Registered", "Whatsapp rest template not registered for the client", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.REST_TEMPLATE_NOT_REGISTERED),
-    WHSMS004("Kafka Publisher Failure", "Event not published due to error, something went wrong", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE)
+    WHSMS004("Kafka Publisher Failure", "Event not published due to error, something went wrong", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE),
+    WHSMS005("WhatsApp Business Account number not found", "WABA number is not found in the configurations", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.WABA_NUMBER_NOT_FOUND),
+    WHSMS006("WhatsApp Sender not found", "Whatsapp Sender not found for the client", HttpStatus.INTERNAL_SERVER_ERROR, SmsLoggingMarkers.WHATSAPP_SENDER_NOT_FOUND),
     ;
 
     private final String errorTitle;
