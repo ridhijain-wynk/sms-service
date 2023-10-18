@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.annotation.analytic.core.annotations.Analysed;
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.sms.common.dto.wa.outbound.common.ListMessage;
-import in.wynk.sms.common.dto.wa.outbound.common.MediaAttachment;
+import in.wynk.sms.common.dto.wa.outbound.common.MediaSessionAttachment;
+import in.wynk.sms.dto.request.whatsapp.session.MediaSessionRequest;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -47,7 +48,7 @@ public class WhatsappRequest implements Serializable {
     @Analysed
     private String from;
     @Analysed
-    private MediaAttachment mediaAttachment;
+    private MediaSessionAttachment mediaSessionAttachment;
     @Analysed
     private ListMessage list;
     @Analysed

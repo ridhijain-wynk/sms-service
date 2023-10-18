@@ -56,7 +56,7 @@ public class WhatsappTransformationService implements IWhatsappMessageTransform<
                     .to(request.getTo())
                     .from(wrapper.getWABANumber())
                     .type(LIST.getType())
-                    .mediaAttachment(request.getMediaAttachment())
+                    .mediaAttachment(request.getMediaSessionAttachment())
                     .build();
         }
     }
