@@ -70,9 +70,10 @@ public class NotificationController {
     @AnalyseTransaction(name = "messageStatusCallback")
     @PostMapping(path = "/v1/callback/message-status/{serviceId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public WynkResponseEntity<Void> handleCallback(@PathVariable String serviceId, @RequestBody String payload) {
-        AnalyticService.update(BaseConstants.SERVICE, serviceId);
+        final String serviceID = migerationServiceMap.getOrDefault(serviceId, serviceId);
+        AnalyticService.update(BaseConstants.SERVICE, serviceID);
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
-        final WynkService service = serviceCache.get(serviceId);
+        final WynkService service = serviceCache.get(serviceID);
         AnalyticService.update(payload);
         try{
             AnalyticService.update(objectMapper.readValue(payload, MessageStatusCallbackRequest.class));
