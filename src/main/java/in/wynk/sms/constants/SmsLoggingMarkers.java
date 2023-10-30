@@ -29,7 +29,6 @@ public interface SmsLoggingMarkers extends BaseLoggingMarkers {
     Marker SENDER_CONFIGURATIONS_CACHING_FAILURE = MarkerFactory.getMarker("SENDER_CONFIGURATIONS_CACHING_FAILURE");
     Marker SENDERS_CACHING_FAILURE = MarkerFactory.getMarker("SENDERS_CACHING_FAILURE");
     Marker PINPOINT_SMS_ERROR = MarkerFactory.getMarker("PINPOINT_SMS_ERROR");
-    Marker SEND_THROUGH_FALLBACK_ERROR = MarkerFactory.getMarker("SEND_THROUGH_FALLBACK_ERROR");
     Marker INVALID_WHATSAPP_MESSAGE_RECEIVED = MarkerFactory.getMarker("INVALID_WHATSAPP_MESSAGE_RECEIVED");
     Marker SEND_WHATSAPP_MESSAGE_FAILED_NO_RETRY = MarkerFactory.getMarker("SEND_WHATSAPP_MESSAGE_FAILED_NO_RETRY");
     Marker SEND_WHATSAPP_MESSAGE_FAILED_RETRY = MarkerFactory.getMarker("SEND_WHATSAPP_MESSAGE_FAILED_RETRY");
@@ -37,4 +36,5 @@ public interface SmsLoggingMarkers extends BaseLoggingMarkers {
     Marker KAFKA_PUBLISHER_FAILURE = MarkerFactory.getMarker("KAFKA_PUBLISHER_FAILURE");
     Marker WHATSAPP_SENDER_NOT_FOUND = MarkerFactory.getMarker("WHATSAPP_SENDER_NOT_FOUND");
     Marker WABA_NUMBER_NOT_FOUND = MarkerFactory.getMarker("WABA_NUMBER_NOT_FOUND");
+    Marker SEND_THROUGH_FALLBACK_ERROR = MarkerFactory.getMarker("SEND_THROUGH_FALLBACK_ERROR");
 }
