@@ -34,4 +34,5 @@ public interface SmsLoggingMarkers extends BaseLoggingMarkers {
     Marker SEND_WHATSAPP_MESSAGE_FAILED_RETRY = MarkerFactory.getMarker("SEND_WHATSAPP_MESSAGE_FAILED_RETRY");
     Marker REST_TEMPLATE_NOT_REGISTERED = MarkerFactory.getMarker("REST_TEMPLATE_NOT_REGISTERED");
     Marker KAFKA_PUBLISHER_FAILURE = MarkerFactory.getMarker("KAFKA_PUBLISHER_FAILURE");
+    Marker SEND_THROUGH_FALLBACK_ERROR = MarkerFactory.getMarker("SEND_THROUGH_FALLBACK_ERROR");
 }

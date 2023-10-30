@@ -31,16 +31,4 @@ public class WhatsappController {
         AnalyticService.update(payload);
         return WynkResponseEntity.<Void>builder().status(HttpStatus.OK).build();
     }
-
-    @PostMapping(path = "/v1/callback", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @AnalyseTransaction(name = "iqWhatsappCallback")
-    public WynkResponseEntity<Void> iqWhatsappCallback(@RequestBody String payload) {
-        try {
-            AnalyticService.update(payload);
-        } catch(Exception e){
-            //eat the exception and return 200 OK
-            log.error("Caught exception while processing iq response ", e);
-        }
-        return WynkResponseEntity.<Void>builder().status(HttpStatus.OK).build();
-    }
 }
