@@ -81,7 +81,7 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
         sendMessage(request, timeInterval, maxCalls);
     }
 
-    @RateLimiter(key = "#request.getClientAlias()", value = "#request.getMessage().getTo()", interval = "#timeInterval", maxCalls = "#maxCalls")
+    @RateLimiter(key = "#request.getClientAlias()", value = "#request.getMessage().getType()", interval = "#timeInterval", maxCalls = "#maxCalls")
     private void sendMessage(WhatsappMessageRequest request, String timeInterval, String maxCalls){
         AnalyticService.update(SMSConstants.TIME_INTERVAL, timeInterval);
         AnalyticService.update(SMSConstants.CALLS_PERMITTED, maxCalls);
