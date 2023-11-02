@@ -6,7 +6,7 @@ import com.github.annotation.analytic.core.annotations.Analysed;
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.sms.common.dto.wa.outbound.common.ListMessage;
 import in.wynk.sms.common.dto.wa.outbound.common.MediaSessionAttachment;
-import in.wynk.sms.dto.request.whatsapp.session.MediaSessionRequest;
+import in.wynk.sms.common.dto.wa.outbound.common.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -48,7 +48,9 @@ public class WhatsappRequest implements Serializable {
     @Analysed
     private String from;
     @Analysed
-    private MediaSessionAttachment mediaSessionAttachment;
+    private MediaSessionAttachment mediaAttachment;
+    @Analysed
+    private MediaTemplateAttachment media;
     @Analysed
     private ListMessage list;
     @Analysed
@@ -59,6 +61,10 @@ public class WhatsappRequest implements Serializable {
     private List<OrderDetail> orderDetails;
     @Analysed
     private OrderStatus orderStatus;
+    @Analysed
+    private MessageBody messageBody;
+    @Analysed
+    private CallBackUrls callBackUrls;
 
     @Getter
     @Builder
@@ -72,13 +78,13 @@ public class WhatsappRequest implements Serializable {
     @Builder
     @AnalysedEntity
     public static class Contact {
-        private List<Contact.Address> addresses;
+        private List<Address> addresses;
         private String birthday;
-        private List<Contact.Email> emails;
-        private Contact.Name name;
-        private Contact.Org org;
-        private List<Contact.Phone> phones;
-        private List<Contact.Url> urls;
+        private List<Email> emails;
+        private Name name;
+        private Org org;
+        private List<Phone> phones;
+        private List<Url> urls;
 
         @Getter
         @Builder
@@ -144,8 +150,8 @@ public class WhatsappRequest implements Serializable {
     public static class OrderDetail {
         private String type;
         private String payment_configuration;
-        private OrderDetail.TotalAmount total_amount;
-        private OrderDetail.Order order;
+        private TotalAmount total_amount;
+        private Order order;
         private Subtotal subtotal;
         private Tax tax;
         private Shipping shipping;
