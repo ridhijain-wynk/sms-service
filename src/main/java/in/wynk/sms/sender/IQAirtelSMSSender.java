@@ -12,6 +12,7 @@ import in.wynk.exception.WynkRuntimeException;
 import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.core.entity.Senders;
 import in.wynk.sms.core.service.IMessageService;
+import in.wynk.sms.core.service.IRedisCacheService;
 import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.MessageTemplateDTO;
 import in.wynk.sms.dto.request.IQSmsRequest;
@@ -77,6 +78,9 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
     @Autowired
     private ObjectMapper mapper;
 
+    @Autowired
+    private IRedisCacheService redisDataService;
+
     @Override
     @AnalyseTransaction(name = "sendSmsAirtelIQ")
     public void sendMessage(SmsRequest request) throws Exception {
@@ -129,6 +133,7 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
                     IQSmsResponse response = responseEntity.getBody();
                     AnalyticService.update(HTTP_STATUS_CODE, responseEntity.getStatusCode().name());
                     AnalyticService.update(response);
+                    redisDataService.save(response.getMessageRequestId(), request);
                 } catch (HttpStatusCodeException ex) {
                     try {
                         if (ex.getStatusCode() == HttpStatus.BAD_REQUEST && Objects.nonNull(ex.getResponseBodyAsString())) {

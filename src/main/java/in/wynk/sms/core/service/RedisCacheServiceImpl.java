@@ -15,14 +15,14 @@ import static in.wynk.cache.constant.BeanConstant.L2CACHE_MANAGER;
 public class RedisCacheServiceImpl implements IRedisCacheService {
 
     @Override
-    @CachePut(cacheName = "PinpointSender", cacheKey = "'message-id:'+ #messageId", l2CacheTtl = 60 * 60, cacheManager = L2CACHE_MANAGER)
+    @CachePut(cacheName = "SmsRequest", cacheKey = "'message-id:'+ #messageId", l2CacheTtl = 60 * 60, cacheManager = L2CACHE_MANAGER)
     public SmsRequest save (String messageId, SmsRequest request){
         log.info("message id - "+messageId+" added in redis. Text - "+request.getText());
         return request;
     }
 
     @Override
-    @Cacheable(cacheName = "PinpointSender", cacheKey = "'message-id:'+ #messageId", l2CacheTtl = 60 * 60, cacheManager = L2CACHE_MANAGER)
+    @Cacheable(cacheName = "SmsRequest", cacheKey = "'message-id:'+ #messageId", l2CacheTtl = 60 * 60, cacheManager = L2CACHE_MANAGER)
     public SmsRequest get (String messageId){
         log.info("message id - "+messageId+" fetched from redis.");
         return null;
