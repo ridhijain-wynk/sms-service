@@ -22,12 +22,14 @@ import in.wynk.sms.core.entity.SenderDetails;
 import in.wynk.sms.core.service.IRedisCacheService;
 import in.wynk.sms.core.service.MessageCachingService;
 import in.wynk.sms.core.service.SenderConfigurationsCachingService;
+import in.wynk.sms.core.service.SendersCachingService;
 import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.enums.SmsErrorType;
 import in.wynk.sms.event.ClientPinpointStreamEvent;
 import in.wynk.sms.event.IQDeliveryReportEvent;
+import in.wynk.sms.event.PinpointStreamEvent;
 import in.wynk.sms.event.SmsNotificationEvent;
 import in.wynk.sms.event.WhatsappOrderDetailsEvent;
 import in.wynk.sms.sender.IMessageSender;
@@ -69,6 +71,7 @@ public class SmsEventsListener {
     private final MessageCachingService messageCachingService;
     private final ClientDetailsCachingService clientDetailsCachingService;
     private final SenderConfigurationsCachingService senderConfigCachingService;
+    private final SendersCachingService sendersCachingService;
     private final IRedisCacheService redisDataService;
     private final IKafkaEventPublisher<String, String> kafkaEventPublisher;
 
@@ -172,16 +175,16 @@ public class SmsEventsListener {
                 final SenderConfigurations senderConfigurations = senderConfigCachingService.getSenderConfigurationsByAliasAndCountry(client.getAlias(), countryCode);
                 if(Objects.nonNull(senderConfigurations)){
                     Map<CommunicationType, SenderDetails> senderDetailsMap = senderConfigurations.getDetails().get(request.getPriority());
-                    if (!CollectionUtils.isEmpty(senderDetailsMap) && senderDetailsMap.containsKey(request.getCommunicationType()) && senderDetailsMap.get(request.getCommunicationType()).isPrimaryPresent()) {
-                        final String primarySenderId = senderDetailsMap.get(request.getCommunicationType()).getPrimary();
-                        if (senderDetailsMap.get(request.getCommunicationType()).isSecondaryPresent()) {
-                            final String secondarySenderId = senderDetailsMap.get(request.getCommunicationType()).getSecondary();
-                            if(StringUtils.equalsIgnoreCase(primarySenderId, beanName)){
-                                findSenderBean(request, secondarySenderId);
-                            } else if(StringUtils.equalsIgnoreCase(secondarySenderId, beanName)){
+                    if(!CollectionUtils.isEmpty(senderDetailsMap) && senderDetailsMap.containsKey(request.getCommunicationType()) && senderDetailsMap.get(request.getCommunicationType()).isPrimaryPresent()){
+                        final String primarySenderBean = sendersCachingService.getSenderById(senderDetailsMap.get(request.getCommunicationType()).getPrimary()).getName();
+                        if(senderDetailsMap.get(request.getCommunicationType()).isSecondaryPresent()){
+                            final String secondarySenderBean = sendersCachingService.getSenderById(senderDetailsMap.get(request.getCommunicationType()).getSecondary()).getName();
+                            if(StringUtils.equalsIgnoreCase(primarySenderBean, beanName)){
+                                findSenderBean(request, secondarySenderBean);
+                            } else if(StringUtils.equalsIgnoreCase(secondarySenderBean, beanName)){
                                 log.info("No fallback configured after secondary sender.");
                             } else {
-                                findSenderBean(request, primarySenderId);
+                                findSenderBean(request, primarySenderBean);
                             }
                         }
                     }
