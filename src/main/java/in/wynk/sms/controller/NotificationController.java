@@ -39,7 +39,7 @@ public class NotificationController {
 
     private final IEntityCacheService<WynkService, String> serviceCache;
 
-    private final IKafkaEventPublisher<String, String> kafkaEventPublisher;
+    private final IKafkaEventPublisher<String, Object> kafkaEventPublisher;
     private final ObjectMapper objectMapper;
 
     private final Map<String, String> migerationServiceMap = new HashMap() {{
@@ -54,7 +54,9 @@ public class NotificationController {
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
         final WynkService service = serviceCache.get(serviceID);
         AnalyticService.update(payload);
+        Object payloadObj = null;
         try{
+            payloadObj = objectMapper.readValue(payload, Object.class);
             Map<String, Object> payloadMap = objectMapper.readValue(payload, Map.class);
             AnalyticService.update(payloadMap);
         } catch(Exception ignored){}
@@ -63,7 +65,7 @@ public class NotificationController {
             add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
             add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
         }};
-        kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
+        kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payloadObj, headers);
         return WynkResponseEntity.<Void>builder().build();
     }
 
