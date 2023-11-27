@@ -73,7 +73,7 @@ public class SmsEventsListener {
     private final SenderConfigurationsCachingService senderConfigCachingService;
     private final SendersCachingService sendersCachingService;
     private final IRedisCacheService redisDataService;
-    private final IKafkaEventPublisher<String, String> kafkaEventPublisher;
+    private final IKafkaEventPublisher<String, OrderDetailsRespEvent> kafkaEventPublisher;
 
     @EventListener
     @AnalyseTransaction(name = "smsNotificationEvent")
@@ -240,7 +240,7 @@ public class SmsEventsListener {
                 add(new RecordHeader(BaseConstants.SESSION_ID, event.getSessionId().getBytes()));
                 add(new RecordHeader(BaseConstants.REQUEST_ID, event.getRequestId().getBytes()));
             }};
-            kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
+            kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), orderDetailsRespEvent, headers);
         } catch (Exception e) {
             log.error(SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE, "Unable to publish the order details response event in kafka due to {}", e.getMessage(), e);
             throw new WynkRuntimeException(SmsErrorType.WHSMS004, e);
