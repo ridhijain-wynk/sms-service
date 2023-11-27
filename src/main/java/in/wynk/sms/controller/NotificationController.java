@@ -53,12 +53,10 @@ public class NotificationController {
         AnalyticService.update(BaseConstants.SERVICE, serviceID);
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
         final WynkService service = serviceCache.get(serviceID);
-        AnalyticService.update(payload);
         Object payloadObj = null;
         try{
             payloadObj = objectMapper.readValue(payload, Object.class);
-            Map<String, Object> payloadMap = objectMapper.readValue(payload, Map.class);
-            AnalyticService.update(payloadMap);
+            AnalyticService.update(payloadObj);
         } catch(Exception ignored){}
         final List<Header> headers = new ArrayList<Header>() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
@@ -76,16 +74,17 @@ public class NotificationController {
         AnalyticService.update(BaseConstants.SERVICE, serviceID);
         AnalyticService.update(BaseConstants.PAYLOAD, payload);
         final WynkService service = serviceCache.get(serviceID);
-        AnalyticService.update(payload);
+        Object payloadObj = null;
         try{
-            AnalyticService.update(objectMapper.readValue(payload, MessageStatusCallbackRequest.class));
+            payloadObj = objectMapper.readValue(payload, Object.class);
+            AnalyticService.update(payloadObj);
         } catch(Exception ignored){}
         final List<Header> headers = new ArrayList<Header>() {{
             add(new RecordHeader(BaseConstants.SERVICE_ID, service.getId().getBytes()));
             add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
             add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
         }};
-        kafkaEventPublisher.publish(whatsappMessageStatusTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payload, headers);
+        kafkaEventPublisher.publish(whatsappMessageStatusTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payloadObj, headers);
         return WynkResponseEntity.<Void>builder().build();
     }
 }
