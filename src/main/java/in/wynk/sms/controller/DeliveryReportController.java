@@ -31,6 +31,7 @@ public class DeliveryReportController {
         try {
             final IQDeliveryReportRequest request = objectMapper.readValue(payload, IQDeliveryReportRequest.class);
             if(request.getMessageStatus().equalsIgnoreCase("CUSTOMER_ERROR") ||
+                    request.getMessageStatus().equalsIgnoreCase("SCRUBBING_ERROR") ||
                     request.getMessageStatus().equalsIgnoreCase("DELIVER_ERROR")){
                 //message was not delivered, need to retry
                 eventPublisher.publishEvent(IQDeliveryReportEvent.builder().messageRequestId(request.getMessageRequestId()).build());
