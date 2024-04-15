@@ -1,0 +1,36 @@
+package in.wynk.sms.pubsub.message;
+
+import com.github.annotation.analytic.core.annotations.Analysed;
+import com.github.annotation.analytic.core.annotations.AnalysedEntity;
+import in.wynk.common.dto.IObjectMapper;
+import in.wynk.pubsub.dto.WynkPubSub;
+import in.wynk.sms.common.constant.SMSPriority;
+import in.wynk.sms.common.message.SmsNotificationGCPMessage;
+import in.wynk.sms.dto.request.SmsRequest;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+@SuperBuilder
+@Getter
+@NoArgsConstructor
+@WynkPubSub(projectName = "${sms.priority.highest.pubSub.projectName}", topicName = "${sms.priority.highest.pubSub.topicName}", subscriptionName = "${sms.priority.highest.pubSub.subscriptionName}", bufferInterval = "${sms.priority.highest.pubSub.bufferInterval}")
+@AnalysedEntity
+public class HighestPriorityGCPMessage extends SmsRequest implements IObjectMapper {
+
+    @Builder.Default
+    @Analysed
+    private final SMSPriority priority = SMSPriority.HIGHEST;
+
+    public static HighestPriorityGCPMessage from(SmsNotificationGCPMessage smsNotificationMessage) {
+        return HighestPriorityGCPMessage.builder()
+                .messageId(smsNotificationMessage.getMsisdn() + System.currentTimeMillis())
+                .countryCode(smsNotificationMessage.getCountry().getCountryCode())
+                .service(smsNotificationMessage.getService())
+                .msisdn(smsNotificationMessage.getMsisdn())
+                .text(smsNotificationMessage.getMessage())
+                .templateId(smsNotificationMessage.getMessageId())
+                .build();
+    }
+}

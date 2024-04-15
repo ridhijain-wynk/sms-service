@@ -10,10 +10,11 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.common.utils.BeanLocatorFactory;
 import in.wynk.exception.WynkRuntimeException;
+import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.common.dto.wa.inbound.OrderDetailsRespEvent;
-import in.wynk.sms.common.message.SmsNotificationMessage;
+import in.wynk.sms.common.message.SmsNotificationGCPMessage;
 import in.wynk.sms.constants.SMSConstants;
 import in.wynk.sms.constants.SmsLoggingMarkers;
 import in.wynk.sms.core.entity.Messages;
@@ -29,7 +30,6 @@ import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.enums.SmsErrorType;
 import in.wynk.sms.event.ClientPinpointStreamEvent;
 import in.wynk.sms.event.IQDeliveryReportEvent;
-import in.wynk.sms.event.PinpointStreamEvent;
 import in.wynk.sms.event.SmsNotificationEvent;
 import in.wynk.sms.event.WhatsappOrderDetailsEvent;
 import in.wynk.sms.sender.IMessageSender;
@@ -68,6 +68,8 @@ public class SmsEventsListener {
     private final ObjectMapper objectMapper;
     private final IRuleEvaluator ruleEvaluator;
     private final ISqsManagerService sqsManagerService;
+
+    private final IPubSubManagerService pubSubManagerService;
     private final MessageCachingService messageCachingService;
     private final ClientDetailsCachingService clientDetailsCachingService;
     private final SenderConfigurationsCachingService senderConfigCachingService;
@@ -81,7 +83,7 @@ public class SmsEventsListener {
         if (StringUtils.isNotEmpty(event.getMsisdn())) {
             if (StringUtils.isNotEmpty(event.getMessage())) {
                 log.info(OLD_MESSAGE_PATTERN, "Resolved message present for {}", event.getMsisdn());
-                SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
+                SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationGCPMessage.builder()
                         .message(event.getMessage())
                         .msisdn(event.getMsisdn())
                         .service(event.getService())
@@ -89,7 +91,8 @@ public class SmsEventsListener {
                         .messageId(event.getMessageId())
                         .build());
                 AnalyticService.update(smsRequest);
-                sqsManagerService.publishSQSMessage(smsRequest);
+                //sqsManagerService.publishSQSMessage(smsRequest);
+                pubSubManagerService.publishPubSubMessage(smsRequest);
             } else if (Objects.nonNull(event.getContextMap())) {
                 final String circleCode = String.valueOf(event.getContextMap().get(CIRCLE_CODE));
                 Messages message = getMessage(event.getMessageId(), circleCode);
@@ -109,7 +112,7 @@ public class SmsEventsListener {
                             .build();
                     final String evaluatedMessage = ruleEvaluator.evaluate(smsMessage, () -> seContext, SMS_MESSAGE_TEMPLATE_CONTEXT, String.class);
 
-                    SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
+                    SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationGCPMessage.builder()
                             .message(evaluatedMessage)
                             .msisdn(event.getMsisdn())
                             .service(event.getService())
@@ -117,7 +120,8 @@ public class SmsEventsListener {
                             .messageId(message.getId())
                             .build());
                     AnalyticService.update(smsRequest);
-                    sqsManagerService.publishSQSMessage(smsRequest);
+                    //sqsManagerService.publishSQSMessage(smsRequest);
+                    pubSubManagerService.publishPubSubMessage(smsMessage);
                     log.info("Message pushed for request for "+ smsRequest.getMessageId()+ "- " + smsRequest.getMsisdn());
                 }
             }
