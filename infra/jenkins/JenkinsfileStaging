@@ -56,13 +56,12 @@ pipeline {
                 docker login ${region}/${projet_name}/${repo_name}
                 docker push ${region}/${projet_name}/${repo_name}/${repo_name}:${BUILD_NUMBER}
                 '''
-            }
+           }
         }
-
+    }
     post {
         always {
             cleanWs()
         }
     }
-
 }
