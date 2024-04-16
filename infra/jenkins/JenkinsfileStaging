@@ -58,6 +58,11 @@ pipeline {
                 '''
            }
         }
+        stage('ArgoCD Deployment') {
+            steps {
+                build job: "$build_job", parameters: [[$class: 'StringParameterValue', name: 'APP_ENV', value: "${app_env}"], [$class: 'StringParameterValue', name: 'SERVICE_NAME', value: "${service_name}"], [$class: 'StringParameterValue', name: 'IMAGE_REPO', value: "${image_repo}"], [$class: 'StringParameterValue', name: 'IMAGE_TAG', value: "${BUILD_NUMBER}"]] , wait: true
+            }
+        }
     }
     post {
         always {
