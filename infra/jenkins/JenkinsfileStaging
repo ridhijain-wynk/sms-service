@@ -17,7 +17,7 @@ pipeline {
         working_dir = 'infra'
         env_e  = 'dev'
         git_url = "https://github.com/WynkLimited/revenue-backend.git"
-        jar_name = "sms-0.0.1.jar"
+        jar_name = "wynk-sms-0.0.1.jar"
         // Argo Deploy specific var's
         service_name = "sms"
         app_env = "stag"
