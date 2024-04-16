@@ -29,17 +29,23 @@ public class SmsSqsConfig {
     @Value("${sms.sqs.messages.extractor.visibilityTimeoutSeconds:30}")
     private int visibilityTimeoutSeconds;
 
+    @Value("${sms.sqs.queue.enabled:false}")
+    private boolean enabled;
+
     @Bean
     public NotificationMessageConsumer notificationConsumer(@Value("${sms.notification.queue.name}") String queueName,
                                                             @Value("${sms.notification.queue.threads:80}") int parallelism,
                                                             @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                             ObjectMapper objectMapper) {
-        return new NotificationMessageConsumer(queueName,
-                sqsClient,
-                objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                executor(parallelism),
-                scheduledThreadPoolExecutor(schedulerPoolSize));
+        if(enabled) {
+            return new NotificationMessageConsumer(queueName,
+                    sqsClient,
+                    objectMapper,
+                    new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
+                    executor(parallelism),
+                    scheduledThreadPoolExecutor(schedulerPoolSize));
+        }
+        return null;
     }
 
     @Bean
@@ -47,12 +53,15 @@ public class SmsSqsConfig {
                                                           @Value("${sms.promotional.queue.threads:5}") int parallelism,
                                                           @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                           ObjectMapper objectMapper) {
-        return new PromotionalMessageConsumer(queueName,
-                sqsClient,
-                objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                executor(parallelism),
-                scheduledThreadPoolExecutor(schedulerPoolSize));
+        if(enabled) {
+            return new PromotionalMessageConsumer(queueName,
+                    sqsClient,
+                    objectMapper,
+                    new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
+                    executor(parallelism),
+                    scheduledThreadPoolExecutor(schedulerPoolSize));
+        }
+        return null;
     }
 
     @Bean
@@ -60,12 +69,15 @@ public class SmsSqsConfig {
                                                      @Value("${sms.priority.highest.queue.threads:100}") int parallelism,
                                                      @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                      ObjectMapper objectMapper) {
-        return new HighestPriorityConsumer(queueName,
-                sqsClient,
-                objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                executor(parallelism),
-                scheduledThreadPoolExecutor(schedulerPoolSize));
+        if(enabled) {
+            return new HighestPriorityConsumer(queueName,
+                    sqsClient,
+                    objectMapper,
+                    new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
+                    executor(parallelism),
+                    scheduledThreadPoolExecutor(schedulerPoolSize));
+        }
+        return null;
     }
 
     @Bean
@@ -73,12 +85,15 @@ public class SmsSqsConfig {
                                                      @Value("${sms.priority.high.queue.threads:100}") int parallelism,
                                                      @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                      ObjectMapper objectMapper) {
-        return new HighPriorityConsumer(queueName,
-                sqsClient,
-                objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                executor(parallelism),
-                scheduledThreadPoolExecutor(schedulerPoolSize));
+        if(enabled) {
+            return new HighPriorityConsumer(queueName,
+                    sqsClient,
+                    objectMapper,
+                    new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
+                    executor(parallelism),
+                    scheduledThreadPoolExecutor(schedulerPoolSize));
+        }
+        return null;
     }
 
     @Bean
@@ -86,12 +101,15 @@ public class SmsSqsConfig {
                                                    @Value("${sms.priority.low.queue.threads:5}") int parallelism,
                                                    @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                    ObjectMapper objectMapper) {
-        return new LowPriorityConsumer(queueName,
-                sqsClient,
-                objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                executor(parallelism),
-                scheduledThreadPoolExecutor(schedulerPoolSize));
+        if(enabled) {
+            return new LowPriorityConsumer(queueName,
+                    sqsClient,
+                    objectMapper,
+                    new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
+                    executor(parallelism),
+                    scheduledThreadPoolExecutor(schedulerPoolSize));
+        }
+        return null;
     }
 
     @Bean
@@ -99,12 +117,15 @@ public class SmsSqsConfig {
                                                          @Value("${sms.priority.medium.queue.threads:5}") int parallelism,
                                                          @Qualifier(BeanConstant.SQS_MANAGER) AmazonSQS sqsClient,
                                                          ObjectMapper objectMapper) {
-        return new MediumPriorityConsumer(queueName,
-                sqsClient,
-                objectMapper,
-                new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
-                executor(parallelism),
-                scheduledThreadPoolExecutor(schedulerPoolSize));
+        if(enabled) {
+            return new MediumPriorityConsumer(queueName,
+                    sqsClient,
+                    objectMapper,
+                    new SmsMessageExtractor(queueName, sqsClient, batchSize, waitTimeSeconds, visibilityTimeoutSeconds),
+                    executor(parallelism),
+                    scheduledThreadPoolExecutor(schedulerPoolSize));
+        }
+        return null;
     }
 
     private ExecutorService executor(int threads) {
