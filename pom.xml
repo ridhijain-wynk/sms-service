@@ -54,11 +54,11 @@
             <artifactId>lib-stream</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>in.wynk</groupId>
             <artifactId>lib-cache</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>in.wynk</groupId>
             <artifactId>client-api</artifactId>
