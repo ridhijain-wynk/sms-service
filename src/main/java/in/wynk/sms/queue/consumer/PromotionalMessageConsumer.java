@@ -4,6 +4,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
 import in.wynk.queue.service.ISqsManagerService;
@@ -32,7 +33,7 @@ public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollin
     @Value("${sms.promotional.queue.consumer.delayTimeUnit}")
     private TimeUnit delayTimeUnit;
     @Autowired
-    private ISqsManagerService sqsManagerService;
+    private IPubSubManagerService pubSubManagerService;
 
     public PromotionalMessageConsumer(String queueName,
                                       AmazonSQS sqs,
@@ -52,7 +53,7 @@ public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollin
                 try {
                     SmsRequest message = parseMessage(request);
                     AnalyticService.update(message);
-                    sqsManagerService.publishSQSMessage(message);
+                    pubSubManagerService.publishPubSubMessage(message);
                 } catch (IllegalArgumentException ex) {
                     log.error(PROMOTIONAL_MSG_ERROR, "Invalid message: {} for msisdn: {}", request.getMessage(), request.getMsisdn());
                 }
