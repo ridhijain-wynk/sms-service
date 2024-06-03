@@ -76,6 +76,17 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>in.wynk</groupId>
+            <artifactId>lib-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>in.wynk</groupId>
+            <artifactId>lib-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
