@@ -12,6 +12,7 @@ import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
+import in.wynk.sms.pubsub.message.HighPriorityGCPMessage;
 import in.wynk.sms.pubsub.message.HighestPriorityGCPMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -59,7 +60,7 @@ public class SmsController {
         }
         smsRequest.setMsisdn(msisdn);
         if (StringUtils.isNotEmpty(smsRequest.getText()) && (smsRequest.getText().contains("PIN") || smsRequest.getText().contains("pin") || smsRequest.getText().contains("OTP") || smsRequest.getText().contains("otp") || smsRequest.getText().contains("CODE") || smsRequest.getText().contains("code")))
-            smsRequest = HighestPriorityGCPMessage.builder().countryCode(smsRequest.getCountryCode()).communicationType(smsRequest.getCommunicationType()).msisdn(smsRequest.getMsisdn()).service(smsRequest.getService()).text(smsRequest.getText()).message(smsRequest.getText()).shortCode(smsRequest.getShortCode()).messageId(smsRequest.getMsisdn() + System.currentTimeMillis()).build();
+            smsRequest = HighPriorityGCPMessage.builder().countryCode(smsRequest.getCountryCode()).communicationType(smsRequest.getCommunicationType()).msisdn(smsRequest.getMsisdn()).service(smsRequest.getService()).text(smsRequest.getText()).message(smsRequest.getText()).shortCode(smsRequest.getShortCode()).messageId(smsRequest.getMsisdn() + System.currentTimeMillis()).build();
         AnalyticService.update(smsRequest);
         smsRequest.setClientAlias(client.getAlias());
        // sqsManagerService.publishSQSMessage(smsRequest);
