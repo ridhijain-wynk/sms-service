@@ -41,7 +41,7 @@ pipeline {
                 export PATH=/opt/JavaVersions/jdk1.8.0_202/bin:$PATH
                 PATH=$PATH:/opt/MavenVersions/apache-maven-3.3.9/bin/
                 echo $PATH
-                /opt/MavenVersions/apache-maven-3.3.9/bin/mvn -Denv=preprod -s /opt/ConfigWCF/settings.xml clean install -P wynk-sms -am -Denv=$env_e
+                /opt/MavenVersions/apache-maven-3.3.9/bin/mvn -Denv=preprod -s /opt/ConfigWCF/settings.xml clean install -P sms -am -Denv=$env_e
                 """
             }
         }
