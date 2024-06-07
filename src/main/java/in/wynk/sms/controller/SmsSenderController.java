@@ -3,6 +3,7 @@ package in.wynk.sms.controller;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import com.google.gson.Gson;
+import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.dto.SMSFactory;
@@ -22,6 +23,9 @@ public class SmsSenderController {
 
     @Autowired
     private ISqsManagerService sqsManagerService;
+
+    @Autowired
+    private IPubSubManagerService pubSubManagerService;
 
 
     @PostMapping(value = "/sms/send")
@@ -46,7 +50,8 @@ public class SmsSenderController {
                     request.setPriority(SMSPriority.HIGHEST.getSmsPriority());
                 SmsRequest sms = SMSFactory.getSmsRequest(request);
                 AnalyticService.update(sms);
-                sqsManagerService.publishSQSMessage(sms);
+                //sqsManagerService.publishSQSMessage(sms);
+                pubSubManagerService.publishPubSubMessage(sms);
             } catch (Exception e) {
                 logger.error("error while executing sendSMS ", e);
             }
