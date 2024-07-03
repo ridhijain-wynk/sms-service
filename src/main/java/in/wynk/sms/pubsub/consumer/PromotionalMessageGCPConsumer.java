@@ -1,9 +1,11 @@
-package in.wynk.sms.queue.consumer;
+package in.wynk.sms.pubsub.consumer;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
+import in.wynk.pubsub.extractor.IPubSubMessageExtractor;
+import in.wynk.pubsub.poller.AbstractPubSubMessagePolling;
 import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
@@ -22,26 +24,25 @@ import java.util.concurrent.TimeUnit;
 import static in.wynk.sms.constants.SmsLoggingMarkers.PROMOTIONAL_MSG_ERROR;
 
 @Slf4j
-public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollingQueue<SendSmsRequest[]> {
+public class PromotionalMessageGCPConsumer extends AbstractPubSubMessagePolling<SendSmsRequest[]> {
 
     private final ExecutorService messageHandlerThreadPool;
     private final ScheduledExecutorService pollingThreadPool;
-    @Value("${sms.promotional.queue.consumer.enabled}")
+    @Value("${sms.promotional.pubSub.consumer.enabled}")
     private boolean enabled;
-    @Value("${sms.promotional.queue.consumer.delay}")
+    @Value("${sms.promotional.pubSub.consumer.delay}")
     private long consumerDelay;
-    @Value("${sms.promotional.queue.consumer.delayTimeUnit}")
+    @Value("${sms.promotional.pubSub.consumer.delayTimeUnit}")
     private TimeUnit delayTimeUnit;
     @Autowired
     private IPubSubManagerService pubSubManagerService;
 
-    public PromotionalMessageConsumer(String queueName,
-                                      AmazonSQS sqs,
-                                      ObjectMapper objectMapper,
-                                      ISQSMessageExtractor messagesExtractor,
-                                      ExecutorService messageHandlerThreadPool,
-                                      ScheduledExecutorService pollingThreadPool) {
-        super(queueName, sqs, objectMapper, messagesExtractor, messageHandlerThreadPool);
+    public PromotionalMessageGCPConsumer(String projectName, String topicName, String subscriptionName,
+                                         ExecutorService messageHandlerThreadPool,
+                                         ObjectMapper objectMapper,
+                                         IPubSubMessageExtractor pubSubMessageExtractor,
+                                         ScheduledExecutorService pollingThreadPool) {
+        super(projectName, topicName, subscriptionName, messageHandlerThreadPool, objectMapper, pubSubMessageExtractor);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;
     }
@@ -92,6 +93,7 @@ public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollin
             log.info("Shutting down ...");
             pollingThreadPool.shutdownNow();
             messageHandlerThreadPool.shutdown();
+            pubSubMessageExtractor.stop();
         }
     }
 

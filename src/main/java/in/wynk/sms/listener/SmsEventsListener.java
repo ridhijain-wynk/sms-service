@@ -10,10 +10,11 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.common.utils.BeanLocatorFactory;
 import in.wynk.exception.WynkRuntimeException;
+import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.common.dto.wa.inbound.OrderDetailsRespEvent;
-import in.wynk.sms.common.message.SmsNotificationMessage;
+import in.wynk.sms.common.message.SmsNotificationGCPMessage;
 import in.wynk.sms.constants.SMSConstants;
 import in.wynk.sms.constants.SmsLoggingMarkers;
 import in.wynk.sms.core.entity.Messages;
@@ -68,6 +69,8 @@ public class SmsEventsListener {
     private final ObjectMapper objectMapper;
     private final IRuleEvaluator ruleEvaluator;
     private final ISqsManagerService sqsManagerService;
+
+    private final IPubSubManagerService pubSubManagerService;
     private final MessageCachingService messageCachingService;
     private final ClientDetailsCachingService clientDetailsCachingService;
     private final SenderConfigurationsCachingService senderConfigCachingService;
@@ -81,7 +84,7 @@ public class SmsEventsListener {
         if (StringUtils.isNotEmpty(event.getMsisdn())) {
             if (StringUtils.isNotEmpty(event.getMessage())) {
                 log.info(OLD_MESSAGE_PATTERN, "Resolved message present for {}", event.getMsisdn());
-                SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
+                SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationGCPMessage.builder()
                         .message(event.getMessage())
                         .msisdn(event.getMsisdn())
                         .service(event.getService())
@@ -89,7 +92,8 @@ public class SmsEventsListener {
                         .messageId(event.getMessageId())
                         .build());
                 AnalyticService.update(smsRequest);
-                sqsManagerService.publishSQSMessage(smsRequest);
+                //sqsManagerService.publishSQSMessage(smsRequest);
+                pubSubManagerService.publishPubSubMessage(smsRequest);
             } else if (Objects.nonNull(event.getContextMap())) {
                 final String circleCode = String.valueOf(event.getContextMap().get(CIRCLE_CODE));
                 Messages message = getMessage(event.getMessageId(), circleCode);
@@ -109,7 +113,7 @@ public class SmsEventsListener {
                             .build();
                     final String evaluatedMessage = ruleEvaluator.evaluate(smsMessage, () -> seContext, SMS_MESSAGE_TEMPLATE_CONTEXT, String.class);
 
-                    SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
+                    SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationGCPMessage.builder()
                             .message(evaluatedMessage)
                             .msisdn(event.getMsisdn())
                             .service(event.getService())
@@ -117,7 +121,8 @@ public class SmsEventsListener {
                             .messageId(message.getId())
                             .build());
                     AnalyticService.update(smsRequest);
-                    sqsManagerService.publishSQSMessage(smsRequest);
+                    //sqsManagerService.publishSQSMessage(smsRequest);
+                    pubSubManagerService.publishPubSubMessage(smsMessage);
                     log.info("Message pushed for request for "+ smsRequest.getMessageId()+ "- " + smsRequest.getMsisdn());
                 }
             }
@@ -141,8 +146,8 @@ public class SmsEventsListener {
     @AnalyseTransaction(name = "pinpointStreamEvent")
     public void onPinpointSMSEvent(ClientPinpointStreamEvent event) {
         AnalyticService.update(event);
-        if(StringUtils.equalsIgnoreCase(event.getPinpointEvent().getEvent_type(), "_SMS.FAILURE")){
-            if(event.getPinpointEvent().getAttributes().containsKey("record_status")){
+        if (StringUtils.equalsIgnoreCase(event.getPinpointEvent().getEvent_type(), "_SMS.FAILURE")) {
+            if (event.getPinpointEvent().getAttributes().containsKey("record_status")) {
                 String recordStatus = event.getPinpointEvent().getAttributes().get("record_status");
                 /*if(EnumSet.of(PinpointRecordStatus.UNREACHABLE,
                         PinpointRecordStatus.UNKNOWN,
@@ -151,15 +156,15 @@ public class SmsEventsListener {
                         PinpointRecordStatus.NO_QUOTA_LEFT,
                         PinpointRecordStatus.MAX_PRICE_EXCEEDED,
                         PinpointRecordStatus.TTL_EXPIRED).contains(PinpointRecordStatus.valueOf(recordStatus))){*/
-                    log.error(PINPOINT_SMS_ERROR, "Unable to send the message via Pinpoint for {}", event.getPinpointEvent().getAttributes().get("destination_phone_number"));
-                    SmsRequest request = redisDataService.get(event.getPinpointEvent().getAttributes().get("message_id"));
-                    if(Objects.nonNull(request)){
-                        sendThroughFallback(request, PINPOINT_SENDER_BEAN);
-                    } else {
-                        log.info("Message request not found in redis.");
-                    }
+                log.error(PINPOINT_SMS_ERROR, "Unable to send the message via Pinpoint for {}", event.getPinpointEvent().getAttributes().get("destination_phone_number"));
+                SmsRequest request = redisDataService.get(event.getPinpointEvent().getAttributes().get("message_id"));
+                if(Objects.nonNull(request)){
+                    sendThroughFallback(request, PINPOINT_SENDER_BEAN);
+                } else {
+                    log.info("Message request not found in redis.");
+                }
                 //}
-                log.info("Response from Pinpoint for {}",event.getPinpointEvent().getAttributes().get("destination_phone_number"));
+                log.info("Response from Pinpoint for {}", event.getPinpointEvent().getAttributes().get("destination_phone_number"));
             }
         }
     }
@@ -170,7 +175,7 @@ public class SmsEventsListener {
             if (Objects.isNull(client)) {
                 client = clientDetailsCachingService.getClientByService(request.getService());
             }
-            if (Objects.nonNull(client)){
+            if (Objects.nonNull(client)) {
                 final String countryCode = StringUtils.isNotEmpty(request.getCountryCode()) ? Country.getCountryIdByCountryCode(request.getCountryCode()) : BaseConstants.DEFAULT_COUNTRY_CODE;
                 final SenderConfigurations senderConfigurations = senderConfigCachingService.getSenderConfigurationsByAliasAndCountry(client.getAlias(), countryCode);
                 if(Objects.nonNull(senderConfigurations)){
@@ -195,11 +200,11 @@ public class SmsEventsListener {
         }
     }
 
-    private void findSenderBean (SmsRequest request, String primarySenderId) throws Exception {
+    private void findSenderBean(SmsRequest request, String primarySenderId) throws Exception {
         try {
             BeanLocatorFactory.getBean(primarySenderId, new ParameterizedTypeReference<IMessageSender<SmsRequest>>() {
             }).sendMessage(request);
-        } catch(Exception e){
+        } catch (Exception e) {
             log.error(SMS_SEND_BEAN_ERROR, "error while adding " + primarySenderId + " bean.");
         }
     }
