@@ -38,10 +38,10 @@ public class LowPriorityGCPConsumer extends AbstractPubSubMessagePolling<LowPrio
     private final ScheduledExecutorService pollingThreadPool;
 
     public LowPriorityGCPConsumer(String projectName, String topicName, String subscriptionName,
-                                  ExecutorService messageHandlerThreadPool,
-                                  ObjectMapper objectMapper,
-                                  IPubSubMessageExtractor pubSubMessageExtractor,
-                                  ScheduledExecutorService pollingThreadPool) {
+                                   ExecutorService messageHandlerThreadPool,
+                                   ObjectMapper objectMapper,
+                                   IPubSubMessageExtractor pubSubMessageExtractor,
+                                   ScheduledExecutorService pollingThreadPool) {
         super(projectName, topicName, subscriptionName, messageHandlerThreadPool, objectMapper, pubSubMessageExtractor);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;

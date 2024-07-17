@@ -48,6 +48,8 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
     private final ClientDetailsCachingService clientDetailsCachingService;
     @Value("${wynk.kafka.consumers.enabled}")
     private boolean enabled;
+    @Value("${wynk.kafka.producers.whatsapp.iq.send.message.topic}")
+    private String kafkaSendMessageTopic;
     @Value("${wynk.kafka.producers.whatsapp.iq.retry.message.topic}")
     private String kafkaRetryTopic;
     @Value("${wynk.kafka.producers.whatsapp.iq.dlt.message.topic}")

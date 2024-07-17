@@ -37,10 +37,10 @@ public class MediumPriorityGCPConsumer  extends AbstractPubSubMessagePolling<Med
     private final ScheduledExecutorService pollingThreadPool;
 
     public MediumPriorityGCPConsumer(String projectName, String topicName, String subscriptionName,
-                                     ExecutorService messageHandlerThreadPool,
-                                     ObjectMapper objectMapper,
-                                     IPubSubMessageExtractor pubSubMessageExtractor,
-                                     ScheduledExecutorService pollingThreadPool) {
+                                      ExecutorService messageHandlerThreadPool,
+                                      ObjectMapper objectMapper,
+                                      IPubSubMessageExtractor pubSubMessageExtractor,
+                                      ScheduledExecutorService pollingThreadPool) {
         super(projectName, topicName, subscriptionName, messageHandlerThreadPool, objectMapper, pubSubMessageExtractor);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;
