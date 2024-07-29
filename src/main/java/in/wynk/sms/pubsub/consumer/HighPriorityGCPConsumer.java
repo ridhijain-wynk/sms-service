@@ -38,9 +38,8 @@ public class HighPriorityGCPConsumer extends AbstractPubSubMessagePolling<HighPr
     public HighPriorityGCPConsumer(String projectName, String topicName, String subscriptionName,
                                    ExecutorService messageHandlerThreadPool,
                                    ObjectMapper objectMapper,
-                                   IPubSubMessageExtractor pubSubMessageExtractor,
                                    ScheduledExecutorService pollingThreadPool) {
-        super(projectName, topicName, subscriptionName, messageHandlerThreadPool, objectMapper, pubSubMessageExtractor);
+        super(projectName, topicName, subscriptionName, messageHandlerThreadPool, pollingThreadPool, objectMapper);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;
     }
@@ -87,7 +86,6 @@ public class HighPriorityGCPConsumer extends AbstractPubSubMessagePolling<HighPr
             log.info("Shutting down ...");
             pollingThreadPool.shutdownNow();
             messageHandlerThreadPool.shutdown();
-            pubSubMessageExtractor.stop();
         }
     }
 

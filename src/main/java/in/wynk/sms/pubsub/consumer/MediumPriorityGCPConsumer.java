@@ -6,7 +6,6 @@ import in.wynk.pubsub.poller.AbstractPubSubMessagePolling;
 import in.wynk.sms.core.service.ISenderHandler;
 import in.wynk.sms.dto.MessageDetails;
 import in.wynk.sms.dto.request.SmsRequest;
-import in.wynk.sms.pubsub.message.HighestPriorityGCPMessage;
 import in.wynk.sms.pubsub.message.MediumPriorityGCPMessage;
 import in.wynk.sms.sender.IMessageSender;
 import in.wynk.sms.sender.ISmsSenderUtils;
@@ -19,7 +18,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static in.wynk.sms.constants.SmsLoggingMarkers.HIGHEST_PRIORITY_SMS_ERROR;
 import static in.wynk.sms.constants.SmsLoggingMarkers.MEDIUM_PRIORITY_SMS_ERROR;
 
 @Slf4j
@@ -39,9 +37,8 @@ public class MediumPriorityGCPConsumer  extends AbstractPubSubMessagePolling<Med
     public MediumPriorityGCPConsumer(String projectName, String topicName, String subscriptionName,
                                       ExecutorService messageHandlerThreadPool,
                                       ObjectMapper objectMapper,
-                                      IPubSubMessageExtractor pubSubMessageExtractor,
                                       ScheduledExecutorService pollingThreadPool) {
-        super(projectName, topicName, subscriptionName, messageHandlerThreadPool, objectMapper, pubSubMessageExtractor);
+        super(projectName, topicName, subscriptionName, messageHandlerThreadPool, pollingThreadPool, objectMapper);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;
     }
@@ -86,7 +83,6 @@ public class MediumPriorityGCPConsumer  extends AbstractPubSubMessagePolling<Med
             log.info("Shutting down ...");
             pollingThreadPool.shutdownNow();
             messageHandlerThreadPool.shutdown();
-            pubSubMessageExtractor.stop();
         }
     }
 

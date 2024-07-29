@@ -23,7 +23,6 @@ public class SmsPubSubConfig {
         return new HighestPriorityGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -32,7 +31,6 @@ public class SmsPubSubConfig {
         return new HighPriorityGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -41,7 +39,6 @@ public class SmsPubSubConfig {
         return new MediumPriorityGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -50,7 +47,6 @@ public class SmsPubSubConfig {
         return new LowPriorityGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -59,7 +55,6 @@ public class SmsPubSubConfig {
         return new NotificationMessageGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -68,7 +63,6 @@ public class SmsPubSubConfig {
         return new PromotionalMessageGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 

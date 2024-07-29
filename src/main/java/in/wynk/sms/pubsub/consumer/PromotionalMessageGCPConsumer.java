@@ -1,15 +1,11 @@
 package in.wynk.sms.pubsub.consumer;
 
-import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.pubsub.extractor.IPubSubMessageExtractor;
 import in.wynk.pubsub.poller.AbstractPubSubMessagePolling;
 import in.wynk.pubsub.service.IPubSubManagerService;
-import in.wynk.queue.extractor.ISQSMessageExtractor;
-import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
-import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.model.SendSmsRequest;
@@ -40,9 +36,8 @@ public class PromotionalMessageGCPConsumer extends AbstractPubSubMessagePolling<
     public PromotionalMessageGCPConsumer(String projectName, String topicName, String subscriptionName,
                                          ExecutorService messageHandlerThreadPool,
                                          ObjectMapper objectMapper,
-                                         IPubSubMessageExtractor pubSubMessageExtractor,
                                          ScheduledExecutorService pollingThreadPool) {
-        super(projectName, topicName, subscriptionName, messageHandlerThreadPool, objectMapper, pubSubMessageExtractor);
+        super(projectName, topicName, subscriptionName, messageHandlerThreadPool, pollingThreadPool, objectMapper);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;
     }
@@ -93,7 +88,6 @@ public class PromotionalMessageGCPConsumer extends AbstractPubSubMessagePolling<
             log.info("Shutting down ...");
             pollingThreadPool.shutdownNow();
             messageHandlerThreadPool.shutdown();
-            pubSubMessageExtractor.stop();
         }
     }
 
