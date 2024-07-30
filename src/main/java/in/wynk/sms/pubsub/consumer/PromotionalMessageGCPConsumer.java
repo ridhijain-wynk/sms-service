@@ -72,13 +72,13 @@ public class PromotionalMessageGCPConsumer extends AbstractPubSubMessagePolling<
     @Override
     public void start() {
         if (enabled) {
-            log.info("Starting...");
-            pollingThreadPool.scheduleWithFixedDelay(
+            log.info("Starting PromotionalMessageGCPConsumer...");
+            /*pollingThreadPool.scheduleWithFixedDelay(
                     this::poll,
                     0,
                     consumerDelay,
                     delayTimeUnit
-            );
+            );*/
         }
     }
 

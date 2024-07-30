@@ -66,13 +66,13 @@ public class MediumPriorityGCPConsumer  extends AbstractPubSubMessagePolling<Med
     @Override
     public void start() {
         if (enabled) {
-            log.info("Starting ...");
-            pollingThreadPool.scheduleWithFixedDelay(
+            log.info("Starting MediumPriorityGCPConsumer...");
+            /*pollingThreadPool.scheduleWithFixedDelay(
                     this::poll,
                     0,
                     consumerDelay,
                     delayTimeUnit
-            );
+            );*/
         }
 
     }

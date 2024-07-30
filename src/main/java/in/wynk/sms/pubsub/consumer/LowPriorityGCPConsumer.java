@@ -68,13 +68,13 @@ public class LowPriorityGCPConsumer extends AbstractPubSubMessagePolling<LowPrio
     @Override
     public void start() {
         if (enabled) {
-            log.info("Starting ...");
-            pollingThreadPool.scheduleWithFixedDelay(
+            log.info("Starting LowPriorityGCPConsumer ...");
+            /*pollingThreadPool.scheduleWithFixedDelay(
                     this::poll,
                     0,
                     consumerDelay,
                     delayTimeUnit
-            );
+            );*/
         }
     }
 

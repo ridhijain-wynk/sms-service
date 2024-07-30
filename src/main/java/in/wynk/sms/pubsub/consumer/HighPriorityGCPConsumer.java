@@ -70,13 +70,13 @@ public class HighPriorityGCPConsumer extends AbstractPubSubMessagePolling<HighPr
     @Override
     public void start() {
         if (enabled) {
-            log.info("Starting ...");
-            pollingThreadPool.scheduleWithFixedDelay(
+            log.info("Starting HighPriorityGCPConsumer...");
+            /*pollingThreadPool.scheduleWithFixedDelay(
                     this::poll,
                     0,
                     consumerDelay,
                     delayTimeUnit
-            );
+            );*/
         }
     }
 

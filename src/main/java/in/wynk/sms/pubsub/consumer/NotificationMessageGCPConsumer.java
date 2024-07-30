@@ -61,13 +61,13 @@ public class NotificationMessageGCPConsumer extends AbstractPubSubMessagePolling
     @Override
     public void start() {
         if (enabled) {
-            log.info("Starting...");
-            pollingThreadPool.scheduleWithFixedDelay(
+            log.info("Starting NotificationMessageGCPConsumer...");
+            /*pollingThreadPool.scheduleWithFixedDelay(
                     this::poll,
                     0,
                     consumerDelay,
                     delayTimeUnit
-            );
+            );*/
         }
 
     }
