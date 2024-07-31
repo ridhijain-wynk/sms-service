@@ -3,7 +3,6 @@ package in.wynk.sms.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.wynk.sms.pubsub.consumer.*;
-import in.wynk.sms.pubsub.extractor.SmsPubSubMessageExtractor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
