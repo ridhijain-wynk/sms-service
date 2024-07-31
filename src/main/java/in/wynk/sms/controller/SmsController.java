@@ -12,6 +12,7 @@ import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
+import in.wynk.sms.pubsub.message.HighPriorityGCPMessage;
 import in.wynk.sms.pubsub.message.HighestPriorityGCPMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
