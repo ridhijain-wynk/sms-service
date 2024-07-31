@@ -121,7 +121,7 @@ public class SmsEventsListener {
                             .build());
                     AnalyticService.update(smsRequest);
                     //sqsManagerService.publishSQSMessage(smsRequest);
-                    pubSubManagerService.publishPubSubMessage(smsMessage);
+                    pubSubManagerService.publishPubSubMessage(smsRequest);
                     log.info("Message pushed for request for "+ smsRequest.getMessageId()+ "- " + smsRequest.getMsisdn());
                 }
             }
