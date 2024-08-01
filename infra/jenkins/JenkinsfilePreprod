@@ -51,6 +51,7 @@ pipeline {
                 pwd
                 cd /mnt/jenkins/workspace/${JOB_NAME}/wynk-sms/infra/docker
                 cp /mnt/jenkins/workspace/${JOB_NAME}/wynk-sms/build/${jar_name} /mnt/jenkins/workspace/${JOB_NAME}/wynk-sms/infra/docker
+                cp /opt/NewRelic/newrelic/newrelic.jar /mnt/jenkins/workspace/${JOB_NAME}/wynk-sms/infra/docker
                 gcloud auth configure-docker ${region}
                 docker build --build-arg profile=$env_e -t ${region}/${projet_name}/${repo_name}/${repo_name}:${BUILD_NUMBER} -f Dockerfile .
                 docker login ${region}/${projet_name}/${repo_name}
