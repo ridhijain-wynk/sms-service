@@ -4,10 +4,18 @@ ENV profile $profile
 ENV JAR_NAME=wynk-sms-0.0.1.jar
 ENV JAVA_OPTS="-Duser.timezone=Asia/Calcutta -Dfile.encoding=UTF-8"
 ENV JMX_OPTS="-Xmx2g -XX:+HeapDumpOnOutOfMemoryError -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:MaxTenuringThreshold=1 -XX:+AggressiveOpts -XX:+UseFastAccessorMethods"
+#####
+RUN mkdir -p /usr/local/newrelic
+ENV NEW_RELIC_JAR_NAME=newrelic.jar
+ENV NEW_RELIC_YAML=newrelic.yml
+ADD $NEW_RELIC_JAR_NAME /usr/local/newrelic/
+ADD $NEW_RELIC_YAML /usr/local/newrelic/
+#####
 ADD $JAR_NAME /opt/
 WORKDIR /opt/
 RUN mkdir -p /data
 RUN mkdir -p /logs
 RUN echo $JAVA_OPTS
 EXPOSE 8081
-CMD exec java $JMX_OPTS $JAVA_OPTS -jar /opt/$JAR_NAME
+#CMD exec java $JMX_OPTS $JAVA_OPTS -jar /opt/$JAR_NAME
+CMD exec java $JMX_OPTS $JAVA_OPTS -javaagent:/usr/local/newrelic/newrelic.jar -jar /opt/$JAR_NAME
