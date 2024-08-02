@@ -1,3 +1,4 @@
+/*
 package in.wynk.sms.pubsub.extractor;
 
 import in.wynk.pubsub.extractor.AbstractPubSubMessageExtractor;
@@ -10,3 +11,4 @@ public class SmsPubSubMessageExtractor extends AbstractPubSubMessageExtractor {
     }
 }
 
+*/

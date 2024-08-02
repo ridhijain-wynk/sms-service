@@ -40,9 +40,8 @@ public class LowPriorityGCPConsumer extends AbstractPubSubMessagePolling<LowPrio
     public LowPriorityGCPConsumer(String projectName, String topicName, String subscriptionName,
                                    ExecutorService messageHandlerThreadPool,
                                    ObjectMapper objectMapper,
-                                   IPubSubMessageExtractor pubSubMessageExtractor,
                                    ScheduledExecutorService pollingThreadPool) {
-        super(projectName, topicName, subscriptionName, messageHandlerThreadPool, objectMapper, pubSubMessageExtractor);
+        super(projectName, topicName, subscriptionName, messageHandlerThreadPool,pollingThreadPool, objectMapper);
         this.pollingThreadPool = pollingThreadPool;
         this.messageHandlerThreadPool = messageHandlerThreadPool;
     }
@@ -72,12 +71,12 @@ public class LowPriorityGCPConsumer extends AbstractPubSubMessagePolling<LowPrio
     public void start() {
         if (enabled) {
             log.info("Starting ...");
-            pollingThreadPool.scheduleWithFixedDelay(
+            /*pollingThreadPool.scheduleWithFixedDelay(
                     this::poll,
                     0,
                     consumerDelay,
                     delayTimeUnit
-            );
+            );*/
         }
     }
 
@@ -87,7 +86,6 @@ public class LowPriorityGCPConsumer extends AbstractPubSubMessagePolling<LowPrio
             log.info("Shutting down ...");
             pollingThreadPool.shutdownNow();
             messageHandlerThreadPool.shutdown();
-            pubSubMessageExtractor.stop();
         }
     }
 

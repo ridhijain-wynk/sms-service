@@ -3,7 +3,6 @@ package in.wynk.sms.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.wynk.sms.pubsub.consumer.*;
-import in.wynk.sms.pubsub.extractor.SmsPubSubMessageExtractor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +22,6 @@ public class SmsPubSubConfig {
         return new HighestPriorityGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -32,7 +30,6 @@ public class SmsPubSubConfig {
         return new HighPriorityGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -41,7 +38,6 @@ public class SmsPubSubConfig {
         return new MediumPriorityGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -50,7 +46,6 @@ public class SmsPubSubConfig {
         return new LowPriorityGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -59,7 +54,6 @@ public class SmsPubSubConfig {
         return new NotificationMessageGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
@@ -68,7 +62,6 @@ public class SmsPubSubConfig {
         return new PromotionalMessageGCPConsumer(projectName, topicName, subscriptionName,
                 executor(parallelism),
                 objectMapper,
-                new SmsPubSubMessageExtractor(projectName, subscriptionName, bufferInterval),
                 scheduledThreadPoolExecutor(schedulerPoolSize));
     }
 
