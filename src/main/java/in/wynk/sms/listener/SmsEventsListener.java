@@ -10,11 +10,9 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.common.utils.BeanLocatorFactory;
 import in.wynk.exception.WynkRuntimeException;
-import in.wynk.pubsub.service.IPubSubManagerService;
-import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.common.constant.Country;
 import in.wynk.sms.common.dto.wa.inbound.OrderDetailsRespEvent;
-import in.wynk.sms.common.message.SmsNotificationGCPMessage;
+import in.wynk.sms.common.message.SmsNotificationMessage;
 import in.wynk.sms.constants.SMSConstants;
 import in.wynk.sms.constants.SmsLoggingMarkers;
 import in.wynk.sms.core.entity.Messages;
@@ -36,6 +34,7 @@ import in.wynk.sms.sender.IMessageSender;
 import in.wynk.spel.IRuleEvaluator;
 import in.wynk.spel.builder.DefaultStandardExpressionContextBuilder;
 import in.wynk.stream.producer.IKafkaEventPublisher;
+import in.wynk.stream.producer.IKafkaPublisherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -67,9 +66,7 @@ public class SmsEventsListener {
     private String whatsappInboundTopic;
     private final ObjectMapper objectMapper;
     private final IRuleEvaluator ruleEvaluator;
-    private final ISqsManagerService sqsManagerService;
-
-    private final IPubSubManagerService pubSubManagerService;
+    private final IKafkaPublisherService kafkaPublisherService;
     private final MessageCachingService messageCachingService;
     private final ClientDetailsCachingService clientDetailsCachingService;
     private final SenderConfigurationsCachingService senderConfigCachingService;
@@ -83,7 +80,7 @@ public class SmsEventsListener {
         if (StringUtils.isNotEmpty(event.getMsisdn())) {
             if (StringUtils.isNotEmpty(event.getMessage())) {
                 log.info(OLD_MESSAGE_PATTERN, "Resolved message present for {}", event.getMsisdn());
-                SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationGCPMessage.builder()
+                SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
                         .message(event.getMessage())
                         .msisdn(event.getMsisdn())
                         .service(event.getService())
@@ -91,8 +88,7 @@ public class SmsEventsListener {
                         .messageId(event.getMessageId())
                         .build());
                 AnalyticService.update(smsRequest);
-                //sqsManagerService.publishSQSMessage(smsRequest);
-                pubSubManagerService.publishPubSubMessage(smsRequest);
+                kafkaPublisherService.publishKafkaMessage(smsRequest);
             } else if (Objects.nonNull(event.getContextMap())) {
                 final String circleCode = String.valueOf(event.getContextMap().get(CIRCLE_CODE));
                 Messages message = getMessage(event.getMessageId(), circleCode);
@@ -112,7 +108,7 @@ public class SmsEventsListener {
                             .build();
                     final String evaluatedMessage = ruleEvaluator.evaluate(smsMessage, () -> seContext, SMS_MESSAGE_TEMPLATE_CONTEXT, String.class);
 
-                    SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationGCPMessage.builder()
+                    SmsRequest smsRequest = SMSFactory.getSmsRequest(SmsNotificationMessage.builder()
                             .message(evaluatedMessage)
                             .msisdn(event.getMsisdn())
                             .service(event.getService())
@@ -120,8 +116,7 @@ public class SmsEventsListener {
                             .messageId(message.getId())
                             .build());
                     AnalyticService.update(smsRequest);
-                    //sqsManagerService.publishSQSMessage(smsRequest);
-                    pubSubManagerService.publishPubSubMessage(smsRequest);
+                    kafkaPublisherService.publishKafkaMessage(smsRequest);
                     log.info("Message pushed for request for "+ smsRequest.getMessageId()+ "- " + smsRequest.getMsisdn());
                 }
             }

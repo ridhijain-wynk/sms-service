@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.github.annotation.analytic.core.annotations.Analysed;
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.sms.common.constant.SMSPriority;
-import in.wynk.sms.pubsub.message.HighPriorityGCPMessage;
-import in.wynk.sms.pubsub.message.HighestPriorityGCPMessage;
-import in.wynk.sms.pubsub.message.LowPriorityGCPMessage;
-import in.wynk.sms.pubsub.message.MediumPriorityGCPMessage;
+import in.wynk.sms.queue.message.HighPriorityMessage;
+import in.wynk.sms.queue.message.HighestPriorityMessage;
+import in.wynk.sms.queue.message.LowPriorityMessage;
+import in.wynk.sms.queue.message.MediumPriorityMessage;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -21,10 +21,10 @@ import java.io.Serializable;
 @SuperBuilder
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "priority")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = HighestPriorityGCPMessage.class, name = "HIGHEST"),
-        @JsonSubTypes.Type(value = HighPriorityGCPMessage.class, name = "HIGH"),
-        @JsonSubTypes.Type(value = MediumPriorityGCPMessage.class, name = "MEDIUM"),
-        @JsonSubTypes.Type(value = LowPriorityGCPMessage.class, name = "LOW")
+        @JsonSubTypes.Type(value = HighestPriorityMessage.class, name = "HIGHEST"),
+        @JsonSubTypes.Type(value = HighPriorityMessage.class, name = "HIGH"),
+        @JsonSubTypes.Type(value = MediumPriorityMessage.class, name = "MEDIUM"),
+        @JsonSubTypes.Type(value = LowPriorityMessage.class, name = "LOW")
 })
 @Getter
 @AnalysedEntity

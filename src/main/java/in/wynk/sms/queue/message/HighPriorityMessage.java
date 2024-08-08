@@ -7,6 +7,7 @@ import in.wynk.queue.dto.WynkQueue;
 import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.common.message.SmsNotificationMessage;
 import in.wynk.sms.dto.request.SmsRequest;
+import in.wynk.stream.advice.DelayedKafkaEvent;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @NoArgsConstructor
-@WynkQueue(queueName = "${sms.priority.high.queue.name}", delaySeconds = "${sms.priority.high.queue.delayInSecond}", maxRetryCount = 0)
+//@WynkQueue(queueName = "${sms.priority.high.queue.name}", delaySeconds = "${sms.priority.high.queue.delayInSecond}", maxRetryCount = 0)
+@DelayedKafkaEvent(topic = "${wynk.kafka.consumers.listenerFactory.high[0].factoryDetails.topic}", maxRetryCount = 0)
 @AnalysedEntity
 public class HighPriorityMessage extends SmsRequest implements IObjectMapper {
 
