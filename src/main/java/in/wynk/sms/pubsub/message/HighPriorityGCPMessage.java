@@ -6,7 +6,7 @@ import in.wynk.common.dto.IObjectMapper;
 import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.common.message.SmsNotificationGCPMessage;
 import in.wynk.sms.dto.request.SmsRequest;
-import in.wynk.stream.advice.DelayedKafkaEvent;
+import in.wynk.stream.advice.WynkKafkaMessage;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 //@WynkPubSub(projectName = "${sms.priority.high.pubSub.projectName}", topicName = "${sms.priority.high.pubSub.topicName}", subscriptionName = "${sms.priority.high.pubSub.subscriptionName}", bufferInterval = "${sms.priority.high.pubSub.bufferInterval}")
-@DelayedKafkaEvent(topic = "${sms.priority.high.kafka.topic}")
+@WynkKafkaMessage(topic = "${sms.priority.high.kafka.topic}")
 @AnalysedEntity
 public class HighPriorityGCPMessage extends SmsRequest implements IObjectMapper {
 
