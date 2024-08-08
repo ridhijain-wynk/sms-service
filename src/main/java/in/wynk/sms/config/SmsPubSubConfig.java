@@ -11,10 +11,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-@Configuration
+//@Configuration
 public class SmsPubSubConfig {
 
-    @Value("${sms.pubSub.messages.schedule.thread.pool.size:10}")
+    /*@Value("${sms.pubSub.messages.schedule.thread.pool.size:10}")
     private int schedulerPoolSize;
 
     @Bean
@@ -72,6 +72,6 @@ public class SmsPubSubConfig {
 
     private ScheduledExecutorService scheduledThreadPoolExecutor(int schedulerPoolSize) {
         return Executors.newScheduledThreadPool(schedulerPoolSize);
-    }
+    }*/
 }
 

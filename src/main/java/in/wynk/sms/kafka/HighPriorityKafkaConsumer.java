@@ -56,10 +56,10 @@ public class HighPriorityKafkaConsumer extends AbstractKafkaEventConsumer<String
     }
 
     @KafkaListener(id = "highPriorityMessageListener", topics = "${wynk.kafka.consumers.listenerFactory.high[0].factoryDetails.topic}", containerFactory = "${wynk.kafka.consumers.listenerFactory.high[0].name}")
-    protected void listenHighPriorityMessage(@Header(StreamConstant.MESSAGE_LAST_ATTEMPTED_SEQUENCE) String lastAttemptedSequence,
-                                                @Header(StreamConstant.MESSAGE_CREATION_DATETIME) String createdAt,
-                                                @Header(StreamConstant.MESSAGE_LAST_PROCESSED_DATETIME) String lastProcessedAt,
-                                                @Header(StreamConstant.RETRY_COUNT) String retryCount,
+    protected void listenHighPriorityMessage(@Header(value = StreamConstant.MESSAGE_LAST_ATTEMPTED_SEQUENCE, required = false) String lastAttemptedSequence,
+                                             @Header(value = StreamConstant.MESSAGE_CREATION_DATETIME, required = false) String createdAt,
+                                             @Header(value = StreamConstant.MESSAGE_LAST_PROCESSED_DATETIME, required = false) String lastProcessedAt,
+                                             @Header(value = StreamConstant.RETRY_COUNT, required = false) String retryCount,
                                                 ConsumerRecord<String, HighPriorityMessage> consumerRecord) {
         try {
             log.debug("Kafka consume record result {} for event {}", consumerRecord, consumerRecord.value().toString());

@@ -16,7 +16,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @NoArgsConstructor
-//@WynkQueue(queueName = "${sms.priority.highest.queue.name}", delaySeconds = "${sms.priority.highest.queue.delayInSecond}", maxRetryCount = 0)
 @DelayedKafkaEvent(topic = "${wynk.kafka.consumers.listenerFactory.highest[0].factoryDetails.topic}", maxRetryCount = 0)
 @AnalysedEntity
 public class HighestPriorityMessage extends SmsRequest implements IObjectMapper {
