@@ -3,10 +3,8 @@ package in.wynk.sms.pubsub.message;
 import com.github.annotation.analytic.core.annotations.Analysed;
 import com.github.annotation.analytic.core.annotations.AnalysedEntity;
 import in.wynk.common.dto.IObjectMapper;
-import in.wynk.pubsub.dto.WynkPubSub;
 import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.common.message.SmsNotificationGCPMessage;
-import in.wynk.sms.common.message.SmsNotificationMessage;
 import in.wynk.sms.dto.request.SmsRequest;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @AnalysedEntity
-@WynkPubSub(projectName = "${sms.priority.low.pubSub.projectName}", topicName = "${sms.priority.low.pubSub.topicName}", subscriptionName = "${sms.priority.low.pubSub.subscriptionName}", bufferInterval = "${sms.priority.low.pubSub.bufferInterval}")
+//@WynkPubSub(projectName = "${sms.priority.low.pubSub.projectName}", topicName = "${sms.priority.low.pubSub.topicName}", subscriptionName = "${sms.priority.low.pubSub.subscriptionName}", bufferInterval = "${sms.priority.low.pubSub.bufferInterval}")
 public class LowPriorityGCPMessage extends SmsRequest implements IObjectMapper {
 
     @Builder.Default

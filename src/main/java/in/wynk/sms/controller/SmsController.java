@@ -31,12 +31,10 @@ public class SmsController {
 
     private final ISqsManagerService<Object> sqsManagerService;
 
-    private final IPubSubManagerService<Object> pubSubManagerService;
     private final ClientDetailsCachingService clientDetailsCachingService;
 
-    public SmsController(ISqsManagerService<Object> sqsManagerService, IPubSubManagerService<Object> pubSubManagerService, ClientDetailsCachingService clientDetailsCachingService) {
+    public SmsController(ISqsManagerService<Object> sqsManagerService, ClientDetailsCachingService clientDetailsCachingService) {
         this.sqsManagerService = sqsManagerService;
-        this.pubSubManagerService = pubSubManagerService;
         this.clientDetailsCachingService = clientDetailsCachingService;
     }
 
