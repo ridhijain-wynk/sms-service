@@ -28,7 +28,7 @@ public class HighPriorityMessage extends SmsRequest implements IObjectMapper {
     public static HighPriorityMessage from(SmsNotificationMessage smsNotificationMessage) {
         return HighPriorityMessage.builder()
                 .messageId(smsNotificationMessage.getMsisdn() + System.currentTimeMillis())
-                .countryCode(smsNotificationMessage.getCountry().getCountryCode())
+                .countryCode(smsNotificationMessage.fetchCountry().getCountryCode())
                 .service(smsNotificationMessage.getService())
                 .msisdn(smsNotificationMessage.getMsisdn())
                 .text(smsNotificationMessage.getMessage())
