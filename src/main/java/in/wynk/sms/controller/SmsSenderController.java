@@ -50,7 +50,6 @@ public class SmsSenderController {
                     request.setPriority(SMSPriority.HIGHEST.getSmsPriority());
                 SmsRequest sms = SMSFactory.getSmsRequest(request);
                 AnalyticService.update(sms);
-                //sqsManagerService.publishSQSMessage(sms);
                 kafkaPublisherService.publishKafkaMessage(sms);
             } catch (Exception e) {
                 logger.error("error while executing sendSMS ", e);
