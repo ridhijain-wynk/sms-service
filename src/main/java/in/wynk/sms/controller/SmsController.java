@@ -7,12 +7,12 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BCEncryptor;
 import in.wynk.exception.WynkErrorType;
 import in.wynk.exception.WynkRuntimeException;
-import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.dto.response.SmsResponse;
-import in.wynk.sms.pubsub.message.HighestPriorityGCPMessage;
+import in.wynk.sms.queue.message.HighestPriorityMessage;
+import in.wynk.stream.producer.IKafkaPublisherService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,10 +31,12 @@ public class SmsController {
 
     private final ISqsManagerService<Object> sqsManagerService;
 
+    private final IKafkaPublisherService<String, Object> kafkaPublisherService;
     private final ClientDetailsCachingService clientDetailsCachingService;
 
-    public SmsController(ISqsManagerService<Object> sqsManagerService, ClientDetailsCachingService clientDetailsCachingService) {
+    public SmsController(ISqsManagerService<Object> sqsManagerService, IKafkaPublisherService<String, Object> kafkaPublisherService, ClientDetailsCachingService clientDetailsCachingService) {
         this.sqsManagerService = sqsManagerService;
+        this.kafkaPublisherService = kafkaPublisherService;
         this.clientDetailsCachingService = clientDetailsCachingService;
     }
 
@@ -57,11 +59,11 @@ public class SmsController {
         }
         smsRequest.setMsisdn(msisdn);
         if (StringUtils.isNotEmpty(smsRequest.getText()) && (smsRequest.getText().contains("PIN") || smsRequest.getText().contains("pin") || smsRequest.getText().contains("OTP") || smsRequest.getText().contains("otp") || smsRequest.getText().contains("CODE") || smsRequest.getText().contains("code")))
-            smsRequest = HighestPriorityGCPMessage.builder().countryCode(smsRequest.getCountryCode()).communicationType(smsRequest.getCommunicationType()).msisdn(smsRequest.getMsisdn()).service(smsRequest.getService()).text(smsRequest.getText()).message(smsRequest.getText()).shortCode(smsRequest.getShortCode()).messageId(smsRequest.getMsisdn() + System.currentTimeMillis()).build();
+            smsRequest = HighestPriorityMessage.builder().countryCode(smsRequest.getCountryCode()).communicationType(smsRequest.getCommunicationType()).msisdn(smsRequest.getMsisdn()).service(smsRequest.getService()).text(smsRequest.getText()).message(smsRequest.getText()).shortCode(smsRequest.getShortCode()).messageId(smsRequest.getMsisdn() + System.currentTimeMillis()).build();
         AnalyticService.update(smsRequest);
         smsRequest.setClientAlias(client.getAlias());
        // sqsManagerService.publishSQSMessage(smsRequest);
-        pubSubManagerService.publishPubSubMessage(smsRequest);
+        kafkaPublisherService.publishKafkaMessage(smsRequest);
         return SmsResponse.builder().build();
     }
 

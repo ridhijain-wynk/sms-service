@@ -3,13 +3,13 @@ package in.wynk.sms.controller;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import com.google.gson.Gson;
-import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.model.SendSmsRequest;
 import in.wynk.sms.model.SendSmsResponse;
+import in.wynk.stream.producer.IKafkaPublisherService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class SmsSenderController {
     private ISqsManagerService sqsManagerService;
 
     @Autowired
-    private IPubSubManagerService pubSubManagerService;
+    private IKafkaPublisherService kafkaPublisherService;
 
 
     @PostMapping(value = "/sms/send")
@@ -51,7 +51,7 @@ public class SmsSenderController {
                 SmsRequest sms = SMSFactory.getSmsRequest(request);
                 AnalyticService.update(sms);
                 //sqsManagerService.publishSQSMessage(sms);
-                pubSubManagerService.publishPubSubMessage(sms);
+                kafkaPublisherService.publishKafkaMessage(sms);
             } catch (Exception e) {
                 logger.error("error while executing sendSMS ", e);
             }

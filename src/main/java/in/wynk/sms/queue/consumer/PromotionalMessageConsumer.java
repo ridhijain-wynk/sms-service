@@ -4,13 +4,12 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
-import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.extractor.ISQSMessageExtractor;
 import in.wynk.queue.poller.AbstractSQSMessageConsumerPollingQueue;
-import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.dto.SMSFactory;
 import in.wynk.sms.dto.request.SmsRequest;
 import in.wynk.sms.model.SendSmsRequest;
+import in.wynk.stream.producer.IKafkaPublisherService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +32,7 @@ public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollin
     @Value("${sms.promotional.queue.consumer.delayTimeUnit}")
     private TimeUnit delayTimeUnit;
     @Autowired
-    private IPubSubManagerService pubSubManagerService;
+    private IKafkaPublisherService kafkaPublisherService;
 
     public PromotionalMessageConsumer(String queueName,
                                       AmazonSQS sqs,
@@ -53,7 +52,7 @@ public class PromotionalMessageConsumer extends AbstractSQSMessageConsumerPollin
                 try {
                     SmsRequest message = parseMessage(request);
                     AnalyticService.update(message);
-                    pubSubManagerService.publishPubSubMessage(message);
+                    kafkaPublisherService.publishKafkaMessage(message);
                 } catch (IllegalArgumentException ex) {
                     log.error(PROMOTIONAL_MSG_ERROR, "Invalid message: {} for msisdn: {}", request.getMessage(), request.getMsisdn());
                 }

@@ -17,10 +17,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-@Configuration
+//@Configuration
 public class SmsSqsConfig {
 
-    @Value("${sms.sqs.messages.schedule.thread.pool.size:10}")
+    /*@Value("${sms.sqs.messages.schedule.thread.pool.size:10}")
     private int schedulerPoolSize;
     @Value("${sms.sqs.messages.extractor.batchSize:100}")
     private int batchSize;
@@ -168,5 +168,5 @@ public class SmsSqsConfig {
             );
         }
         return null;
-    }
+    }*/
 }
