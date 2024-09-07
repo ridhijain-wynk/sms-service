@@ -1,7 +1,7 @@
 pipeline {
     agent {
         node {
-            label "xstream-msp-prod"
+            label "wcf-prod"
         }
     }
     options {
