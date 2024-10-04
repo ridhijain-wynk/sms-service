@@ -15,7 +15,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @NoArgsConstructor
-//@WynkPubSub(projectName = "${sms.priority.highest.pubSub.projectName}", topicName = "${sms.priority.highest.pubSub.topicName}", subscriptionName = "${sms.priority.highest.pubSub.subscriptionName}", bufferInterval = "${sms.priority.highest.pubSub.bufferInterval}")
 @WynkKafkaMessage(topic = "${sms.priority.highest.kafka.topic}")
 @AnalysedEntity
 public class HighestPriorityGCPMessage extends SmsRequest implements IObjectMapper {
