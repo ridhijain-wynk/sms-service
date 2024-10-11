@@ -3,7 +3,6 @@ package in.wynk.sms.controller;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import com.google.gson.Gson;
-import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.common.constant.SMSPriority;
 import in.wynk.sms.dto.SMSFactory;

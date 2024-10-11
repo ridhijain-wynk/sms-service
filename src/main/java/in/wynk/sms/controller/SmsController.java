@@ -7,7 +7,6 @@ import in.wynk.client.service.ClientDetailsCachingService;
 import in.wynk.common.utils.BCEncryptor;
 import in.wynk.exception.WynkErrorType;
 import in.wynk.exception.WynkRuntimeException;
-import in.wynk.pubsub.service.IPubSubManagerService;
 import in.wynk.queue.service.ISqsManagerService;
 import in.wynk.sms.dto.request.CommunicationType;
 import in.wynk.sms.dto.request.SmsRequest;
