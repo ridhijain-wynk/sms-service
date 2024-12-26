@@ -26,6 +26,7 @@ public class IQSmsRequest {
     String messageType;
     String dltTemplateId;
     String entityId;
+    String OTP;
 
     public static IQSmsRequest from(MessageTemplateDTO messageTemplateDTO, SmsRequest smsRequest, String clientAlias, Senders senders, String customerId, String entityId, String countryCode) {
         IQSmsRequestBuilder builder = IQSmsRequest.builder();
@@ -38,6 +39,14 @@ public class IQSmsRequest {
                     .messageType(messageTemplateDTO.getMessageType().getType())
                     .dltTemplateId(messageTemplateDTO.getMessageTemplateId())
                     .entityId(entityId);
+        }
+        switch (smsRequest.getPriority()) {
+            case HIGHEST:
+            case HIGH:
+                builder.OTP("true");
+                break;
+            default:
+                break;
         }
         return builder.build();
     }
