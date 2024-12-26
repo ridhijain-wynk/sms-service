@@ -126,6 +126,8 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
                     URI uri = new URI(Optional.of(senders.getUrl(messageTemplateDTO.getMessageType())).orElse(this.airtelIqApiUrl));
                     HttpEntity<IQSmsRequest> requestEntity = new HttpEntity<>(iqSmsRequest, headers);
                     AnalyticService.update("requestEntity",requestEntity.toString());
+                    AnalyticService.update("iqSmsRequestToString",iqSmsRequest.toString());
+
                     ResponseEntity<IQSmsResponse> responseEntity = smsRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, IQSmsResponse.class);
                     IQSmsResponse response = responseEntity.getBody();
                     AnalyticService.update(HTTP_STATUS_CODE, responseEntity.getStatusCode().name());

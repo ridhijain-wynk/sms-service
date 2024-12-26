@@ -17,6 +17,7 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level= AccessLevel. PRIVATE)
 @Builder
+@ToString
 public class IQSmsRequest {
 
     String customerId;
