@@ -22,6 +22,7 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
+@ToString
 public class IQSmsRequest {
 
     String customerId;
@@ -31,7 +32,7 @@ public class IQSmsRequest {
     String messageType;
     String dltTemplateId;
     String entityId;
-    String OTP;
+    String otp;
 
     public static IQSmsRequest from(MessageTemplateDTO messageTemplateDTO, SmsRequest smsRequest, String clientAlias, Senders senders, String customerId, String entityId, String countryCode) {
         IQSmsRequestBuilder builder = IQSmsRequest.builder();
@@ -48,7 +49,7 @@ public class IQSmsRequest {
         switch (smsRequest.getPriority()) {
             case HIGHEST:
             case HIGH:
-                builder.OTP("true");
+                builder.otp("true");
                 break;
             default:
                 break;
