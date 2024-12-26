@@ -48,7 +48,6 @@ public class IQSmsRequest {
         }
         switch (smsRequest.getPriority()) {
             case HIGHEST:
-            case HIGH:
                 builder.otp("true");
                 break;
             default:
