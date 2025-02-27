@@ -25,7 +25,7 @@ public class DeliveryReportController {
     private final ApplicationEventPublisher eventPublisher;
 
     @PostMapping(path = "/v1/callback", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @AnalyseTransaction(name = "IQSMSCallback")
+    @AnalyseTransaction(name = "smsStatusCallback")
     public WynkResponseEntity<Void> iqDeliveryReport(@RequestBody String payload) {
         AnalyticService.update(payload);
         try {

@@ -31,10 +31,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Base64;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static in.wynk.logging.BaseLoggingMarkers.APPLICATION_ERROR;
 import static in.wynk.sms.constants.SMSConstants.*;
@@ -128,13 +125,16 @@ public class IQAirtelSMSSender extends AbstractSMSSender {
                     headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
                     URI uri = new URI(Optional.of(senders.getUrl(messageTemplateDTO.getMessageType())).orElse(this.airtelIqApiUrl));
                     HttpEntity<IQSmsRequest> requestEntity = new HttpEntity<>(iqSmsRequest, headers);
-                    AnalyticService.update("iqSmsRequestString",iqSmsRequest.toString());
+                    AnalyticService.update("requestEntity",requestEntity.toString());
+                    AnalyticService.update("iqSmsRequestToString",iqSmsRequest.toString());
+
                     ResponseEntity<IQSmsResponse> responseEntity = smsRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, IQSmsResponse.class);
                     IQSmsResponse response = responseEntity.getBody();
                     AnalyticService.update(HTTP_STATUS_CODE, responseEntity.getStatusCode().name());
                     AnalyticService.update(response);
                     redisDataService.save(response.getMessageRequestId(), request);
                 } catch (HttpStatusCodeException ex) {
+                    redisDataService.save("random-id - "+ UUID.randomUUID(), request);
                     try {
                         if (ex.getStatusCode() == HttpStatus.BAD_REQUEST && Objects.nonNull(ex.getResponseBodyAsString())) {
                             final Map<String, String> failureResponse = mapper.readValue(ex.getResponseBodyAsString(), new TypeReference<Map<String, String>>() {
