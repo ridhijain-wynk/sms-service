@@ -7,6 +7,8 @@ import in.wynk.sms.core.entity.SenderDetails;
 import in.wynk.sms.core.service.MessageCachingService;
 import in.wynk.sms.core.service.SenderConfigurationsCachingService;
 import in.wynk.sms.dto.request.CommunicationType;
+import in.wynk.sms.enums.MessageTypeSuffix;
+
 import java.util.Map;
 import java.util.Objects;
 
@@ -25,6 +27,27 @@ public class SMSUtils {
                 }
             }
         }
+        return shortCode;
+    }
+
+
+    public static String getSuffixedShortCode (String templateId, String shortCode) {
+            if(Objects.nonNull(templateId)){
+                    Messages messages = BeanLocatorFactory.getBean(MessageCachingService.class).get(templateId);
+                    messages = (Objects.isNull(messages))? BeanLocatorFactory.getBean(MessageCachingService.class).getMessageByTemplateId(templateId) : messages;
+                    if(Objects.nonNull(messages.getMessageType())){
+                        switch (messages.getMessageType()){
+                            case TRANSACTIONAL: return shortCode+ MessageTypeSuffix.TRANSACTIONAL.getSuffix();
+                            case PROMOTIONAL: return shortCode+ MessageTypeSuffix.PROMOTIONAL.getSuffix();
+                            case SERVICE_EXPLICIT: return shortCode+ MessageTypeSuffix.SERVICE_EXPLICIT.getSuffix();
+                            case SERVICE_IMPLICIT: return shortCode+ MessageTypeSuffix.SERVICE_IMPLICIT.getSuffix();
+                            case UNKNOWN: return shortCode;
+                            default:return shortCode;
+                        }
+                    }
+                }
+
+
         return shortCode;
     }
 }
