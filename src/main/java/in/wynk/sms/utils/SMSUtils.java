@@ -31,7 +31,7 @@ public class SMSUtils {
     }
 
 
-    public static String getSuffixedShortCode (String templateId, String shortCode) {
+    public static String getSuffixedShortCode (String templateId, String shortCode,SMSPriority smsPriority) {
             if(Objects.nonNull(templateId)){
                     Messages messages = BeanLocatorFactory.getBean(MessageCachingService.class).get(templateId);
                     messages = (Objects.isNull(messages))? BeanLocatorFactory.getBean(MessageCachingService.class).getMessageByTemplateId(templateId) : messages;
@@ -46,8 +46,22 @@ public class SMSUtils {
                         }
                     }
                 }
-
+            if(Objects.nonNull(smsPriority)) {
+                switch (smsPriority) {
+                    case HIGHEST:
+                        return shortCode + MessageTypeSuffix.TRANSACTIONAL.getSuffix();
+                    case HIGH:
+                        return shortCode + MessageTypeSuffix.PROMOTIONAL.getSuffix();
+                    case MEDIUM:
+                        return shortCode + MessageTypeSuffix.PROMOTIONAL.getSuffix();
+                    case LOW:
+                        return shortCode + MessageTypeSuffix.PROMOTIONAL.getSuffix();
+                    default:return shortCode;
+                }
+            }
 
         return shortCode;
+
+
     }
 }
