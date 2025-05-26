@@ -59,7 +59,7 @@ public class LobbySmsSender extends AbstractSMSSender {
             String accountName = Objects.nonNull(senders.getAccountName()) ? senders.getAccountName() : "Testnorth";
             String password = senders.getPassword();
             String shortCode = SMSUtils.getShortCode(request.getTemplateId(), request.getPriority(), client.getAlias(), senders.getShortCode(), countryCode);
-            shortCode=SMSUtils.getSuffixedShortCode(request.getTemplateId(), shortCode);
+            shortCode=SMSUtils.getSuffixedShortCode(request.getTemplateId(), shortCode,request.getPriority());
             int mClass = request.isEnglish() ? 1: Objects.nonNull(senders.getMClass()) ? Integer.parseInt(senders.getMClass()) : 2;
             int coding = Objects.nonNull(senders.getCoding()) ? senders.getCoding() : 0;
             final Body body = new Body();
