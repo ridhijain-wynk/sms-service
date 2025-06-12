@@ -31,7 +31,7 @@ public class SMSUtils {
     }
 
 
-    public static String getSuffixedShortCode (String templateId, String shortCode,SMSPriority smsPriority) {
+    public static String getSuffixedShortCode (String templateId, String shortCode, SMSPriority smsPriority) {
             if(Objects.nonNull(templateId)){
                     Messages messages = BeanLocatorFactory.getBean(MessageCachingService.class).get(templateId);
                     messages = (Objects.isNull(messages))? BeanLocatorFactory.getBean(MessageCachingService.class).getMessageByTemplateId(templateId) : messages;
@@ -39,29 +39,28 @@ public class SMSUtils {
                         switch (messages.getMessageType()){
                             case TRANSACTIONAL: return shortCode+ MessageTypeSuffix.TRANSACTIONAL.getSuffix();
                             case PROMOTIONAL: return shortCode+ MessageTypeSuffix.PROMOTIONAL.getSuffix();
-                            case SERVICE_EXPLICIT: return shortCode+ MessageTypeSuffix.SERVICE_EXPLICIT.getSuffix();
-                            case SERVICE_IMPLICIT: return shortCode+ MessageTypeSuffix.SERVICE_IMPLICIT.getSuffix();
+                            case SERVICE_EXPLICIT:
+                            case SERVICE_IMPLICIT:
+                                return shortCode+ MessageTypeSuffix.SERVICE.getSuffix();
                             case UNKNOWN: return shortCode;
                             default:return shortCode;
                         }
                     }
                 }
-            if(Objects.nonNull(smsPriority)) {
-                switch (smsPriority) {
-                    case HIGHEST:
-                        return shortCode + MessageTypeSuffix.TRANSACTIONAL.getSuffix();
-                    case HIGH:
-                        return shortCode + MessageTypeSuffix.PROMOTIONAL.getSuffix();
-                    case MEDIUM:
-                        return shortCode + MessageTypeSuffix.PROMOTIONAL.getSuffix();
-                    case LOW:
-                        return shortCode + MessageTypeSuffix.PROMOTIONAL.getSuffix();
-                    default:return shortCode;
-                }
+
+        if(Objects.nonNull(smsPriority)) {
+            switch (smsPriority) {
+                case HIGHEST:
+                    return shortCode + MessageTypeSuffix.TRANSACTIONAL.getSuffix();
+                case HIGH:
+                    return shortCode + MessageTypeSuffix.SERVICE.getSuffix();
+                case MEDIUM:
+                case LOW:
+                    return shortCode + MessageTypeSuffix.PROMOTIONAL.getSuffix();
+                default:return shortCode;
             }
+        }
 
-        return shortCode;
-
-
+     return shortCode;
     }
 }

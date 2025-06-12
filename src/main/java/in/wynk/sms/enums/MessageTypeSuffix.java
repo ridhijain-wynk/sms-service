@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum MessageTypeSuffix {
 
-    PROMOTIONAL("-P"), TRANSACTIONAL("-T"), SERVICE_IMPLICIT("-S"), SERVICE_EXPLICIT("-S");
+    PROMOTIONAL("-P"), TRANSACTIONAL("-T"), SERVICE("-S");
 
     @Analysed
     private final String suffix;
