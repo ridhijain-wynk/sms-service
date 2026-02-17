@@ -2,7 +2,6 @@ package in.wynk.sms.core.service;
 
 import in.wynk.sms.dto.request.*;
 import in.wynk.sms.dto.response.VoiceSmsResponse;
-import jnr.ffi.Struct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

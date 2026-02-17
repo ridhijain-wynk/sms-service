@@ -75,8 +75,18 @@
             <groupId>in.wynk</groupId>
             <artifactId>client-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.data</groupId>
+                    <artifactId>spring-data-cassandra</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-core</artifactId>
+            <version>4.17.0</version>
+        </dependency>
         <dependency>
             <groupId>in.wynk</groupId>
             <artifactId>wynk-service-api</artifactId>
@@ -93,13 +103,6 @@
             <artifactId>lib-common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>in.wynk</groupId>
-            <artifactId>lib-data</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
