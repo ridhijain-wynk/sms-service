@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
@@ -18,7 +18,7 @@ public class ClientCoreConfig {
 
     @Primary
     @Bean(BeanConstant.CLIENT_DETAILS_MONGO_DB_FACTORY)
-    public MongoDbFactory clientMongoDbFactory(MongoProperties mongoProperties) {
+    public MongoDatabaseFactory clientMongoDbFactory(MongoProperties mongoProperties) {
         return WynkMongoDbFactoryBuilder.buildMongoDbFactory(mongoProperties, "client");
     }
 

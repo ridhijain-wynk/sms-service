@@ -1,6 +1,6 @@
 package in.wynk.sms.controller;
 
-import com.datastax.driver.core.utils.UUIDs;
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
@@ -60,7 +60,7 @@ public class NotificationController {
                 add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
                 add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
             }};
-            kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payloadObj, headers);
+            kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), Uuids.timeBased().toString(), payloadObj, headers);
             AnalyticService.update(payloadObj);
         } catch(Exception e){
             log.error(SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE, "Unable to publish the inbound notifications in kafka due to {}", e.getMessage(), e);
@@ -82,7 +82,7 @@ public class NotificationController {
                 add(new RecordHeader(BaseConstants.ORG_ID, service.getLinkedClient().getBytes()));
                 add(new RecordHeader(BaseConstants.REQUEST_ID, MDC.get(LoggingConstants.REQUEST_ID).getBytes()));
             }};
-            kafkaEventPublisher.publish(whatsappMessageStatusTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), payloadObj, headers);
+            kafkaEventPublisher.publish(whatsappMessageStatusTopic, null, System.currentTimeMillis(), Uuids.timeBased().toString(), payloadObj, headers);
             AnalyticService.update(payloadObj);
         } catch(Exception e){
             log.error(SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE, "Unable to publish the whatsapp message status callback in kafka due to {}", e.getMessage(), e);

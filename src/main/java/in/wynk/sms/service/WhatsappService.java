@@ -1,6 +1,6 @@
 package in.wynk.sms.service;
 
-import com.datastax.driver.core.utils.UUIDs;
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import in.wynk.common.constant.BaseConstants;
 import in.wynk.data.dto.IEntityCacheService;
 import in.wynk.exception.WynkRuntimeException;
@@ -62,7 +62,7 @@ public class WhatsappService {
             headers.add(new RecordHeader(BaseConstants.SERVICE_ID, service.getBytes()));
             headers.add(new RecordHeader(BaseConstants.ORG_ID, wynkService.getLinkedClient().getBytes()));
             headers.add(new RecordHeader(BaseConstants.REQUEST_ID, requestId.getBytes()));
-            kafkaEventPublisher.publish(topic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(),
+            kafkaEventPublisher.publish(topic, null, System.currentTimeMillis(), Uuids.timeBased().toString(),
                     message,
                     headers);
             return requestId;

@@ -1,8 +1,6 @@
 package in.wynk.sms.kafka;
 
-import com.datastax.driver.core.utils.UUIDs;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
 import com.github.annotation.analytic.core.service.AnalyticService;
 import in.wynk.client.service.ClientDetailsCachingService;
@@ -138,7 +136,7 @@ public class WhatsappKafkaConsumer extends AbstractKafkaEventConsumer<String, Wh
             headers.add(new RecordHeader(BaseConstants.ORG_ID, orgId.getBytes()));
             headers.add(new RecordHeader(BaseConstants.REQUEST_ID, requestId.getBytes()));
             headers.add(new RecordHeader(SMSConstants.KAFKA_RETRY_COUNT, retryAttempt.getBytes()));
-            kafkaEventPublisher.publish(topic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(),
+            kafkaEventPublisher.publish(topic, null, System.currentTimeMillis(), Uuids.timeBased().toString(),
                     consumerRecord.value(),
                     headers);
         } catch(Exception ignored){}

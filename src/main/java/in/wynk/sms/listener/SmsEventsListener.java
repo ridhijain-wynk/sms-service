@@ -1,6 +1,6 @@
 package in.wynk.sms.listener;
 
-import com.datastax.driver.core.utils.UUIDs;
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.annotation.analytic.core.annotations.AnalyseTransaction;
@@ -239,7 +239,7 @@ public class SmsEventsListener {
                 add(new RecordHeader(BaseConstants.SESSION_ID, event.getSessionId().getBytes()));
                 add(new RecordHeader(BaseConstants.REQUEST_ID, event.getRequestId().getBytes()));
             }};
-            kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), UUIDs.timeBased().toString(), orderDetailsRespEvent, headers);
+            kafkaEventPublisher.publish(whatsappInboundTopic, null, System.currentTimeMillis(), Uuids.timeBased().toString(), orderDetailsRespEvent, headers);
         } catch (Exception e) {
             log.error(SmsLoggingMarkers.KAFKA_PUBLISHER_FAILURE, "Unable to publish the order details response event in kafka due to {}", e.getMessage(), e);
             throw new WynkRuntimeException(SmsErrorType.WHSMS004, e);
